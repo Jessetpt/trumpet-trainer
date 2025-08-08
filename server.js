@@ -218,6 +218,41 @@ app.post('/api/auth/login', async (req, res) => {
      }
    });
    
+   // Test endpoint to reset a user's password (for debugging)
+   app.post('/api/auth/reset-user-password', async (req, res) => {
+     try {
+       const { email, newPassword } = req.body;
+   
+       if (!email || !newPassword) {
+         return res.status(400).json({ error: 'Email and new password are required' });
+       }
+   
+       if (newPassword.length < 6) {
+         return res.status(400).json({ error: 'Password must be at least 6 characters' });
+       }
+   
+       // Hash new password
+       const hashedPassword = await bcrypt.hash(newPassword, 12);
+   
+       // Update password
+       const { error } = await supabase
+         .from('users')
+         .update({ password: hashedPassword })
+         .eq('email', email);
+   
+       if (error) {
+         console.error('Supabase error:', error);
+         return res.status(500).json({ error: 'Failed to update password' });
+       }
+   
+       res.json({ message: 'Password updated successfully' });
+   
+     } catch (error) {
+       console.error('Reset user password error:', error);
+       res.status(500).json({ error: 'Internal server error' });
+     }
+   });
+   
    // Reset password with token
    app.post('/api/auth/reset-password', async (req, res) => {
      try {

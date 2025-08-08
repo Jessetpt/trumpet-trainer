@@ -70,12 +70,15 @@
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      console.log('Form submitted!'); // Debug log
       
       const formData = new FormData(loginForm);
       const userData = {
         email: formData.get('email'),
         password: formData.get('password')
       };
+      
+      console.log('Form data:', userData); // Debug log
       
       if (!isLoginMode) {
         // Signup mode - include all fields
@@ -86,6 +89,7 @@
       // Show loading state
       submitButton.textContent = isLoginMode ? 'Signing In...' : 'Creating Account...';
       submitButton.disabled = true;
+      console.log('Starting authentication...'); // Debug log
       
       try {
         if (isResetMode) {
@@ -109,6 +113,7 @@
           }
         } else if (isLoginMode) {
           // Login logic
+          console.log('Attempting login with:', userData);
           const response = await fetch('http://localhost:3000/api/auth/login', {
             method: 'POST',
             headers: {
@@ -118,6 +123,7 @@
           });
           
           const data = await response.json();
+          console.log('Login response:', data);
           
           if (response.ok) {
             // Store user data and token
@@ -148,10 +154,11 @@
             alert(data.error || 'Registration failed');
           }
         }
-      } catch (error) {
-        console.error('Auth error:', error);
-        alert('Network error. Please try again.');
-      } finally {
+              } catch (error) {
+          console.error('Auth error:', error);
+          alert('Network error. Please try again.');
+        } finally {
+          console.log('Authentication attempt completed'); // Debug log
         // Reset button state
         if (isResetMode) {
           submitButton.textContent = 'Send Reset Link';

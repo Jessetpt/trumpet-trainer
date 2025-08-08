@@ -7,8 +7,10 @@
   const submitButton = document.querySelector('.cta');
   const passwordField = document.getElementById('password');
   const passwordLabel = document.querySelector('label[for="password"]');
+  const forgotPasswordLink = document.getElementById('forgotPassword');
 
   let isLoginMode = false;
+  let isResetMode = false;
 
   // Theme handling
   function updateLogo() {
@@ -23,6 +25,7 @@
   // Toggle between signup and login
   function toggleMode() {
     isLoginMode = !isLoginMode;
+    isResetMode = false;
     
     if (isLoginMode) {
       // Switch to login mode
@@ -36,6 +39,10 @@
       // Hide name and phone fields
       document.querySelector('label[for="name"]').parentElement.style.display = 'none';
       document.querySelector('label[for="phone"]').parentElement.style.display = 'none';
+      
+      // Show password and forgot password
+      document.querySelector('label[for="password"]').parentElement.style.display = 'grid';
+      forgotPasswordLink.style.display = 'block';
       
       // Clear the form
       loginForm.reset();
@@ -51,6 +58,8 @@
       // Show name and phone fields
       document.querySelector('label[for="name"]').parentElement.style.display = 'grid';
       document.querySelector('label[for="phone"]').parentElement.style.display = 'grid';
+      document.querySelector('label[for="password"]').parentElement.style.display = 'grid';
+      forgotPasswordLink.style.display = 'block';
       
       // Clear the form
       loginForm.reset();
@@ -79,7 +88,26 @@
       submitButton.disabled = true;
       
       try {
-        if (isLoginMode) {
+        if (isResetMode) {
+          // Password reset logic
+          const response = await fetch('http://localhost:3000/api/auth/forgot-password', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email: userData.email })
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            alert(`Password reset link sent! Token: ${data.resetToken}\n\nIn production, this would be sent via email.`);
+            // Reset form back to login
+            toggleMode();
+          } else {
+            alert(data.error || 'Password reset failed');
+          }
+        } else if (isLoginMode) {
           // Login logic
           const response = await fetch('http://localhost:3000/api/auth/login', {
             method: 'POST',
@@ -125,7 +153,11 @@
         alert('Network error. Please try again.');
       } finally {
         // Reset button state
-        submitButton.textContent = isLoginMode ? 'Sign In & Play' : 'Create Account & Start Playing';
+        if (isResetMode) {
+          submitButton.textContent = 'Send Reset Link';
+        } else {
+          submitButton.textContent = isLoginMode ? 'Sign In & Play' : 'Create Account & Start Playing';
+        }
         submitButton.disabled = false;
       }
     });
@@ -137,6 +169,30 @@
       e.preventDefault();
       toggleMode();
     });
+  }
+
+  // Forgot password functionality
+  if (forgotPasswordLink) {
+    forgotPasswordLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      showResetForm();
+    });
+  }
+
+  function showResetForm() {
+    isResetMode = true;
+    formTitle.textContent = 'Reset Password';
+    formSubtitle.textContent = 'Enter your email to receive a reset link';
+    submitButton.textContent = 'Send Reset Link';
+    
+    // Hide all fields except email
+    document.querySelector('label[for="name"]').parentElement.style.display = 'none';
+    document.querySelector('label[for="phone"]').parentElement.style.display = 'none';
+    document.querySelector('label[for="password"]').parentElement.style.display = 'none';
+    
+    // Show back to login link
+    showLoginLink.textContent = 'Back to Login';
+    forgotPasswordLink.style.display = 'none';
   }
 
   // Theme toggle

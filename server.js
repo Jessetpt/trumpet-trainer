@@ -174,11 +174,92 @@ app.post('/api/auth/login', async (req, res) => {
 
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Get user profile
+           res.status(500).json({ error: 'Internal server error' });
+     }
+   });
+   
+   // Password reset request
+   app.post('/api/auth/forgot-password', async (req, res) => {
+     try {
+       const { email } = req.body;
+   
+       if (!email) {
+         return res.status(400).json({ error: 'Email is required' });
+       }
+   
+       // Check if user exists
+       const { data: user, error } = await supabase
+         .from('users')
+         .select('id, name, email')
+         .eq('email', email)
+         .single();
+   
+       if (error || !user) {
+         return res.status(404).json({ error: 'No account found with this email' });
+       }
+   
+       // Generate reset token (in production, you'd send this via email)
+       const resetToken = jwt.sign(
+         { userId: user.id, email: user.email, type: 'password-reset' },
+         process.env.JWT_SECRET,
+         { expiresIn: '1h' }
+       );
+   
+       // For now, just return the token (in production, send via email)
+       res.json({
+         message: 'Password reset link sent to your email',
+         resetToken: resetToken, // Remove this in production
+         note: 'In production, this would be sent via email'
+       });
+   
+     } catch (error) {
+       console.error('Password reset error:', error);
+       res.status(500).json({ error: 'Internal server error' });
+     }
+   });
+   
+   // Reset password with token
+   app.post('/api/auth/reset-password', async (req, res) => {
+     try {
+       const { resetToken, newPassword } = req.body;
+   
+       if (!resetToken || !newPassword) {
+         return res.status(400).json({ error: 'Reset token and new password are required' });
+       }
+   
+       if (newPassword.length < 6) {
+         return res.status(400).json({ error: 'Password must be at least 6 characters' });
+       }
+   
+       // Verify reset token
+       const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
+       if (decoded.type !== 'password-reset') {
+         return res.status(400).json({ error: 'Invalid reset token' });
+       }
+   
+       // Hash new password
+       const hashedPassword = await bcrypt.hash(newPassword, 12);
+   
+       // Update password
+       const { error } = await supabase
+         .from('users')
+         .update({ password: hashedPassword })
+         .eq('id', decoded.userId);
+   
+       if (error) {
+         console.error('Supabase error:', error);
+         return res.status(500).json({ error: 'Failed to update password' });
+       }
+   
+       res.json({ message: 'Password updated successfully' });
+   
+     } catch (error) {
+       console.error('Reset password error:', error);
+       res.status(500).json({ error: 'Invalid or expired reset token' });
+     }
+   });
+   
+   // Get user profile
 app.get('/api/user/profile', authenticateToken, async (req, res) => {
   try {
     const { data: user, error } = await supabase

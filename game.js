@@ -509,19 +509,19 @@
   // Add leaderboard and profile buttons (bottom right, next to theme toggle)
   const leaderboardBtn = document.createElement('button');
   leaderboardBtn.textContent = 'Leaderboard';
-  leaderboardBtn.style.cssText = 'position: fixed; bottom: 20px; right: 140px; background: var(--panel); border: 1px solid rgba(0,0,0,0.15); color: var(--ink); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; z-index: 1000;';
+  leaderboardBtn.style.cssText = 'position: absolute; bottom: 10px; right: 80px; border: 1px solid rgba(0,0,0,0.15); background: var(--panel); color: var(--ink); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px;';
   leaderboardBtn.addEventListener('click', () => {
     window.location.href = 'leaderboard.html';
   });
-  document.body.appendChild(leaderboardBtn);
+  document.getElementById('board').appendChild(leaderboardBtn);
 
   const profileBtn = document.createElement('button');
   profileBtn.textContent = 'Profile';
-  profileBtn.style.cssText = 'position: fixed; bottom: 20px; right: 220px; background: var(--panel); border: 1px solid rgba(0,0,0,0.15); color: var(--ink); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; z-index: 1000;';
+  profileBtn.style.cssText = 'position: absolute; bottom: 10px; right: 150px; border: 1px solid rgba(0,0,0,0.15); background: var(--panel); color: var(--ink); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px;';
   profileBtn.addEventListener('click', () => {
     window.location.href = 'profile.html';
   });
-  document.body.appendChild(profileBtn);
+  document.getElementById('board').appendChild(profileBtn);
 
   // Difficulty selector
   const difficultySelect = document.getElementById('difficulty');

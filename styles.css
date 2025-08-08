@@ -269,6 +269,22 @@ body {
   text-decoration: underline;
 }
 
+.forgot-password {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.forgot-password a {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.forgot-password a:hover {
+  text-decoration: underline;
+}
+
 .theme-toggle {
   position: fixed;
   top: 20px;

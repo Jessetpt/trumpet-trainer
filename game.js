@@ -77,19 +77,20 @@
     return 12 * (octave + 1) + base; // MIDI 0 at C-1
   }
 
-  // Build midi -> valves mapping using canonical primary fingerings across F#3..C6
+  // Build midi -> valves mapping using canonical primary fingerings across F#3..G6
   const BASE_FINGERINGS = [
     ['F#3', [1,2,3]], ['G3', [1,3]], ['G#3', [2,3]], ['A3', [1,2]], ['Bb3', [1]], ['B3', [2]],
     ['C4', []], ['C#4', [1,2,3]], ['D4', [1,3]], ['Eb4', [2,3]], ['E4', [1,2]], ['F4', [1]], ['F#4', [2]],
     ['G4', []], ['Ab4', [2,3]], ['A4', [1,2]], ['Bb4', [1]], ['B4', [2]], ['C5', []], ['C#5', [1,2]],
     ['D5', [1]], ['Eb5', [2]], ['E5', []], ['F5', [1]], ['F#5', [2]], ['G5', []],
-    ['Ab5', [2,3]], ['A5', [1,2]], ['Bb5', [1]], ['B5', [2]], ['C6', []]
+    ['Ab5', [2,3]], ['A5', [1,2]], ['Bb5', [1]], ['B5', [2]], ['C6', []],
+    ['C#6', [1,2]], ['D6', [1]], ['Eb6', [2]], ['E6', []], ['F6', [1]], ['F#6', [2]], ['G6', []]
   ];
   const midiToValves = new Map();
   BASE_FINGERINGS.forEach(([name, valves]) => { midiToValves.set(noteMidi(name), valves); });
 
   const MIDI_MIN = noteMidi('F#3');
-  const MIDI_MAX = noteMidi('C6');
+  const MIDI_MAX = noteMidi('G6');
 
   function namesForMidi(midi) {
     // Ensure top boundary C6 shows only C6 (no B#5 alias)
@@ -340,8 +341,10 @@
   }
 
   function toAccidental(name) {
+    if (name.includes('##')) return '##';
+    if (name.includes('bb')) return 'bb';
     if (name.includes('#')) return '#';
-    if (/[A-G]b[0-9]/.test(name)) return 'b';
+    if (name.includes('b')) return 'b';
     return '';
   }
 

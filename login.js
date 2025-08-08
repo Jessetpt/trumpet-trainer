@@ -36,6 +36,9 @@
       // Hide name and phone fields
       document.querySelector('label[for="name"]').parentElement.style.display = 'none';
       document.querySelector('label[for="phone"]').parentElement.style.display = 'none';
+      
+      // Clear the form
+      loginForm.reset();
     } else {
       // Switch to signup mode
       formTitle.textContent = 'Trumpet Trainer';
@@ -48,6 +51,9 @@
       // Show name and phone fields
       document.querySelector('label[for="name"]').parentElement.style.display = 'grid';
       document.querySelector('label[for="phone"]').parentElement.style.display = 'grid';
+      
+      // Clear the form
+      loginForm.reset();
     }
   }
 

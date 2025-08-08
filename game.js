@@ -507,21 +507,25 @@
   }
 
   // Add leaderboard and profile buttons (bottom right, next to theme toggle)
-  const leaderboardBtn = document.createElement('button');
-  leaderboardBtn.textContent = 'Leaderboard';
-  leaderboardBtn.style.cssText = 'position: absolute; bottom: 10px; right: 80px; border: 1px solid rgba(0,0,0,0.15); background: var(--panel); color: var(--ink); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px;';
-  leaderboardBtn.addEventListener('click', () => {
-    window.location.href = 'leaderboard.html';
-  });
-  document.getElementById('board').appendChild(leaderboardBtn);
+  const buttonContainer = document.createElement('div');
+  buttonContainer.style.cssText = 'position: absolute; bottom: 10px; right: 80px; display: flex; gap: 8px;';
+  document.getElementById('board').appendChild(buttonContainer);
 
   const profileBtn = document.createElement('button');
   profileBtn.textContent = 'Profile';
-  profileBtn.style.cssText = 'position: absolute; bottom: 10px; right: 150px; border: 1px solid rgba(0,0,0,0.15); background: var(--panel); color: var(--ink); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px;';
+  profileBtn.style.cssText = 'border: 1px solid rgba(0,0,0,0.15); background: var(--panel); color: var(--ink); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px;';
   profileBtn.addEventListener('click', () => {
     window.location.href = 'profile.html';
   });
-  document.getElementById('board').appendChild(profileBtn);
+  buttonContainer.appendChild(profileBtn);
+
+  const leaderboardBtn = document.createElement('button');
+  leaderboardBtn.textContent = 'Leaderboard';
+  leaderboardBtn.style.cssText = 'border: 1px solid rgba(0,0,0,0.15); background: var(--panel); color: var(--ink); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px;';
+  leaderboardBtn.addEventListener('click', () => {
+    window.location.href = 'leaderboard.html';
+  });
+  buttonContainer.appendChild(leaderboardBtn);
 
   // Difficulty selector
   const difficultySelect = document.getElementById('difficulty');

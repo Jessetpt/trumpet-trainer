@@ -27,43 +27,51 @@
     isLoginMode = !isLoginMode;
     isResetMode = false;
     
-    if (isLoginMode) {
-      // Switch to login mode
-      formTitle.textContent = 'Welcome Back';
-      formSubtitle.textContent = 'Sign in to continue your trumpet training';
-      submitButton.textContent = 'Sign In & Play';
-      passwordLabel.textContent = 'Password';
-      passwordField.placeholder = 'Enter your password';
-      showLoginLink.textContent = 'Create new account';
-      
-      // Hide name and phone fields
-      document.querySelector('label[for="name"]').parentElement.style.display = 'none';
-      document.querySelector('label[for="phone"]').parentElement.style.display = 'none';
-      
-      // Show password and forgot password
-      document.querySelector('label[for="password"]').parentElement.style.display = 'grid';
-      forgotPasswordLink.style.display = 'block';
-      
-      // Clear the form
-      loginForm.reset();
-    } else {
-      // Switch to signup mode
-      formTitle.textContent = 'Trumpet Trainer';
-      formSubtitle.textContent = 'Create your account to track high scores and compete with other players';
-      submitButton.textContent = 'Create Account & Start Playing';
-      passwordLabel.textContent = 'Password';
-      passwordField.placeholder = 'Create a password';
-      showLoginLink.textContent = 'Already have an account? Sign In';
-      
-      // Show name and phone fields
-      document.querySelector('label[for="name"]').parentElement.style.display = 'grid';
-      document.querySelector('label[for="phone"]').parentElement.style.display = 'grid';
-      document.querySelector('label[for="password"]').parentElement.style.display = 'grid';
-      forgotPasswordLink.style.display = 'block';
-      
-      // Clear the form
-      loginForm.reset();
-    }
+          if (isLoginMode) {
+        // Switch to login mode
+        formTitle.textContent = 'Welcome Back';
+        formSubtitle.textContent = 'Sign in to continue your trumpet training';
+        submitButton.textContent = 'Sign In & Play';
+        passwordLabel.textContent = 'Password';
+        passwordField.placeholder = 'Enter your password';
+        showLoginLink.textContent = 'Create new account';
+        
+        // Hide name and phone fields and remove required attribute
+        const nameField = document.getElementById('name');
+        const phoneField = document.getElementById('phone');
+        document.querySelector('label[for="name"]').parentElement.style.display = 'none';
+        document.querySelector('label[for="phone"]').parentElement.style.display = 'none';
+        if (nameField) nameField.removeAttribute('required');
+        if (phoneField) phoneField.removeAttribute('required');
+        
+        // Show password and forgot password
+        document.querySelector('label[for="password"]').parentElement.style.display = 'grid';
+        forgotPasswordLink.style.display = 'block';
+        
+        // Clear the form
+        loginForm.reset();
+      } else {
+        // Switch to signup mode
+        formTitle.textContent = 'Trumpet Trainer';
+        formSubtitle.textContent = 'Create your account to track high scores and compete with other players';
+        submitButton.textContent = 'Create Account & Start Playing';
+        passwordLabel.textContent = 'Password';
+        passwordField.placeholder = 'Create a password';
+        showLoginLink.textContent = 'Already have an account? Sign In';
+        
+        // Show name and phone fields and add required attribute
+        const nameField = document.getElementById('name');
+        const phoneField = document.getElementById('phone');
+        document.querySelector('label[for="name"]').parentElement.style.display = 'grid';
+        document.querySelector('label[for="phone"]').parentElement.style.display = 'grid';
+        document.querySelector('label[for="password"]').parentElement.style.display = 'grid';
+        forgotPasswordLink.style.display = 'block';
+        if (nameField) nameField.setAttribute('required', 'required');
+        if (phoneField) phoneField.setAttribute('required', 'required');
+        
+        // Clear the form
+        loginForm.reset();
+      }
   }
 
   // Form submission
@@ -192,10 +200,16 @@
     formSubtitle.textContent = 'Enter your email to receive a reset link';
     submitButton.textContent = 'Send Reset Link';
     
-    // Hide all fields except email
+    // Hide all fields except email and remove required attributes
+    const nameField = document.getElementById('name');
+    const phoneField = document.getElementById('phone');
+    const passwordField = document.getElementById('password');
     document.querySelector('label[for="name"]').parentElement.style.display = 'none';
     document.querySelector('label[for="phone"]').parentElement.style.display = 'none';
     document.querySelector('label[for="password"]').parentElement.style.display = 'none';
+    if (nameField) nameField.removeAttribute('required');
+    if (phoneField) phoneField.removeAttribute('required');
+    if (passwordField) passwordField.removeAttribute('required');
     
     // Show back to login link
     showLoginLink.textContent = 'Back to Login';

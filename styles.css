@@ -108,6 +108,36 @@ body {
   color: var(--ink); background: rgba(0,0,0,0.04);
   font-weight: 600; font-size: 13px;
 }
+
+.difficulty-selector {
+  margin: 16px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.difficulty-selector label {
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.difficulty-selector select {
+  padding: 8px 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.difficulty-selector select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(32, 156, 189, 0.1);
+}
 .cta {
   appearance: none; border: none; outline: none; cursor: pointer;
   padding: 10px 14px; border-radius: 10px; background: var(--accent); color: #fff; font-weight: 700;

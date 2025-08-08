@@ -23,6 +23,15 @@
   // Game constants
   const ROUND_SECONDS = 60;
   const NOTE_TIME_LIMIT_MS = 4000; // max time to answer a note before it counts as miss
+  
+  // Difficulty settings
+  const DIFFICULTY_RANGES = {
+    easy: { min: noteMidi('F#3'), max: noteMidi('C6') },
+    medium: { min: noteMidi('F#3'), max: noteMidi('G6') },
+    hard: { min: noteMidi('F#3'), max: noteMidi('G6') }
+  };
+  
+  let currentDifficulty = 'easy';
   // Initialize VexFlow (supports v4 global Vex.Flow and fallback variants)
   const VF = (window.Vex && window.Vex.Flow) || (window.VexFlow && window.VexFlow.Flow) || window.VexFlow || null;
   if (!VF) {
@@ -91,11 +100,24 @@
     const names = [];
     if (pc in natNames) {
       names.push(`${natNames[pc]}${octave}`);
+      
       // Include single-accidental enharmonics for certain naturals
       if (pc === 0) names.push(`B#${octave-1}`);    // Cn == B#(n-1)
       if (pc === 4) names.push(`Fb${octave}`);      // En == Fbn
       if (pc === 5) names.push(`E#${octave}`);      // Fn == E#n
       if (pc === 11) names.push(`Cb${octave+1}`);   // Bn == Cb(n+1)
+      
+      // Add double accidentals for hard mode
+      if (currentDifficulty === 'hard') {
+        if (pc === 0) names.push(`B##${octave-1}`); // C == B##
+        if (pc === 2) names.push(`Cbb${octave+1}`); // D == Cbb
+        if (pc === 4) names.push(`Fbb${octave}`);   // E == Fbb
+        if (pc === 5) names.push(`E##${octave}`);   // F == E##
+        if (pc === 7) names.push(`F##${octave}`);   // G == F##
+        if (pc === 9) names.push(`Gbb${octave+1}`); // A == Gbb
+        if (pc === 11) names.push(`Abb${octave+1}`); // B == Abb
+      }
+      
       return names;
     }
     // Black keys: provide both sharp and flat spellings
@@ -133,7 +155,8 @@
   }
 
   function randNote() {
-    const midi = Math.floor(Math.random() * (MIDI_MAX - MIDI_MIN + 1)) + MIDI_MIN;
+    const range = DIFFICULTY_RANGES[currentDifficulty];
+    const midi = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
     const name = pickSpelling(midi);
     const valves = midiToValves.get(midi) || [];
     return { midi, name, valves };
@@ -496,6 +519,15 @@
     window.location.href = 'profile.html';
   });
   document.body.appendChild(profileBtn);
+
+  // Difficulty selector
+  const difficultySelect = document.getElementById('difficulty');
+  if (difficultySelect) {
+    difficultySelect.addEventListener('change', (e) => {
+      currentDifficulty = e.target.value;
+      console.log('Difficulty changed to:', currentDifficulty);
+    });
+  }
 
   // Boot
   resetRound();

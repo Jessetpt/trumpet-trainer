@@ -1,4 +1,9 @@
 (() => {
+  // Initialize Supabase client
+  const supabaseUrl = 'https://ooiowourmbkmhrhuaybl.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vaW93b3VybWJrbWhyaHVheWJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2MzE1NjYsImV4cCI6MjA3MDIwNzU2Nn0.Jbv5EKbQ4TZmWP-mVZoXymguXXS_8Fw4Kgm0DM4GU0o';
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
   const loginForm = document.getElementById('loginForm');
   const showLoginLink = document.getElementById('showLogin');
   const brandLogo = document.getElementById('brandLogo');
@@ -101,23 +106,22 @@
       
       try {
         if (isResetMode) {
-          // Password reset logic
-          const response = await fetch('http://localhost:3000/api/auth/forgot-password', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email: userData.email })
-          });
-          
-          const data = await response.json();
-          
-          if (response.ok) {
-            alert(`Password reset link sent! Token: ${data.resetToken}\n\nIn production, this would be sent via email.`);
-            // Reset form back to login
-            toggleMode();
-          } else {
-            alert(data.error || 'Password reset failed');
+          // Password reset logic using Supabase Auth
+          try {
+            const { data, error } = await supabase.auth.resetPasswordForEmail(userData.email, {
+              redirectTo: window.location.origin + '/reset-password.html'
+            });
+            
+            if (error) {
+              alert(error.message || 'Password reset failed');
+            } else {
+              alert('Password reset link sent to your email! Check your inbox and spam folder.');
+              // Reset form back to login
+              toggleMode();
+            }
+          } catch (error) {
+            console.error('Password reset error:', error);
+            alert('Failed to send reset email. Please try again.');
           }
         } else if (isLoginMode) {
           // Login logic

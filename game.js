@@ -508,12 +508,12 @@
 
   // Add leaderboard and profile buttons (bottom right, next to theme toggle)
   const buttonContainer = document.createElement('div');
-  buttonContainer.style.cssText = 'position: absolute; bottom: 10px; right: 80px; display: flex; gap: 8px;';
+  buttonContainer.style.cssText = 'position: absolute; bottom: 10px; right: 80px; display: flex; gap: 12px; align-items: center;';
   document.getElementById('board').appendChild(buttonContainer);
 
   const profileBtn = document.createElement('button');
   profileBtn.textContent = 'Profile';
-  profileBtn.style.cssText = 'border: 1px solid rgba(0,0,0,0.15); background: var(--panel); color: var(--ink); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px;';
+  profileBtn.style.cssText = 'border: 1px solid rgba(0,0,0,0.15); background: var(--panel); color: var(--ink); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; min-width: 60px; height: 28px; display: flex; align-items: center; justify-content: center;';
   profileBtn.addEventListener('click', () => {
     window.location.href = 'profile.html';
   });
@@ -521,7 +521,7 @@
 
   const leaderboardBtn = document.createElement('button');
   leaderboardBtn.textContent = 'Leaderboard';
-  leaderboardBtn.style.cssText = 'border: 1px solid rgba(0,0,0,0.15); background: var(--panel); color: var(--ink); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px;';
+  leaderboardBtn.style.cssText = 'border: 1px solid rgba(0,0,0,0.15); background: var(--panel); color: var(--ink); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; min-width: 80px; height: 28px; display: flex; align-items: center; justify-content: center;';
   leaderboardBtn.addEventListener('click', () => {
     window.location.href = 'leaderboard.html';
   });

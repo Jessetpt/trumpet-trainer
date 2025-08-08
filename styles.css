@@ -571,3 +571,66 @@ body {
   color: #e74c3c;
 }
 
+/* Reset password page styles */
+#resetApp {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 20px;
+}
+
+.reset-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+.reset-card {
+  background: var(--panel);
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.reset-card h1 {
+  margin: 0 0 8px 0;
+  color: var(--ink);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.reset-card .subtitle {
+  margin: 0 0 32px 0;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.reset-card #brandLogo {
+  width: 80px;
+  height: auto;
+  margin-bottom: 24px;
+}
+
+.reset-form {
+  display: grid;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.reset-footer {
+  margin-top: 24px;
+  color: var(--muted);
+}
+
+.reset-footer a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.reset-footer a:hover {
+  text-decoration: underline;
+}
+

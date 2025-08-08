@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Trumpet Trainer — Profile</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main id="profileApp">
+      <div class="profile-container">
+        <div class="profile-card">
+          <img id="brandLogo" alt="Logo" src="Untitled design.svg" onerror="this.style.display='none'" />
+          <h1>My Profile</h1>
+          
+          <div id="userInfo" class="user-info">
+            <div class="loading">Loading profile...</div>
+          </div>
+          
+          <div id="statsSection" class="stats-section">
+            <h2>My Statistics</h2>
+            <div id="statsList" class="stats-list">
+              <div class="loading">Loading statistics...</div>
+            </div>
+          </div>
+          
+          <div class="profile-actions">
+            <button id="backToGame" class="cta">Back to Game</button>
+            <button id="leaderboardBtn" class="secondary">Leaderboard</button>
+            <button id="logoutBtn" class="danger">Logout</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script defer src="profile.js"></script>
+  </body>
+</html> 

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Trumpet Trainer — Leaderboard</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main id="leaderboardApp">
+      <div class="leaderboard-container">
+        <div class="leaderboard-card">
+          <img id="brandLogo" alt="Logo" src="Untitled design.svg" onerror="this.style.display='none'" />
+          <h1>Leaderboard</h1>
+          <p class="subtitle">Top players and their best scores</p>
+          
+          <div id="leaderboardList" class="leaderboard-list">
+            <div class="loading">Loading leaderboard...</div>
+          </div>
+          
+          <div class="leaderboard-actions">
+            <button id="backToGame" class="cta">Back to Game</button>
+            <button id="profileBtn" class="secondary">My Profile</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script defer src="leaderboard.js"></script>
+  </body>
+</html> 

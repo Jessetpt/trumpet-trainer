@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Trumpet Trainer — Game 1</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
+  </head>
+  <body>
+    <main id="app">
+      <div id="board">
+        <img id="brandLogo" alt="Logo" src="Untitled design.svg" onerror="this.style.display='none'" />
+        <button id="themeToggle" aria-label="Toggle light/dark mode"></button>
+        <button id="logoutBtn" aria-label="Sign out">Sign Out</button>
+        <div id="vf"></div>
+        <div id="hud">
+          <div id="valves"></div>
+          <div id="stats"></div>
+        </div>
+      </div>
+
+      <section id="overlay" aria-live="polite">
+        <div class="card">
+          <img id="brandLogo" alt="Logo" src="Untitled design.svg" onerror="this.style.display='none'" />
+          <h1 id="title">Trumpet Trainer</h1>
+          <p id="subtitle">Read fast. Finger faster. Build streaks.</p>
+          <div class="chips">
+            <span class="chip">1 = ←</span>
+            <span class="chip">2 = ↓</span>
+            <span class="chip">3 = →</span>
+            <span class="chip">0 = ↰ / Enter</span>
+            <span class="chip">Start/Pause = Space</span>
+            <span class="chip">Reset = R</span>
+          </div>
+          <button id="startBtn" class="cta">Start 60s Round</button>
+          <p id="cta" class="hint">Press Space to start</p>
+        </div>
+      </section>
+    </main>
+
+    <script defer src="game.js"></script>
+  </body>
+  </html>
+

@@ -99,6 +99,21 @@
             gap: 0.5rem;
         }
 
+        .refresh-btn {
+            background: linear-gradient(135deg, var(--primary-teal), var(--primary-orange));
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .refresh-btn:hover {
+            transform: scale(1.05);
+        }
+
         .nav-btn {
             background: linear-gradient(135deg, var(--primary-teal), var(--primary-orange));
             color: white;
@@ -498,6 +513,7 @@
             <a href="leaderboard.html" class="nav-btn active">🏆 Leaderboard</a>
             <a href="analytics.html" class="nav-btn">📊 Analytics</a>
             <a href="profile.html" class="profile-btn">👤 Profile</a>
+            <button class="refresh-btn" id="refresh-btn" title="Refresh data">🔄</button>
             <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">
                 🌙
             </button>

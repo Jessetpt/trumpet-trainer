@@ -4,6 +4,8 @@ class NoteAnalytics {
         this.currentData = [];
         this.currentSort = { field: 'avg_response_time', direction: 'desc' };
         this.currentFilters = { difficulty: '', time_mode: '' };
+        this.analyticsCache = new Map();
+        this.CACHE_DURATION = 60000; // 1 minute cache
         
         this.init();
     }
@@ -38,6 +40,16 @@ class NoteAnalytics {
         if (timeFilter) {
             timeFilter.addEventListener('change', () => this.updateFilters());
         }
+
+        // Add refresh button functionality
+        const refreshBtn = document.getElementById('refresh-btn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                // Clear cache and reload
+                this.analyticsCache.clear();
+                this.loadData();
+            });
+        }
     }
 
     updateFilters() {
@@ -57,6 +69,17 @@ class NoteAnalytics {
 
     async loadData() {
         try {
+            const cacheKey = `${this.currentFilters.difficulty}-${this.currentFilters.time_mode}`;
+            const cached = this.analyticsCache.get(cacheKey);
+            
+            // Check if we have recent cached data
+            if (cached && (Date.now() - cached.timestamp) < this.CACHE_DURATION) {
+                this.currentData = cached.data;
+                this.updateStats();
+                this.renderTable();
+                return;
+            }
+
             this.showLoading();
             
             const token = localStorage.getItem('authToken');
@@ -79,7 +102,8 @@ class NoteAnalytics {
 
             const response = await fetch(url.toString(), {
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Cache-Control': 'no-cache'
                 }
             });
 
@@ -89,6 +113,12 @@ class NoteAnalytics {
 
             const data = await response.json();
             this.currentData = data.notes || [];
+            
+            // Cache the successful response
+            this.analyticsCache.set(cacheKey, {
+                data: this.currentData,
+                timestamp: Date.now()
+            });
             
             this.updateStats();
             this.renderTable();

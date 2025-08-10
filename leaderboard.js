@@ -39,20 +39,44 @@
     return null;
   }
 
-  // Load leaderboard
+  // Cache for leaderboard data to prevent excessive API calls
+  const leaderboardCache = new Map();
+  const CACHE_DURATION = 30000; // 30 seconds
+
+  // Load leaderboard with caching
   async function loadLeaderboard(mode, timeMode) {
+    const cacheKey = `${mode}-${timeMode}`;
+    const cached = leaderboardCache.get(cacheKey);
+    
+    // Check if we have recent cached data
+    if (cached && (Date.now() - cached.timestamp) < CACHE_DURATION) {
+      displayLeaderboard(cached.data, mode, timeMode);
+      return;
+    }
+
     leaderboardList.innerHTML = '<div class="loading">Loading leaderboard...</div>';
+    
     try {
       // Use configuration to get the correct API base URL
       const baseUrl = window.appConfig ? window.appConfig.apiBaseUrl : 'http://localhost:3000/api';
       const url = new URL(`${baseUrl}/scores/leaderboard`);
       url.searchParams.set('mode', mode);
       url.searchParams.set('time_mode', timeMode);
-      url.searchParams.set('_t', Date.now().toString());
-      const response = await fetch(url.toString(), { cache: 'no-store' });
-      const data = await response.json();
+      
+      const response = await fetch(url.toString(), { 
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
       
       if (response.ok) {
+        const data = await response.json();
+        // Cache the successful response
+        leaderboardCache.set(cacheKey, {
+          data: data.leaderboard,
+          timestamp: Date.now()
+        });
         displayLeaderboard(data.leaderboard, mode, timeMode);
       } else {
         leaderboardList.innerHTML = `<div class="error">${data.error || 'Failed to load leaderboard'}</div>`;
@@ -126,6 +150,16 @@
   }
 
 
+
+  // Add refresh button functionality
+  const refreshBtn = document.getElementById('refresh-btn');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => {
+      // Clear cache and reload
+      leaderboardCache.clear();
+      reload();
+    });
+  }
 
   // Load leaderboard on page load
   reload();

@@ -99,20 +99,7 @@
             gap: 0.5rem;
         }
 
-        .refresh-btn {
-            background: linear-gradient(135deg, var(--primary-teal), var(--primary-orange));
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
 
-        .refresh-btn:hover {
-            transform: scale(1.05);
-        }
 
         .free-class-btn {
             background: linear-gradient(135deg, var(--primary-orange), var(--primary-teal));
@@ -129,8 +116,8 @@
         }
 
         .free-class-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(246, 131, 24, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(246, 131, 24, 0.3);
         }
 
         .nav-btn {
@@ -221,8 +208,8 @@
 
         /* Main Content */
         .main-content {
-            margin-top: 5rem;
-            padding: 2rem;
+            margin-top: 4rem;
+            padding: 1rem;
             max-width: 1200px;
             margin-left: auto;
             margin-right: auto;
@@ -230,21 +217,35 @@
 
         .page-header {
             text-align: center;
-            margin-bottom: 3rem;
+            margin-bottom: 1.5rem;
         }
 
         .page-title {
-            font-size: 3rem;
+            font-size: 2.5rem;
             font-weight: 800;
             color: var(--primary-orange);
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             text-shadow: 2px 2px 4px var(--shadow);
+            position: relative;
+            display: inline-block;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-orange), var(--primary-teal));
+            border-radius: 2px;
         }
 
         .page-subtitle {
-            font-size: 1.25rem;
+            font-size: 1rem;
             color: var(--text-secondary);
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
         }
 
         /* Filters Section */
@@ -252,11 +253,17 @@
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 3rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
             box-shadow: 0 4px 12px var(--shadow);
             position: relative;
             overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .filters-section:hover {
+            box-shadow: 0 8px 24px var(--shadow);
+            transform: translateY(-2px);
         }
 
         .filters-section::before {
@@ -270,19 +277,18 @@
         }
 
         .filters-title {
-            font-size: 1.5rem;
-            font-weight: 700;
+            font-size: 1.25rem;
+            font-weight: 600;
             color: var(--text-primary);
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             text-align: center;
         }
 
         .filter-controls {
-            display: flex;
-            gap: 1.5rem;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
         }
 
         .filter-group {
@@ -304,7 +310,6 @@
             background: var(--surface);
             color: var(--text-primary);
             font-size: 1rem;
-            min-width: 150px;
             transition: all 0.2s ease;
         }
 
@@ -312,84 +317,82 @@
             outline: none;
             border-color: var(--primary-orange);
             box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+            transform: translateY(-1px);
         }
 
-        /* Leaderboard Table */
+        .filter-group select:hover {
+            border-color: var(--primary-teal);
+            transform: translateY(-1px);
+        }
+
+        /* Enhanced filter styling */
+        .filter-group {
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .filter-group:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Leaderboard Container */
         .leaderboard-container {
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 16px;
             overflow: hidden;
+            box-shadow: 0 4px 12px var(--shadow);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-container:hover {
             box-shadow: 0 8px 24px var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .leaderboard-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-orange), var(--primary-teal));
         }
 
         .leaderboard-header {
-            background: linear-gradient(135deg, var(--primary-orange), var(--primary-teal));
-            color: white;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
             padding: 1.5rem 2rem;
             text-align: center;
         }
 
         .leaderboard-title {
-            font-size: 1.75rem;
+            font-size: 1.5rem;
             font-weight: 700;
+            color: var(--text-primary);
             margin-bottom: 0.5rem;
         }
 
         .leaderboard-subtitle {
-            opacity: 0.9;
-            font-size: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
         }
 
-        /* Dark mode overrides */
-        .dark .page-title {
-            color: var(--text-primary);
-            text-shadow: 0 0 10px rgba(32, 156, 189, 0.3);
-        }
-
-        .dark .filters-section::before {
-            background: linear-gradient(90deg, rgba(32, 156, 189, 0.8), rgba(246, 131, 24, 0.8));
-        }
-
-        .dark .leaderboard-header {
-            background: linear-gradient(135deg, rgba(32, 156, 189, 0.1), rgba(246, 131, 24, 0.1));
-            color: var(--text-primary);
-            border: 1px solid rgba(32, 156, 189, 0.2);
-        }
-
-        .dark .leaderboard-table th {
-            background: linear-gradient(135deg, rgba(32, 156, 189, 0.1), rgba(246, 131, 24, 0.1));
-            border-bottom-color: rgba(32, 156, 189, 0.5);
-        }
-
-        .dark .leaderboard-table th::after {
-            background: linear-gradient(90deg, rgba(32, 156, 189, 0.8), rgba(246, 131, 24, 0.8));
-        }
-
-        .dark .leaderboard-table tr:nth-child(even) {
-            background: rgba(32, 156, 189, 0.05);
-        }
-
-        .dark .leaderboard-table tr:nth-child(odd) {
-            background: rgba(246, 131, 24, 0.05);
-        }
-
-        .dark .leaderboard-table tr:hover {
-            background: linear-gradient(135deg, rgba(32, 156, 189, 0.15), rgba(246, 131, 24, 0.15));
-        }
-
+        /* Leaderboard Table */
         .leaderboard-table {
             width: 100%;
             border-collapse: collapse;
         }
 
         .leaderboard-table th {
-            background: linear-gradient(135deg, var(--surface), var(--card-bg));
+            background: var(--surface);
             color: var(--text-primary);
             padding: 1rem;
             text-align: left;
             font-weight: 600;
-            border-bottom: 2px solid var(--primary-orange);
+            border-bottom: 1px solid var(--border);
             position: relative;
         }
 
@@ -400,7 +403,7 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: linear-gradient(90deg, var(--primary-orange), var(--primary-teal));
+            background: linear-gradient(90deg, var(--primary-teal), var(--primary-orange));
         }
 
         .leaderboard-table td {
@@ -416,9 +419,8 @@
         }
 
         .leaderboard-table tr:hover {
-            background: linear-gradient(135deg, rgba(32, 156, 189, 0.05), rgba(246, 131, 24, 0.05));
+            background: var(--surface);
             transform: translateX(4px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .leaderboard-table tr:nth-child(even) {
@@ -452,7 +454,6 @@
         .score-cell {
             font-weight: 600;
             color: var(--primary-teal);
-            text-shadow: 0 0 5px rgba(32, 156, 189, 0.3);
         }
 
         .accuracy-cell {
@@ -464,16 +465,71 @@
             font-size: 0.9rem;
         }
 
+        /* Special styling for user's own scores */
+        .my-score {
+            position: relative;
+            background: rgba(32, 156, 189, 0.08) !important;
+            border-radius: 8px;
+            outline: 2px solid var(--primary-teal);
+            outline-offset: -2px;
+        }
+
+        .my-score:hover {
+            background: rgba(32, 156, 189, 0.12) !important;
+            transform: translateX(6px);
+        }
+
+        /* Enhanced table styling */
+        .leaderboard-table tbody tr {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .leaderboard-table tbody tr:hover {
+            background: var(--surface);
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
         /* Loading and Error States */
         .loading, .error, .no-data {
             text-align: center;
-            padding: 3rem 2rem;
+            padding: 2rem;
             color: var(--text-secondary);
             font-size: 1.1rem;
         }
 
         .error {
             color: #dc3545;
+        }
+
+        /* Dark mode overrides */
+        .dark .page-title {
+            color: var(--text-primary);
+            text-shadow: 0 0 10px rgba(32, 156, 189, 0.3);
+        }
+
+        .dark .filters-section::before {
+            background: linear-gradient(90deg, rgba(32, 156, 189, 0.8), rgba(246, 131, 24, 0.8));
+        }
+
+        .dark .leaderboard-container::before {
+            background: linear-gradient(90deg, rgba(32, 156, 189, 0.8), rgba(246, 131, 24, 0.8));
+        }
+
+        .dark .leaderboard-table th::after {
+            background: linear-gradient(90deg, rgba(32, 156, 189, 0.8), rgba(246, 131, 24, 0.8));
+        }
+
+        .dark .leaderboard-table tr:nth-child(even) {
+            background: rgba(32, 156, 189, 0.05);
+        }
+
+        .dark .leaderboard-table tr:nth-child(odd) {
+            background: rgba(246, 131, 24, 0.05);
+        }
+
+        .dark .leaderboard-table tr:hover {
+            background: rgba(32, 156, 189, 0.1);
         }
 
         /* Responsive Design */
@@ -496,21 +552,7 @@
             }
 
             .filter-controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .filter-group select {
-                min-width: auto;
-            }
-
-            .leaderboard-table {
-                font-size: 0.9rem;
-            }
-
-            .leaderboard-table th,
-            .leaderboard-table td {
-                padding: 0.75rem 0.5rem;
+                grid-template-columns: 1fr;
             }
         }
 
@@ -546,49 +588,44 @@
 
             /* Mobile Layout */
             .main-content {
-                margin-top: 6rem;
-                padding: 0 1rem;
+                margin-top: 5rem;
+                padding: 0 0.75rem;
             }
 
             .page-header {
                 text-align: center;
-                margin-bottom: 2rem;
+                margin-bottom: 1rem;
             }
 
             .page-title {
-                font-size: 2rem;
-                margin-bottom: 0.75rem;
+                font-size: 1.5rem;
+                margin-bottom: 0.25rem;
             }
 
             .page-subtitle {
-                font-size: 1rem;
+                font-size: 0.9rem;
             }
 
             /* Mobile Filters */
             .filters-section {
-                padding: 1.5rem;
-                margin-bottom: 2rem;
+                padding: 1rem;
+                margin-bottom: 1rem;
                 border-radius: 12px;
             }
 
             .filters-title {
-                font-size: 1.25rem;
-                margin-bottom: 1rem;
+                font-size: 1.1rem;
+                margin-bottom: 0.75rem;
             }
 
             .filter-controls {
-                flex-direction: column;
-                gap: 1rem;
-                align-items: stretch;
-            }
-
-            .filter-group {
-                width: 100%;
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
             }
 
             .filter-group label {
-                font-size: 0.9rem;
-                margin-bottom: 0.5rem;
+                font-size: 0.8rem;
+                margin-bottom: 0.25rem;
             }
 
             .filter-group select {
@@ -686,13 +723,8 @@
             }
 
             .filter-controls {
-                flex-direction: row;
+                grid-template-columns: repeat(2, 1fr);
                 gap: 1rem;
-            }
-
-            .filter-group {
-                flex: 1;
-                min-width: 150px;
             }
         }
 
@@ -712,10 +744,9 @@
         <div class="nav-controls">
             <a href="index.html" class="nav-btn">🏠 Game</a>
             <a href="leaderboard.html" class="nav-btn active">🏆 Leaderboard</a>
-
             <a href="profile.html" class="profile-btn">👤 Profile</a>
             <a href="free-class.html" class="free-class-btn">🎓 Free Trumpet Class</a>
-
+            <a href="book-chat.html" class="nav-btn">💬 Book Chat</a>
             <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">
                 🌙
             </button>
@@ -733,14 +764,14 @@
             <h2 class="filters-title">Filter Results</h2>
             <div class="filter-controls">
                 <div class="filter-group">
-                            <label for="difficulty-filter">Difficulty</label>
-        <select id="difficulty-filter">
-          <option value="normal">Normal</option>
-          <option value="lead">Lead Trumpet</option>
-          <option value="hard">Hard Mode</option>
-          <option value="doublec">Double C</option>
-          <option value="ultra">Ultra Hard</option>
-        </select>
+                    <label for="difficulty-filter">Difficulty</label>
+                    <select id="difficulty-filter">
+                        <option value="normal">Normal</option>
+                        <option value="lead">Lead Trumpet</option>
+                        <option value="hard">Hard Mode</option>
+                        <option value="doublec">Double C</option>
+                        <option value="ultra">Ultra Hard</option>
+                    </select>
                 </div>
                 <div class="filter-group">
                     <label for="time-filter">Time Mode</label>

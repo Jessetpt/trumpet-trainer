@@ -22,6 +22,27 @@
   let isLoginMode = false;
   let isResetMode = false;
 
+  // Mobile detection
+  function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+           window.innerWidth <= 768;
+  }
+
+  function showMobileMessage() {
+    const mobileMessage = document.getElementById('mobileMessage');
+    const loginContainer = document.querySelector('.login-container');
+    
+    if (mobileMessage && loginContainer) {
+      mobileMessage.style.display = 'flex';
+      loginContainer.style.display = 'none';
+    }
+  }
+
+  // Check if mobile and show message
+  if (isMobileDevice()) {
+    showMobileMessage();
+  }
+
   // Theme handling
   function updateLogo() {
     if (!brandLogo) return;

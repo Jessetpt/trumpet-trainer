@@ -1,9 +1,9 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Trumpet Trainer — Profile</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book a Trumpet Chat - Trumpet Trainer</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎺</text></svg>">
     <style>
         :root {
@@ -99,6 +99,25 @@
             gap: 0.5rem;
         }
 
+        .free-class-btn {
+            background: linear-gradient(135deg, var(--primary-orange), var(--primary-teal));
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .free-class-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(246, 131, 24, 0.3);
+        }
+
         .nav-btn {
             background: linear-gradient(135deg, var(--primary-teal), var(--primary-orange));
             color: white;
@@ -143,25 +162,6 @@
             color: white;
             border-color: transparent;
             box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
-        }
-
-        .free-class-btn {
-            background: linear-gradient(135deg, var(--primary-orange), var(--primary-teal));
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .free-class-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(246, 131, 24, 0.3);
         }
 
         .theme-toggle {
@@ -224,6 +224,20 @@
             color: var(--primary-orange);
             margin-bottom: 0.5rem;
             text-shadow: 2px 2px 4px var(--shadow);
+            position: relative;
+            display: inline-block;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-orange), var(--primary-teal));
+            border-radius: 2px;
         }
 
         .page-subtitle {
@@ -232,19 +246,20 @@
             margin-bottom: 1rem;
         }
 
-        /* Profile Content */
-        .profile-container {
+        /* Chat Booking Content */
+        .chat-booking-container {
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 1.5rem;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
             box-shadow: 0 4px 12px var(--shadow);
             position: relative;
             overflow: hidden;
+            transition: all 0.3s ease;
         }
 
-        .profile-container::before {
+        .chat-booking-container::before {
             content: '';
             position: absolute;
             top: 0;
@@ -254,162 +269,56 @@
             background: linear-gradient(90deg, var(--primary-orange), var(--primary-teal));
         }
 
-        .profile-card {
+        .chat-booking-container:hover {
+            box-shadow: 0 8px 24px var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .chat-booking-card {
             position: relative;
             z-index: 1;
         }
 
-        .profile-card h1 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
-        .profile-card h2 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 1rem;
-            margin-top: 1rem;
-        }
-
-        .profile-card #brandLogo {
-            width: 80px;
-            height: auto;
-            display: block;
-            margin: 0 auto 1rem auto;
-        }
-
-        .user-info {
-            margin-bottom: 1rem;
-        }
-
-        .user-details {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 0.75rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .user-details::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--primary-teal), var(--primary-orange));
-        }
-
-        .user-name {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .user-email, .user-phone, .user-joined {
-            color: var(--text-secondary);
-            margin-bottom: 0.25rem;
-        }
-
-        .stats-section {
-            margin-bottom: 1rem;
-        }
-
-        .stats-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 0.75rem;
-        }
-
-        .stat-item {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1rem;
-            text-align: center;
-            transition: all 0.2s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--primary-teal), var(--primary-orange));
-        }
-
-        .stat-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px var(--shadow);
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.25rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-value {
+        .chat-booking-card h2 {
             font-size: 1.5rem;
             font-weight: 700;
-            color: var(--primary-orange);
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            text-align: center;
         }
 
-        .profile-actions {
-            display: flex;
-            gap: 0.75rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 1rem;
+        .chat-booking-card p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            text-align: center;
         }
 
-        .cta {
+        .cta-section {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .cta-button {
             background: linear-gradient(135deg, var(--primary-teal), var(--primary-orange));
             color: white;
             border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            font-weight: 500;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
             text-decoration: none;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-        }
-
-        .cta:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 180, 216, 0.3);
-        }
-
-        .danger {
-            background: linear-gradient(135deg, var(--primary-orange), var(--primary-teal));
-            color: white;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            cursor: pointer;
+            gap: 0.75rem;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
         }
 
-        .danger::before {
+        .cta-button::before {
             content: '';
             position: absolute;
             top: 0;
@@ -420,24 +329,13 @@
             transition: left 0.3s ease;
         }
 
-        .danger:hover::before {
+        .cta-button:hover::before {
             left: 100%;
         }
 
-        .danger:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
-        }
-
-        .loading, .error, .empty {
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-        }
-
-        .error {
-            color: #dc3545;
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 180, 216, 0.4);
         }
 
         /* Dark mode overrides */
@@ -446,15 +344,7 @@
             text-shadow: 0 0 10px rgba(32, 156, 189, 0.3);
         }
 
-        .dark .profile-container::before {
-            background: linear-gradient(90deg, rgba(32, 156, 189, 0.8), rgba(246, 131, 24, 0.8));
-        }
-
-        .dark .user-details::before {
-            background: linear-gradient(90deg, rgba(32, 156, 189, 0.8), rgba(246, 131, 24, 0.8));
-        }
-
-        .dark .stat-item::before {
+        .dark .chat-booking-container::before {
             background: linear-gradient(90deg, rgba(32, 156, 189, 0.8), rgba(246, 131, 24, 0.8));
         }
 
@@ -475,15 +365,6 @@
 
             .page-title {
                 font-size: 2.5rem;
-            }
-
-            .profile-actions {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .stats-list {
-                grid-template-columns: 1fr;
             }
         }
 
@@ -517,7 +398,7 @@
                 min-width: 44px;
             }
 
-            /* Mobile Profile Layout */
+            /* Mobile Layout */
             .main-content {
                 margin-top: 5rem;
                 padding: 0 0.75rem;
@@ -537,75 +418,27 @@
                 font-size: 0.9rem;
             }
 
-            .profile-container {
-                max-width: 100%;
-            }
-
-            .profile-card {
+            /* Mobile Chat Booking */
+            .chat-booking-container {
                 padding: 1rem;
-                border-radius: 16px;
-            }
-
-            #brandLogo {
-                height: 2.5rem;
-                margin-bottom: 0.75rem;
-            }
-
-            /* Mobile User Info */
-            .user-info {
-                text-align: center;
                 margin-bottom: 1rem;
+                border-radius: 12px;
             }
 
-            .user-name {
+            .chat-booking-card h2 {
                 font-size: 1.25rem;
-                margin-bottom: 0.5rem;
-            }
-
-            .user-email, .user-phone, .user-joined {
-                font-size: 0.8rem;
-                margin-bottom: 0.25rem;
-            }
-
-            /* Mobile Stats */
-            .stats-section h2 {
-                font-size: 1.25rem;
-                text-align: center;
                 margin-bottom: 0.75rem;
             }
 
-            .stats-list {
-                grid-template-columns: 1fr;
-                gap: 0.5rem;
+            .cta-section {
+                margin: 1.5rem 0;
             }
 
-            .stat-item {
-                padding: 0.75rem;
-                border-radius: 12px;
-            }
-
-            .stat-label {
-                font-size: 0.75rem;
-                margin-bottom: 0.25rem;
-            }
-
-            .stat-value {
-                font-size: 1.25rem;
-            }
-
-            /* Mobile Actions */
-            .profile-actions {
-                flex-direction: column;
-                gap: 0.5rem;
-                margin-top: 1rem;
-            }
-
-            .cta, .danger {
+            .cta-button {
                 width: 100%;
-                padding: 0.75rem;
-                font-size: 0.9rem;
+                padding: 0.75rem 1.5rem;
+                font-size: 1rem;
                 border-radius: 12px;
-                min-height: 48px;
                 justify-content: center;
             }
         }
@@ -635,20 +468,12 @@
                 padding: 0 0.5rem;
             }
 
-            .profile-card {
-                padding: 1rem;
-            }
-
             .page-title {
-                font-size: 1.5rem;
+                font-size: 1.75rem;
             }
 
-            .stats-list {
-                gap: 0.5rem;
-            }
-
-            .stat-item {
-                padding: 0.75rem;
+            .chat-booking-container {
+                padding: 1rem;
             }
         }
 
@@ -663,14 +488,10 @@
             .main-content {
                 margin-top: 4rem;
             }
-
-            .stats-list {
-                grid-template-columns: repeat(2, 1fr);
-            }
         }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <!-- Global Navigation Bar -->
     <nav class="global-nav">
         <a href="index.html" class="nav-brand">
@@ -680,9 +501,8 @@
         <div class="nav-controls">
             <a href="index.html" class="nav-btn">🏠 Game</a>
             <a href="leaderboard.html" class="nav-btn">🏆 Leaderboard</a>
-            <a href="profile.html" class="profile-btn active">👤 Profile</a>
+            <a href="profile.html" class="profile-btn">👤 Profile</a>
             <a href="free-class.html" class="free-class-btn">🎓 Free Trumpet Class</a>
-            <a href="book-chat.html" class="nav-btn">💬 Book Chat</a>
             <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">
                 🌙
             </button>
@@ -691,37 +511,28 @@
 
     <!-- Main Content -->
     <div class="main-content">
-        <div class="page-header">
-            <h1 class="page-title">👤 My Profile</h1>
-            <p class="page-subtitle">View your profile information and game statistics</p>
-        </div>
+                       <div class="page-header">
+                   <h1 class="page-title">🎯 Book a Trumpet Chat</h1>
+                   <p class="page-subtitle">Get a personalized strategy session to map your path from inconsistent to unstoppable</p>
+               </div>
 
-        <div class="profile-container">
-            <div class="profile-card">
-                <img id="brandLogo" alt="Logo" src="Untitled design.svg" onerror="this.style.display='none'" />
-                
-                <div id="userInfo" class="user-info">
-                    <div class="loading">Loading profile...</div>
-                </div>
-                
-                <div id="statsSection" class="stats-section">
-                    <h2>My Statistics</h2>
-                    <div id="statsList" class="stats-list">
-                        <div class="loading">Loading statistics...</div>
-                    </div>
-                </div>
-                
-                <div class="profile-actions">
-                    <button id="backToGame" class="cta">🏠 Back to Game</button>
-                    <button id="leaderboardBtn" class="cta">🏆 Leaderboard</button>
-                    <button id="logoutBtn" class="danger">🚪 Logout</button>
+        <div class="chat-booking-container">
+            <div class="chat-booking-card">
+                <h2>Ready to Transform Your Trumpet Playing?</h2>
+                <p>Join countless trumpet players who have made the decision to reach out for help and end the cycle of good and bad chop days for good!</p>
+
+                <div class="cta-section">
+                    <a href="https://www.toot-your-own-horn.com/schedule-free-trumpet-chat-1" target="_blank" class="cta-button">
+                        🗓️ Schedule Your Free Trumpet Chat
+                    </a>
+                    <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-secondary);">
+                        *Must be 18+ to apply • Zoom required • Choose your correct time zone
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="config.js"></script>
-    <script defer src="profile.js"></script>
     <script>
         // Dark Mode Toggle
         const themeToggle = document.getElementById('theme-toggle');
@@ -752,12 +563,7 @@
             if (navLogo) {
                 navLogo.src = theme === 'dark' ? 'Untitled design dark.svg' : 'Untitled design.svg';
             }
-            // Also update the profile logo
-            const profileLogo = document.getElementById('brandLogo');
-            if (profileLogo) {
-                profileLogo.src = theme === 'dark' ? 'Untitled design dark.svg' : 'Untitled design.svg';
-            }
         }
     </script>
-  </body>
+</body>
 </html> 

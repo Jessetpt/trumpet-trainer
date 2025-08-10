@@ -12,6 +12,27 @@
   const resetForm = document.getElementById('resetForm');
   const brandLogo = document.getElementById('brandLogo');
 
+  // Mobile detection
+  function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+           window.innerWidth <= 768;
+  }
+
+  function showMobileMessage() {
+    const mobileMessage = document.getElementById('mobileMessage');
+    const resetContainer = document.querySelector('.reset-container');
+    
+    if (mobileMessage && resetContainer) {
+      mobileMessage.style.display = 'flex';
+      resetContainer.style.display = 'none';
+    }
+  }
+
+  // Check if mobile and show message
+  if (isMobileDevice()) {
+    showMobileMessage();
+  }
+
   // Theme handling
   function updateLogo() {
     if (!brandLogo) return;

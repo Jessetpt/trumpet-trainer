@@ -6,18 +6,23 @@
     return;
   }
 
-  const leaderboardList = document.getElementById('leaderboardList');
-  const backToGameBtn = document.getElementById('backToGame');
-  const profileBtn = document.getElementById('profileBtn');
-  const brandLogo = document.getElementById('brandLogo');
-  const modeSelect = document.getElementById('mode');
-  const timeModeSelect = document.getElementById('timeMode');
+  // Cache for leaderboard data to prevent excessive API calls
+  const leaderboardCache = new Map();
+  const CACHE_DURATION = 30000; // 30 seconds
+
+  // Current filters state
+  let currentFilters = {
+    difficulty: 'normal',
+    time_mode: '60s'
+  };
 
   // Theme handling
   function updateLogo() {
-    if (!brandLogo) return;
-    const dark = document.documentElement.classList.contains('dark');
-    brandLogo.src = dark ? 'Untitled design dark.svg' : 'Untitled design.svg';
+    const navLogo = document.getElementById('nav-logo');
+    if (navLogo) {
+      const dark = document.documentElement.classList.contains('dark');
+      navLogo.src = dark ? 'Untitled design dark.svg' : 'Untitled design.svg';
+    }
   }
 
   // Initialize theme
@@ -39,34 +44,34 @@
     return null;
   }
 
-  // Cache for leaderboard data to prevent excessive API calls
-  const leaderboardCache = new Map();
-  const CACHE_DURATION = 30000; // 30 seconds
-
   // Load leaderboard with caching
-  async function loadLeaderboard(mode, timeMode) {
-    const cacheKey = `${mode}-${timeMode}`;
+  async function loadLeaderboard() {
+    const cacheKey = `${currentFilters.difficulty}-${currentFilters.time_mode}`;
     const cached = leaderboardCache.get(cacheKey);
     
     // Check if we have recent cached data
     if (cached && (Date.now() - cached.timestamp) < CACHE_DURATION) {
-      displayLeaderboard(cached.data, mode, timeMode);
+      displayLeaderboard(cached.data);
       return;
     }
 
-    leaderboardList.innerHTML = '<div class="loading">Loading leaderboard...</div>';
+    const content = document.getElementById('leaderboard-content');
+    if (content) {
+      content.innerHTML = '<div class="loading">Loading leaderboard...</div>';
+    }
     
     try {
       // Use configuration to get the correct API base URL
       const baseUrl = window.appConfig ? window.appConfig.apiBaseUrl : 'http://localhost:3000/api';
       const url = new URL(`${baseUrl}/scores/leaderboard`);
-      url.searchParams.set('mode', mode);
-      url.searchParams.set('time_mode', timeMode);
+      url.searchParams.set('mode', currentFilters.difficulty);
+      url.searchParams.set('time_mode', currentFilters.time_mode);
       
       const response = await fetch(url.toString(), { 
         cache: 'no-store',
         headers: {
-          'Cache-Control': 'no-cache'
+          'Cache-Control': 'no-cache',
+          'Authorization': `Bearer ${token}`
         }
       });
       
@@ -77,90 +82,115 @@
           data: data.leaderboard,
           timestamp: Date.now()
         });
-        displayLeaderboard(data.leaderboard, mode, timeMode);
+        displayLeaderboard(data.leaderboard);
       } else {
-        leaderboardList.innerHTML = `<div class="error">${data.error || 'Failed to load leaderboard'}</div>`;
+        const content = document.getElementById('leaderboard-content');
+        if (content) {
+          content.innerHTML = `<div class="error">Failed to load leaderboard</div>`;
+        }
       }
     } catch (error) {
       console.error('Leaderboard error:', error);
-      leaderboardList.innerHTML = '<div class="error">Network error. Please try again.</div>';
+      const content = document.getElementById('leaderboard-content');
+      if (content) {
+        content.innerHTML = '<div class="error">Network error. Please try again.</div>';
+      }
     }
   }
 
-  function displayLeaderboard(scores, mode, timeMode) {
-    const myLast = getLastScoreFor(mode, timeMode);
+  function displayLeaderboard(scores) {
+    const content = document.getElementById('leaderboard-content');
+    if (!content) return;
+
+    const myLast = getLastScoreFor(currentFilters.difficulty, currentFilters.time_mode);
+    
     if (!scores || scores.length === 0) {
-      leaderboardList.innerHTML = '<div class="empty">No scores yet. Be the first to play!</div>';
+      content.innerHTML = '<div class="no-data">No scores yet. Be the first to play!</div>';
       return;
     }
 
-    leaderboardList.innerHTML = '';
+    const table = `
+      <table class="leaderboard-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Player</th>
+            <th>Score</th>
+            <th>Correct</th>
+            <th>Accuracy</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${scores.map((score, index) => {
+            const rank = index + 1;
+            const isMe = myLast && Number(score.score) === Number(myLast.score);
+            const rowClass = isMe ? 'my-score' : '';
+            
+            return `
+              <tr class="${rowClass}" ${isMe ? 'style="outline: 2px solid var(--primary-teal); border-radius: 8px; background: rgba(32,156,189,0.08);"' : ''}>
+                <td class="rank-cell rank-${rank}">${rank}</td>
+                <td>${score.users?.name || 'Anonymous'}${isMe ? ' (You)' : ''}</td>
+                <td class="score-cell">${score.score.toLocaleString()}</td>
+                <td>${score.correct}</td>
+                <td class="accuracy-cell">${score.accuracy}%</td>
+                <td class="date-cell">${new Date(score.created_at).toLocaleDateString()}</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+
+    content.innerHTML = table;
+  }
+
+  // Filter event handlers
+  function bindFilterEvents() {
+    const difficultyFilter = document.getElementById('difficulty-filter');
+    const timeFilter = document.getElementById('time-filter');
     
-    scores.forEach((score, index) => {
-      const entry = document.createElement('div');
-      entry.className = 'leaderboard-entry';
-      
-      const rank = index + 1;
-      const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
-
-      const isMe = myLast && Number(score.score) === Number(myLast.score);
-      if (isMe) entry.style.cssText = 'outline: 2px solid var(--accent); border-radius: 10px; background: rgba(32,156,189,0.08)';
-      
-      entry.innerHTML = `
-        <div class="rank">${medal}</div>
-        <div class="player-info">
-          <div class="player-name">${score.users.name}${isMe ? ' (You)' : ''}</div>
-          <div class="score-details">
-            <span class="score">${score.score.toLocaleString()}</span>
-            <span class="accuracy">${score.accuracy}% accuracy</span>
-            <span class="correct">${score.correct} correct</span>
-          </div>
-        </div>
-        <div class="date">${new Date(score.created_at).toLocaleDateString()}</div>
-      `;
-      
-      leaderboardList.appendChild(entry);
-    });
-  }
-
-  // Navigation
-  if (backToGameBtn) {
-    backToGameBtn.addEventListener('click', () => {
-      window.location.href = 'index.html';
-    });
-  }
-
-  if (profileBtn) {
-    profileBtn.addEventListener('click', () => {
-      window.location.href = 'profile.html';
-    });
-  }
-
-  function reload() {
-    const mode = modeSelect ? modeSelect.value : 'normal';
-    const timeMode = timeModeSelect ? timeModeSelect.value : '60s';
-    loadLeaderboard(mode, timeMode);
-  }
-
-  if (modeSelect) {
-    modeSelect.addEventListener('change', reload);
-  }
-  if (timeModeSelect) {
-    timeModeSelect.addEventListener('change', reload);
+    if (difficultyFilter) {
+      difficultyFilter.addEventListener('change', () => {
+        currentFilters.difficulty = difficultyFilter.value;
+        loadLeaderboard();
+      });
+    }
+    
+    if (timeFilter) {
+      timeFilter.addEventListener('change', () => {
+        currentFilters.time_mode = timeFilter.value;
+        loadLeaderboard();
+      });
+    }
   }
 
 
 
-  // Add refresh button functionality
-  const refreshBtn = document.getElementById('refresh-btn');
-  if (refreshBtn) {
-    refreshBtn.addEventListener('click', () => {
-      // Clear cache and reload
-      leaderboardCache.clear();
-      reload();
-    });
+  // Initialize page
+  function initialize() {
+    // Set initial filter values
+    const difficultyFilter = document.getElementById('difficulty-filter');
+    const timeFilter = document.getElementById('time-filter');
+    
+    if (difficultyFilter) {
+      difficultyFilter.value = currentFilters.difficulty;
+    }
+    if (timeFilter) {
+      timeFilter.value = currentFilters.time_mode;
+    }
+
+    // Bind events
+    bindFilterEvents();
+    
+    // Load initial data
+    loadLeaderboard();
   }
 
-  // Load leaderboard on page load
-  reload();
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialize);
+  } else {
+    initialize();
+  }
 })(); 

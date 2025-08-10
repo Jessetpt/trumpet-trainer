@@ -896,6 +896,19 @@ body > .theme-toggle {
   border-radius: 12px;
   padding: 24px;
   text-align: left;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--muted);
+}
+
+.user-details::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary-orange), var(--primary-teal));
 }
 
 .user-name {
@@ -965,6 +978,11 @@ body > .theme-toggle {
     max-width: 300px;
     margin: 0 auto;
   }
+}
+
+/* Dark mode overrides for profile */
+:root.dark .user-details::before {
+  background: linear-gradient(90deg, rgba(32, 156, 189, 0.8), rgba(246, 131, 24, 0.8));
 }
 
 .danger {

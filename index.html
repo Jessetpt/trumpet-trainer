@@ -587,6 +587,12 @@
             if (navLogo) {
                 navLogo.src = theme === 'dark' ? 'Untitled design dark.svg' : 'Untitled design.svg';
             }
+            
+            // Also update the game logos to use dark version in dark mode
+            const gameLogos = document.querySelectorAll('#brandLogo');
+            gameLogos.forEach(logo => {
+                logo.src = theme === 'dark' ? 'Untitled design dark.svg' : 'Untitled design.svg';
+            });
         }
     </script>
   </body>

@@ -229,7 +229,7 @@ body {
 #vf { margin: 16px 16px 0 -12px; }
 
 #hud {
-  margin: 8px 16px 8px 16px;
+  margin: -290px 16px 8px 16px;
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;

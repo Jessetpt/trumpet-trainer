@@ -1,7 +1,7 @@
 (() => {
   // Check if user is logged in
-  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-  if (!currentUser) {
+  const token = localStorage.getItem('authToken');
+  if (!token) {
     window.location.href = 'login.html';
     return;
   }
@@ -10,6 +10,8 @@
   const backToGameBtn = document.getElementById('backToGame');
   const profileBtn = document.getElementById('profileBtn');
   const brandLogo = document.getElementById('brandLogo');
+  const modeSelect = document.getElementById('mode');
+  const timeModeSelect = document.getElementById('timeMode');
 
   // Theme handling
   function updateLogo() {
@@ -21,16 +23,31 @@
   // Initialize theme
   updateLogo();
 
-  // Load leaderboard
-  async function loadLeaderboard() {
+  function getLastScoreFor(mode, timeMode) {
     try {
-      const response = await fetch('http://localhost:3000/api/scores/leaderboard');
+      const raw = localStorage.getItem('lastScore');
+      if (!raw) return null;
+      const obj = JSON.parse(raw);
+      if (obj && obj.mode === mode && (!timeMode || obj.time_mode === timeMode)) return obj;
+    } catch {}
+    return null;
+  }
+
+  // Load leaderboard
+  async function loadLeaderboard(mode, timeMode) {
+    leaderboardList.innerHTML = '<div class="loading">Loading leaderboard...</div>';
+    try {
+      const url = new URL('http://localhost:3000/api/scores/leaderboard');
+      url.searchParams.set('mode', mode);
+      url.searchParams.set('time_mode', timeMode);
+      url.searchParams.set('_t', Date.now().toString());
+      const response = await fetch(url.toString(), { cache: 'no-store' });
       const data = await response.json();
       
       if (response.ok) {
-        displayLeaderboard(data.leaderboard);
+        displayLeaderboard(data.leaderboard, mode, timeMode);
       } else {
-        leaderboardList.innerHTML = '<div class="error">Failed to load leaderboard</div>';
+        leaderboardList.innerHTML = `<div class="error">${data.error || 'Failed to load leaderboard'}</div>`;
       }
     } catch (error) {
       console.error('Leaderboard error:', error);
@@ -38,7 +55,8 @@
     }
   }
 
-  function displayLeaderboard(scores) {
+  function displayLeaderboard(scores, mode, timeMode) {
+    const myLast = getLastScoreFor(mode, timeMode);
     if (!scores || scores.length === 0) {
       leaderboardList.innerHTML = '<div class="empty">No scores yet. Be the first to play!</div>';
       return;
@@ -52,11 +70,14 @@
       
       const rank = index + 1;
       const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
+
+      const isMe = myLast && Number(score.score) === Number(myLast.score);
+      if (isMe) entry.style.cssText = 'outline: 2px solid var(--accent); border-radius: 10px; background: rgba(32,156,189,0.08)';
       
       entry.innerHTML = `
         <div class="rank">${medal}</div>
         <div class="player-info">
-          <div class="player-name">${score.users.name}</div>
+          <div class="player-name">${score.users.name}${isMe ? ' (You)' : ''}</div>
           <div class="score-details">
             <span class="score">${score.score.toLocaleString()}</span>
             <span class="accuracy">${score.accuracy}% accuracy</span>
@@ -83,6 +104,19 @@
     });
   }
 
+  function reload() {
+    const mode = modeSelect ? modeSelect.value : 'normal';
+    const timeMode = timeModeSelect ? timeModeSelect.value : '60s';
+    loadLeaderboard(mode, timeMode);
+  }
+
+  if (modeSelect) {
+    modeSelect.addEventListener('change', reload);
+  }
+  if (timeModeSelect) {
+    timeModeSelect.addEventListener('change', reload);
+  }
+
   // Theme toggle
   const themeToggle = document.createElement('button');
   themeToggle.textContent = '🌙';
@@ -95,5 +129,5 @@
   document.body.appendChild(themeToggle);
 
   // Load leaderboard on page load
-  loadLeaderboard();
+  reload();
 })(); 

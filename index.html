@@ -1,9 +1,10 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Trumpet Trainer — Game 1</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trumpet Trainer</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎺</text></svg>">
     <link rel="stylesheet" href="styles.css" />
     <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
   </head>
@@ -34,13 +35,25 @@
             <span class="chip">Reset = R</span>
           </div>
           
-          <div class="difficulty-selector">
-            <label for="difficulty">Difficulty:</label>
-            <select id="difficulty">
-                          <option value="easy">Easy (F#3 - C6)</option>
-            <option value="medium">Medium (F#3 - G6)</option>
-            <option value="hard">Hard (F#3 - G6 + Double Accidentals)</option>
-            </select>
+          <div class="difficulty-selector" style="display:flex; gap:12px; align-items:center; justify-content:center; flex-wrap:wrap;">
+            <div>
+              <label for="difficulty">Difficulty:</label>
+              <select id="difficulty">
+                <option value="normal">Normal (F#3 - C6)</option>
+                <option value="lead">Lead Trumpet (F#3 - G6)</option>
+                <option value="hard">Hard Mode (F#3 - G6 + Double Accidentals)</option>
+                <option value="doublec">Double C (F#3 - C7)</option>
+                <option value="ultra">Ultra Hard (F#3 - C7 + Double Accidentals)</option>
+              </select>
+            </div>
+            <div>
+              <label for="timeMode">Time:</label>
+              <select id="timeMode">
+                <option value="60s" selected>60s</option>
+                <option value="30s">30s</option>
+                <option value="120s">120s</option>
+              </select>
+            </div>
           </div>
           <button id="startBtn" class="cta">Start 60s Round</button>
           <p id="cta" class="hint">Press Space to start</p>

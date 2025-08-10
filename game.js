@@ -1,12 +1,13 @@
 /* Trumpet Trainer — B♭ Trumpet note ID game
    Keys: Left=Valve1, Down=Valve2, Right=Valve3, Enter=Open (0)
-   Space=start/pause, R=reset
+   Space=start/pause/play-again
 */
 
 (() => {
   // Check if user is logged in
-  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-  if (!currentUser) {
+  const token = localStorage.getItem('authToken');
+  const currentUser = localStorage.getItem('currentUser');
+  if (!token && !currentUser) {
     window.location.href = 'login.html';
     return;
   }
@@ -19,19 +20,43 @@
   const valvesEl = document.getElementById('valves');
   const themeToggle = document.getElementById('themeToggle');
   const logoutBtn = document.getElementById('logoutBtn');
+  const startBtn = document.getElementById('startBtn');
+  const timeModeSelect = document.getElementById('timeMode');
+  let selectedTimeMode = (timeModeSelect && timeModeSelect.value) || '60s';
+
+  function secondsForTimeMode(tm) {
+    if (tm === '30s') return 30;
+    if (tm === '120s') return 120;
+    // future: increment/infinite modes can map here
+    return 60;
+  }
+
+  // Round state machine
+  // idle → running → finished
+  let roundState = 'idle';
+  let hasPostedScore = false;
+
+  function setStartButtonLabel() {
+    if (!startBtn) return;
+    if (roundState === 'idle') startBtn.textContent = `Start ${secondsForTimeMode(selectedTimeMode)}s Round`;
+    else if (roundState === 'running') startBtn.textContent = isRunning ? 'Pause' : 'Resume';
+    else startBtn.textContent = 'Play Again';
+  }
 
   // Game constants
-  const ROUND_SECONDS = 60;
+  let ROUND_SECONDS = secondsForTimeMode(selectedTimeMode);
   const NOTE_TIME_LIMIT_MS = 4000; // max time to answer a note before it counts as miss
   
   // Difficulty settings
   const DIFFICULTY_RANGES = {
-    easy: { min: noteMidi('F#3'), max: noteMidi('C6') },
-    medium: { min: noteMidi('F#3'), max: noteMidi('G6') },
-    hard: { min: noteMidi('F#3'), max: noteMidi('G6') }
+    normal: { min: noteMidi('F#3'), max: noteMidi('C6') },
+    lead: { min: noteMidi('F#3'), max: noteMidi('G6') },
+    hard: { min: noteMidi('F#3'), max: noteMidi('G6') },
+    doublec: { min: noteMidi('F#3'), max: noteMidi('C7') },
+    ultra: { min: noteMidi('F#3'), max: noteMidi('C7') }
   };
   
-  let currentDifficulty = 'easy';
+  let currentDifficulty = 'normal';
   // Initialize VexFlow (supports v4 global Vex.Flow and fallback variants)
   const VF = (window.Vex && window.Vex.Flow) || (window.VexFlow && window.VexFlow.Flow) || window.VexFlow || null;
   if (!VF) {
@@ -91,75 +116,174 @@
 
   const MIDI_MIN = noteMidi('F#3');
   const MIDI_MAX = noteMidi('G6');
+  const MIDI_MAX_C7 = noteMidi('C7');
 
-  function namesForMidi(midi) {
-    // Ensure top boundary C6 shows only C6 (no B#5 alias)
-    if (midi === MIDI_MAX) return ['C6'];
-    const pc = ((midi % 12) + 12) % 12;
-    const octave = Math.floor(midi / 12) - 1;
-    const natNames = { 0:'C', 2:'D', 4:'E', 5:'F', 7:'G', 9:'A', 11:'B' };
-    const names = [];
-    if (pc in natNames) {
-      names.push(`${natNames[pc]}${octave}`);
-      
-      // Include single-accidental enharmonics for certain naturals
-      if (pc === 0) names.push(`B#${octave-1}`);    // Cn == B#(n-1)
-      if (pc === 4) names.push(`Fb${octave}`);      // En == Fbn
-      if (pc === 5) names.push(`E#${octave}`);      // Fn == E#n
-      if (pc === 11) names.push(`Cb${octave+1}`);   // Bn == Cb(n+1)
-      
-      // Add double accidentals for hard mode
-      if (currentDifficulty === 'hard') {
-        if (pc === 0) names.push(`B##${octave-1}`); // C == B##
-        if (pc === 2) names.push(`Cbb${octave+1}`); // D == Cbb
-        if (pc === 4) names.push(`Fbb${octave}`);   // E == Fbb
-        if (pc === 5) names.push(`E##${octave}`);   // F == E##
-        if (pc === 7) names.push(`F##${octave}`);   // G == F##
-        if (pc === 9) names.push(`Gbb${octave+1}`); // A == Gbb
-        if (pc === 11) names.push(`Abb${octave+1}`); // B == Abb
-      }
-      
-      return names;
+  // Parse spelled name (supports ## and bb) into MIDI number with octave carry
+  function spelledNameToMidi(name) {
+    const match = name.match(/^([A-Ga-g])(#{1,2}|b{1,2})?(\d)$/);
+    if (!match) return null;
+    const letter = match[1].toUpperCase();
+    const acc = match[2] || '';
+    let octave = parseInt(match[3], 10);
+    const basePcMap = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
+    let pc = basePcMap[letter];
+    for (const ch of acc) {
+      if (ch === '#') pc += 1; else if (ch === 'b') pc -= 1;
     }
-    // Black keys: provide both sharp and flat spellings
-    const sharpMap = {1:'C#',3:'D#',6:'F#',8:'G#',10:'A#'};
-    const flatMap  = {1:'Db',3:'Eb',6:'Gb',8:'Ab',10:'Bb'};
-    const s = sharpMap[pc]; const f = flatMap[pc];
-    if (s) names.push(`${s}${octave}`);
-    if (f) names.push(`${f}${octave}`);
-    return names;
+    // Carry octave if pc stepped out of [0..11]
+    while (pc < 0) { pc += 12; octave -= 1; }
+    while (pc > 11) { pc -= 12; octave += 1; }
+    return 12 * (octave + 1) + pc;
   }
 
-  // Pick spelling with controlled randomness
-  function pickSpelling(midi) {
-    const names = namesForMidi(midi);
-    if (names.length === 1) return names[0];
-    
-    // For black keys: 50/50 sharp/flat split
-    const pc = ((midi % 12) + 12) % 12;
-    const isBlackKey = [1,3,6,8,10].includes(pc);
-    
-    if (isBlackKey && names.length === 2) {
-      // 50/50 split for black keys
-      return Math.random() < 0.5 ? names[0] : names[1];
+  // Hard-mode enharmonic spellings (including doubles) mapped to the correct fingerings by name.
+  // Source: user-provided authoritative chart.
+  const NAME_TO_VALVES = new Map([
+    ['F#3', [1,2,3]], ['Gb3', [1,2,3]], ['E##3', [1,2,3]],
+    ['G3', [1,3]], ['F##3', [1,3]], ['Abb3', [1,3]],
+    ['G#3', [2,3]], ['Ab3', [2,3]],
+    ['A3', [1,2]], ['G##3', [1,2]], ['Bbb3', [1,2]],
+    ['A#3', [1]], ['Bb3', [1]], ['Cbb3', [1]],
+    ['B3', [2]], ['Cb4', [2]], ['A##3', [2]],
+    ['C4', []], ['B#3', []], ['Dbb4', []],
+    ['C#4', [1,2,3]], ['Db4', [1,2,3]], ['B##3', [1,2,3]],
+    ['D4', [1,3]], ['C##4', [1,3]], ['Ebb4', [1,3]],
+    ['D#4', [2,3]], ['Eb4', [2,3]], ['Fbb4', [2,3]],
+    ['E4', [1,2]], ['Fb4', [1,2]], ['D##4', [1,2]],
+    ['F4', [1]], ['E#4', [1]], ['Gbb4', [1]],
+    ['F#4', [2]], ['Gb4', [2]], ['E##4', [2]],
+    ['G4', []], ['F##4', []], ['Abb4', []],
+    ['G#4', [2,3]], ['Ab4', [2,3]],
+    ['A4', [1,2]], ['G##4', [1,2]], ['Bbb4', [1,2]],
+    ['A#4', [1]], ['Bb4', [1]], ['Cbb5', [1]],
+    ['B4', [2]], ['Cb5', [2]], ['A##4', [2]],
+    ['C5', []], ['B#4', []], ['Dbb5', []],
+    ['C#5', [1,2]], ['Db5', [1,2]], ['B##4', [1,2]],
+    ['D5', [1]], ['C##5', [1]], ['Ebb5', [1]],
+    ['D#5', [2]], ['Eb5', [2]], ['Fbb5', [2]],
+    ['E5', []], ['Fb5', []], ['D##5', []],
+    ['F5', [1]], ['E#5', [1]], ['Gbb5', [1]],
+    ['F#5', [2]], ['Gb5', [2]], ['E##5', [2]],
+    ['G5', []], ['F##5', []], ['Abb5', []],
+    ['G#5', [2,3]], ['Ab5', [2,3]],
+    ['A5', [1,2]], ['G##5', [1,2]], ['Bbb5', [1,2]],
+    ['A#5', [1]], ['Bb5', [1]], ['Cbb6', [1]],
+    ['B5', [2]], ['Cb6', [2]], ['A##5', [2]],
+    ['C6', []], ['B#5', []], ['Dbb6', []],
+    ['C#6', [1,2]], ['Db6', [1,2]], ['B##5', [1,2]],
+    ['D6', [1]], ['C##6', [1]], ['Ebb6', [1]],
+    ['D#6', [2]], ['Eb6', [2]], ['Fbb6', [2]],
+    ['E6', []], ['Fb6', []], ['D##6', []],
+    ['F6', [1]], ['E#6', [1]], ['Gbb6', [1]],
+    ['F#6', [2]], ['Gb6', [2]], ['E##6', [2]],
+    ['G6', []], ['F##6', []], ['Abb6', []]
+  ]);
+
+  // Add missing 6th-octave chromatic spellings up to C7
+  const extraTop = [
+    ['G#6', [2,3]], ['Ab6', [2,3]],
+    ['A6', [1,2]], ['G##6', [1,2]], ['Bbb6', [1,2]],
+    ['A#6', [1]], ['Bb6', [1]], ['Cbb7', [1]],
+    ['B6', [2]], ['Cb7', [2]], ['A##6', [2]],
+    ['B#6', []], ['Dbb7', []]
+  ];
+  for (const [n,v] of extraTop) NAME_TO_VALVES.set(n,v);
+
+  // Extend to C7 by mirroring fingerings one octave above C6
+  (function extendToC7() {
+    const topNames = [
+      ['C6','C7'], ['C#6','C#7'], ['Db6','Db7'], ['D6','D7'], ['D#6','D#7'], ['Eb6','Eb7'],
+      ['E6','E7'], ['F6','F7'], ['F#6','F#7'], ['Gb6','Gb7'], ['G6','G7'], ['Ab6','Ab7'], ['G#6','G#7'],
+      ['A6','A7'], ['Bb6','Bb7'], ['A#6','A#7'], ['B6','B7'], ['Cb7','Cb8'], ['B#6','B#7']
+    ];
+    // We only need up to C7; mirror C6-octave shapes
+    const mirrorPairs = [
+      ['C6','C7'], ['C#6','C#7'], ['Db6','Db7'], ['D6','D7'], ['D#6','D#7'], ['Eb6','Eb7'],
+      ['E6','E7'], ['F6','F7'], ['F#6','F#7'], ['Gb6','Gb7'], ['G6','G7'],
+      ['Ab6','Ab7'], ['G#6','G#7'], ['A6','A7'], ['Bb6','Bb7'], ['A#6','A#7'], ['B6','B7'], ['Cb6','Cb7'], ['B#6','B#7']
+    ];
+    const seen = new Set(NAME_TO_VALVES.keys());
+    function copyName(src, dst) {
+      if (!seen.has(src)) return;
+      const v = NAME_TO_VALVES.get(src);
+      NAME_TO_VALVES.set(dst, v);
+      seen.add(dst);
     }
-    
-    // For naturals with enharmonics: ~20% rare spellings
-    if (names.length === 2) {
-      const hasRare = names.some(n => n.includes('B#') || n.includes('Cb') || n.includes('E#') || n.includes('Fb'));
-      if (hasRare) {
-        return Math.random() < 0.2 ? names[1] : names[0];
-      }
+    // Mirror core naturals and accidentals
+    const basePairs = [
+      ['C6','C7'], ['B#5','B#6'], ['Dbb6','Dbb7'],
+      ['C#6','C#7'], ['Db6','Db7'], ['B##5','B##6'],
+      ['D6','D7'], ['C##6','C##7'], ['Ebb6','Ebb7'],
+      ['D#6','D#7'], ['Eb6','Eb7'], ['Fbb6','Fbb7'],
+      ['E6','E7'], ['Fb6','Fb7'], ['D##6','D##7'],
+      ['F6','F7'], ['E#6','E#7'], ['Gbb6','Gbb7'],
+      ['F#6','F#7'], ['Gb6','Gb7'], ['E##6','E##7'],
+      ['G6','G7'], ['F##6','F##7'], ['Abb6','Abb7']
+    ];
+    basePairs.forEach(([src,dst]) => copyName(src,dst));
+  })();
+
+  // Build midi -> available spellings (normal/lead exclude doubles; hard includes doubles; doublec extends to C7 without doubles; ultra extends and includes doubles)
+  const midiToSpellings = new Map();
+  for (const name of NAME_TO_VALVES.keys()) {
+    const midi = spelledNameToMidi(name);
+    if (midi == null || midi < MIDI_MIN || midi > MIDI_MAX_C7) continue;
+    if (!midiToSpellings.has(midi)) midiToSpellings.set(midi, new Set());
+    midiToSpellings.get(midi).add(name);
+  }
+
+  function isDoubleAccidental(name) { return name.includes('##') || name.includes('bb'); }
+  function isSingleAccidental(name) { return name.includes('#') || name.includes('b'); }
+
+  function pickSpellingForMidi(midi) {
+    const all = Array.from(midiToSpellings.get(midi) || []);
+    if (all.length === 0) return null;
+    let pool = all;
+    const allowDoubles = (currentDifficulty === 'hard') || (currentDifficulty === 'ultra');
+    if (!allowDoubles) pool = all.filter(n => !isDoubleAccidental(n));
+
+    // Strict octave cap per difficulty for displayed spelling
+    let maxSpelledOctave = 6;
+    if (currentDifficulty === 'doublec' || currentDifficulty === 'ultra') maxSpelledOctave = 7;
+    pool = pool.filter(n => {
+      const m = n.match(/(\d)$/); return m ? parseInt(m[1], 10) <= maxSpelledOctave : true;
+    });
+
+    if (currentDifficulty === 'hard' || currentDifficulty === 'ultra') {
+      const doubles = pool.filter(isDoubleAccidental);
+      if (doubles.length && Math.random() < 0.4) pool = doubles;
     }
-    
-    return names[0]; // Default to first spelling
+    if (pool.length === 0) pool = all.filter(n => {
+      const m = n.match(/(\d)$/); return m ? parseInt(m[1], 10) <= maxSpelledOctave : true;
+    });
+    if (pool.length === 0) pool = all;
+    return pool[Math.floor(Math.random() * pool.length)];
   }
 
   function randNote() {
     const range = DIFFICULTY_RANGES[currentDifficulty];
-    const midi = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
-    const name = pickSpelling(midi);
-    const valves = midiToValves.get(midi) || [];
+    let midi;
+    for (let tries = 0; tries < 50; tries++) {
+      const candidate = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+      // Extra safety: in Normal, never exceed C6; in Lead/Hard never exceed G6
+      const hardMax = (currentDifficulty === 'doublec' || currentDifficulty === 'ultra') ? MIDI_MAX_C7 : (currentDifficulty === 'normal' ? noteMidi('C6') : MIDI_MAX);
+      if (candidate > hardMax) continue;
+      if (candidate < MIDI_MIN) continue;
+      if (midiToSpellings.has(candidate)) { midi = candidate; break; }
+    }
+    if (!midi) midi = range.min;
+    let name = pickSpellingForMidi(midi) || 'C4';
+    // Final guard: ensure displayed octave within cap
+    let maxSpelledOctave = 6;
+    if (currentDifficulty === 'doublec' || currentDifficulty === 'ultra') maxSpelledOctave = 7;
+    const octMatch = name.match(/(\d)$/);
+    if (octMatch && parseInt(octMatch[1], 10) > maxSpelledOctave) {
+      const allowed = Array.from(midiToSpellings.get(midi) || []).filter(n => {
+        const m = n.match(/(\d)$/); return m ? parseInt(m[1], 10) <= maxSpelledOctave : true;
+      });
+      if (allowed.length) name = allowed[0];
+    }
+    const valves = NAME_TO_VALVES.get(name) || midiToValves.get(midi) || [];
     return { midi, name, valves };
   }
 
@@ -178,9 +302,28 @@
   let numMistakes = 0;
   let totalResponseMs = 0;
   let bestScore = parseInt(localStorage.getItem('bestScore') || '0');
+  let currentRunId = null;
+  function newRunId() {
+    return 'run_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+  }
+
+  async function updateBestForCurrentSelection() {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) return;
+      const url = new URL('http://localhost:3000/api/scores/best');
+      url.searchParams.set('mode', currentDifficulty);
+      url.searchParams.set('time_mode', selectedTimeMode);
+      const resp = await fetch(url.toString(), { headers: { 'Authorization': `Bearer ${token}` } });
+      if (!resp.ok) return;
+      const data = await resp.json();
+      bestScore = Number(data.bestScore || 0);
+    } catch {}
+  }
 
   function resetRound() {
     isRunning = false;
+    ROUND_SECONDS = secondsForTimeMode(selectedTimeMode);
     remainingMs = ROUND_SECONDS * 1000;
     score = 0;
     streak = 0;
@@ -191,26 +334,46 @@
     numCorrect = 0;
     numMistakes = 0;
     totalResponseMs = 0;
+    roundState = 'idle';
+    hasPostedScore = false;
     if (overlay) overlay.classList.remove('hidden');
     if (cta) cta.textContent = 'Press Space to start';
+    if (startBtn) { startBtn.style.display = ''; }
+    setStartButtonLabel();
+    updateBestForCurrentSelection();
   }
 
   function startRound() {
     if (isRunning) return;
     isRunning = true;
+    roundState = 'running';
+    hasPostedScore = false;
+    currentRunId = newRunId();
     if (overlay) overlay.classList.add('hidden');
     nextNote();
+    setStartButtonLabel();
   }
 
   function pauseRound() {
+    if (!isRunning) return;
     isRunning = false;
     if (overlay) overlay.classList.remove('hidden');
     if (cta) cta.textContent = 'Press Space to resume';
+    setStartButtonLabel();
+  }
+
+  function resumeRound() {
+    if (isRunning) return;
+    isRunning = true;
+    if (overlay) overlay.classList.add('hidden');
+    setStartButtonLabel();
   }
 
   function finishRound() {
     isRunning = false;
+    roundState = 'finished';
     if (overlay) overlay.classList.remove('hidden');
+    if (startBtn) { startBtn.style.display = 'none'; }
     
     const avgResponse = numCorrect > 0 ? Math.round(totalResponseMs / numCorrect) : 0;
     const accuracy = numCorrect + numMistakes > 0 ? Math.round(100 * numCorrect / (numCorrect + numMistakes)) : 0;
@@ -218,16 +381,21 @@
     if (cta) {
       cta.innerHTML = `
         <div style="text-align: left; margin-bottom: 16px;">
-          <div><strong>Final Score:</strong> ${score}</div>
-          <div><strong>Best Score:</strong> ${bestScore}</div>
-          <div><strong>Correct:</strong> ${numCorrect}</div>
-          <div><strong>Mistakes:</strong> ${numMistakes}</div>
-          <div><strong>Best Streak:</strong> ${bestStreak}</div>
-          <div><strong>Avg Response:</strong> ${avgResponse}ms</div>
-          <div><strong>Accuracy:</strong> ${accuracy}%</div>
+          <div class="stat-blue"><strong>Final Score:</strong> ${score.toLocaleString()}</div>
+          <div class="stat-orange"><strong>Best Score:</strong> ${bestScore.toLocaleString()}</div>
+          <div class="stat-blue"><strong>Correct:</strong> ${numCorrect.toLocaleString()}</div>
+          <div class="stat-orange"><strong>Mistakes:</strong> ${numMistakes.toLocaleString()}</div>
+          <div class="stat-blue"><strong>Best Streak:</strong> ${bestStreak.toLocaleString()}</div>
+          <div class="stat-orange"><strong>Avg Response:</strong> ${avgResponse.toLocaleString()}ms</div>
+          <div class="stat-blue"><strong>Accuracy:</strong> ${accuracy}%</div>
         </div>
-        Press R to reset or Space to start new round
+        <div style="display:flex; gap:8px;">
+          <button id="playAgainBtn" class="cta btn-orange">Play Again</button>
+          <a id="toLeaderboardBtn" class="cta btn-blue" href="leaderboard.html" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center; padding:8px 12px; border-radius:8px;">Leaderboard</a>
+        </div>
       `;
+      const playAgain = document.getElementById('playAgainBtn');
+      if (playAgain) playAgain.addEventListener('click', () => { resetRound(); startRound(); });
     }
     
     // Save high score locally
@@ -236,8 +404,14 @@
       localStorage.setItem('bestScore', bestScore.toString());
     }
     
-    // Save score to backend
-    saveScoreToBackend(score, numCorrect, numMistakes, bestStreak, avgResponse, accuracy);
+    if (!hasPostedScore) {
+      hasPostedScore = true;
+      // Save score to backend and then check leaderboard placement
+      saveScoreToBackend(score, numCorrect, numMistakes, bestStreak, avgResponse, accuracy)
+        .then(() => maybeShowLeaderboardPlacement(score))
+        .catch(() => {});
+    }
+    setStartButtonLabel();
   }
   
   async function saveScoreToBackend(score, correct, mistakes, bestStreak, avgResponse, accuracy) {
@@ -257,12 +431,24 @@
           mistakes,
           bestStreak,
           avgResponse,
-          accuracy
+          accuracy,
+          mode: currentDifficulty,
+          time_mode: selectedTimeMode,
+          run_id: currentRunId || newRunId()
         })
       });
       
       if (response.ok) {
+        const data = await response.json();
         console.log('Score saved successfully');
+        if (data && data.score) {
+          localStorage.setItem('lastScore', JSON.stringify({
+            score: data.score.score,
+            mode: currentDifficulty,
+            time_mode: selectedTimeMode,
+            created_at: data.score.created_at
+          }));
+        }
       } else {
         console.error('Failed to save score');
       }
@@ -271,9 +457,30 @@
     }
   }
 
+  async function maybeShowLeaderboardPlacement(finalScore) {
+    try {
+      const url = new URL('http://localhost:3000/api/scores/leaderboard');
+      url.searchParams.set('mode', currentDifficulty);
+      url.searchParams.set('time_mode', selectedTimeMode);
+      const resp = await fetch(url.toString());
+      if (!resp.ok) return;
+      const data = await resp.json();
+      const list = Array.isArray(data.leaderboard) ? data.leaderboard : [];
+      const idx = list.findIndex(s => Number(s.score) === Number(finalScore));
+      if (idx >= 0 && cta) {
+        const rank = idx + 1;
+        const niceMode = ({normal:'Normal', lead:'Lead Trumpet', hard:'Hard Mode', doublec:'Double C', ultra:'Ultra Hard'})[currentDifficulty] || currentDifficulty;
+        const note = document.createElement('div');
+        note.style.marginTop = '10px';
+        note.innerHTML = `<span class="stat-orange"><strong>Leaderboard:</strong></span> <span class="stat-blue">You placed #${rank} in ${niceMode} — ${selectedTimeMode.toUpperCase()}</span>`;
+        cta.appendChild(note);
+      }
+    } catch {}
+  }
+
   function layoutForNote(midi) {
     // Simple layout: staff position based on midi
-    const staffPos = (midi - MIDI_MIN) / (MIDI_MAX - MIDI_MIN);
+    const staffPos = (midi - MIDI_MIN) / (MIDI_MAX_C7 - MIDI_MIN);
     return Math.max(0.1, Math.min(0.9, staffPos));
   }
 
@@ -305,10 +512,10 @@
       statsEl.innerHTML = '';
       const rows = [
         `Time: ${secs}s`,
-        `Score: ${score}`,
-        `Streak: ${streak}`,
+        `Score: ${score.toLocaleString()}`,
+        `Streak: ${streak.toLocaleString()}`,
         `Mult: x${multiplier.toFixed(2)}`,
-        `Best: ${bestScore}`,
+        `Best: ${bestScore.toLocaleString()}`,
       ];
       rows.forEach(t => {
         const r = document.createElement('div'); r.className = 'stat-row'; r.textContent = t; statsEl.appendChild(r);
@@ -464,7 +671,14 @@
     if (e.repeat) return;
     if (e.code === 'Space') {
       e.preventDefault();
-      isRunning ? pauseRound() : startRound();
+      if (roundState === 'idle') {
+        startRound();
+      } else if (roundState === 'running') {
+        if (isRunning) pauseRound(); else resumeRound();
+      } else if (roundState === 'finished') {
+        resetRound();
+        startRound();
+      }
       return;
     }
     if (!isRunning && e.key.toLowerCase() === 's') { startRound(); return; }
@@ -530,16 +744,36 @@
   // Difficulty selector
   const difficultySelect = document.getElementById('difficulty');
   if (difficultySelect) {
+    // Ensure default matches label changes
+    currentDifficulty = difficultySelect.value;
     difficultySelect.addEventListener('change', (e) => {
       currentDifficulty = e.target.value;
       console.log('Difficulty changed to:', currentDifficulty);
+      updateBestForCurrentSelection();
+    });
+  }
+
+  if (timeModeSelect) {
+    selectedTimeMode = timeModeSelect.value;
+    timeModeSelect.addEventListener('change', (e) => {
+      selectedTimeMode = e.target.value;
+      setStartButtonLabel();
+      if (roundState === 'idle') {
+        ROUND_SECONDS = secondsForTimeMode(selectedTimeMode);
+        remainingMs = ROUND_SECONDS * 1000;
+      }
+      updateBestForCurrentSelection();
     });
   }
 
   // Boot
   resetRound();
-  const startBtn = document.getElementById('startBtn');
-  if (startBtn) startBtn.addEventListener('click', startRound);
+  setStartButtonLabel();
+  if (startBtn) startBtn.addEventListener('click', () => {
+    if (roundState === 'idle') startRound();
+    else if (roundState === 'running') { if (isRunning) pauseRound(); else resumeRound(); }
+    else if (roundState === 'finished') { resetRound(); startRound(); }
+  });
   requestAnimationFrame(tick);
 })();
 

@@ -25,11 +25,22 @@ CREATE TABLE IF NOT EXISTS scores (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Columns for mode and de-duplication per run
+ALTER TABLE scores ADD COLUMN IF NOT EXISTS mode TEXT NOT NULL DEFAULT 'normal';
+ALTER TABLE scores ADD COLUMN IF NOT EXISTS run_id TEXT;
+-- Preferred new columns (avoid reserved-name confusion with SQL aggregate MODE)
+ALTER TABLE scores ADD COLUMN IF NOT EXISTS game_mode TEXT NOT NULL DEFAULT 'normal';
+ALTER TABLE scores ADD COLUMN IF NOT EXISTS time_mode TEXT NOT NULL DEFAULT '60s';
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_scores_user_id ON scores(user_id);
 CREATE INDEX IF NOT EXISTS idx_scores_score ON scores(score DESC);
 CREATE INDEX IF NOT EXISTS idx_scores_created_at ON scores(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_scores_mode ON scores(mode);
+CREATE INDEX IF NOT EXISTS idx_scores_game_mode ON scores(game_mode);
+CREATE INDEX IF NOT EXISTS idx_scores_time_mode ON scores(time_mode);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_scores_user_run ON scores(user_id, run_id);
 
 -- Enable Row Level Security
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
@@ -90,8 +101,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create view for leaderboard with user names
-CREATE OR REPLACE VIEW leaderboard AS
+-- Create view for leaderboard with user names (include time_mode and game_mode)
+DROP VIEW IF EXISTS leaderboard;
+CREATE VIEW leaderboard AS
 SELECT 
   s.id,
   s.score,
@@ -100,7 +112,10 @@ SELECT
   s.best_streak,
   s.accuracy,
   s.created_at,
-  u.name as player_name
+  s.game_mode,
+  s.time_mode,
+  s.run_id,
+  u.name AS player_name
 FROM scores s
 JOIN users u ON s.user_id = u.id
 ORDER BY s.score DESC, s.created_at ASC;

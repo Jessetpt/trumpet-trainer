@@ -13,6 +13,27 @@
           <img id="brandLogo" alt="Logo" src="Untitled design.svg" onerror="this.style.display='none'" />
           <h1>Leaderboard</h1>
           <p class="subtitle">Top players and their best scores</p>
+
+          <div class="form-row" style="margin: 8px 0 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <div>
+              <label for="mode" style="font-size: 14px;">Mode:</label>
+              <select id="mode" style="padding: 6px 8px; border-radius: 8px;">
+                <option value="normal">Normal</option>
+                <option value="lead">Lead Trumpet</option>
+                <option value="hard">Hard Mode</option>
+                <option value="doublec">Double C</option>
+                <option value="ultra">Ultra Hard</option>
+              </select>
+            </div>
+            <div>
+              <label for="timeMode" style="font-size: 14px;">Time:</label>
+              <select id="timeMode" style="padding: 6px 8px; border-radius: 8px;">
+                <option value="30s">30s</option>
+                <option value="60s" selected>60s</option>
+                <option value="120s">120s</option>
+              </select>
+            </div>
+          </div>
           
           <div id="leaderboardList" class="leaderboard-list">
             <div class="loading">Loading leaderboard...</div>

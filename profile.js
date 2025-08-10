@@ -1,7 +1,7 @@
 (() => {
   // Check if user is logged in
-  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-  if (!currentUser) {
+  const token = localStorage.getItem('authToken');
+  if (!token) {
     window.location.href = 'login.html';
     return;
   }
@@ -46,16 +46,15 @@
         userInfo.innerHTML = '<div class="error">Failed to load profile</div>';
       }
 
-      // Get best score
-      const scoreResponse = await fetch('http://localhost:3000/api/scores/best', {
+      // Get summary (total games + best score)
+      const summaryResponse = await fetch('http://localhost:3000/api/scores/summary', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      
-      if (scoreResponse.ok) {
-        const scoreData = await scoreResponse.json();
-        displayStats(scoreData);
+      if (summaryResponse.ok) {
+        const summary = await summaryResponse.json();
+        displayStats(summary);
       } else {
         statsList.innerHTML = '<div class="error">Failed to load statistics</div>';
       }
@@ -76,13 +75,15 @@
     `;
   }
 
-  function displayStats(scoreData) {
-    const { bestScore, lastUpdated } = scoreData;
+  function displayStats(summary) {
+    const { bestScore, lastUpdated, totalGames } = summary;
+    const best = bestScore ? Number(bestScore).toLocaleString() : 'No scores yet';
+    const games = Number(totalGames || 0).toLocaleString();
     
     statsList.innerHTML = `
       <div class="stat-item">
         <div class="stat-label">Best Score</div>
-        <div class="stat-value">${bestScore ? bestScore.toLocaleString() : 'No scores yet'}</div>
+        <div class="stat-value">${best}</div>
       </div>
       ${lastUpdated ? `
         <div class="stat-item">
@@ -92,7 +93,7 @@
       ` : ''}
       <div class="stat-item">
         <div class="stat-label">Games Played</div>
-        <div class="stat-value">${bestScore ? 'At least 1' : '0'}</div>
+        <div class="stat-value">${games}</div>
       </div>
     `;
   }

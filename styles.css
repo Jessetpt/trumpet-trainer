@@ -18,6 +18,25 @@
   --bad: #f68318;
 }
 
+/* Brand utility buttons */
+.btn-blue {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+}
+.btn-blue:hover { filter: brightness(0.95); }
+
+.btn-orange {
+  background: var(--bad);
+  color: #fff;
+  border: none;
+}
+.btn-orange:hover { filter: brightness(0.95); }
+
+/* Brand text colors */
+.stat-blue { color: var(--accent); }
+.stat-orange { color: var(--bad); }
+
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 body {

@@ -2,7 +2,12 @@
   // Initialize Supabase client
   const supabaseUrl = 'https://ooiowourmbkmhrhuaybl.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vaW93b3VybWJrbWhyaHVheWJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2MzE1NjYsImV4cCI6MjA3MDIwNzU2Nn0.Jbv5EKbQ4TZmWP-mVZoXymguXXS_8Fw4Kgm0DM4GU0o';
-  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+  let supabase = null;
+  if (!window.supabase || !window.supabase.createClient) {
+    console.error('Supabase UMD not loaded. Check CSP and CDN include.');
+  } else {
+    supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+  }
 
   const loginForm = document.getElementById('loginForm');
   const showLoginLink = document.getElementById('showLogin');
@@ -79,104 +84,66 @@
       }
   }
 
+  // Store access token for API calls
+  function setAuthTokenFromSession(session) {
+    const accessToken = session?.access_token;
+    if (accessToken) {
+      localStorage.setItem('authToken', accessToken);
+    }
+  }
+
   // Form submission
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      console.log('Form submitted!'); // Debug log
-      
       const formData = new FormData(loginForm);
-      const userData = {
-        email: formData.get('email'),
-        password: formData.get('password')
-      };
-      
-      console.log('Form data:', userData); // Debug log
-      
-      if (!isLoginMode) {
-        // Signup mode - include all fields
-        userData.name = formData.get('name');
-        userData.phone = formData.get('phone');
-      }
-      
-      // Show loading state
-      submitButton.textContent = isLoginMode ? 'Signing In...' : 'Creating Account...';
+      const email = formData.get('email');
+      const password = formData.get('password');
+      const name = formData.get('name');
+      const phone = formData.get('phone');
+
+      submitButton.textContent = isResetMode ? 'Sending...' : (isLoginMode ? 'Signing In...' : 'Creating Account...');
       submitButton.disabled = true;
-      console.log('Starting authentication...'); // Debug log
-      
+
       try {
         if (isResetMode) {
-          // Password reset logic using Supabase Auth
-          try {
-            const { data, error } = await supabase.auth.resetPasswordForEmail(userData.email, {
-              redirectTo: window.location.origin + '/reset-password.html'
-            });
-            
-            if (error) {
-              alert(error.message || 'Password reset failed');
-            } else {
-              alert('Password reset link sent to your email! Check your inbox and spam folder.');
-              // Reset form back to login
-              toggleMode();
-            }
-          } catch (error) {
-            console.error('Password reset error:', error);
-            alert('Failed to send reset email. Please try again.');
-          }
+          if (!supabase) return alert('Supabase failed to load. Refresh and try again.');
+          const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + '/reset-password.html'
+          });
+          if (error) return alert(error.message || 'Password reset failed');
+          alert('Password reset link sent to your email!');
+          isResetMode = false;
+          isLoginMode = true;
+          toggleMode();
         } else if (isLoginMode) {
-          // Login logic
-          console.log('Attempting login with:', userData);
-          const response = await fetch('http://localhost:3000/api/auth/login', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(userData)
-          });
-          
-          const data = await response.json();
-          console.log('Login response:', data);
-          
-          if (response.ok) {
-            // Store user data and token
-            localStorage.setItem('currentUser', JSON.stringify(data.user));
-            localStorage.setItem('authToken', data.token);
-            window.location.href = 'index.html';
-          } else {
-            alert(data.error || 'Login failed');
-          }
+          if (!supabase) return alert('Supabase failed to load. Refresh and try again.');
+          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) return alert(error.message || 'Login failed');
+          setAuthTokenFromSession(data.session);
+          window.location.href = 'index.html';
         } else {
-          // Signup logic
-          const response = await fetch('http://localhost:3000/api/auth/register', {
+          if (!supabase) return alert('Supabase failed to load. Refresh and try again.');
+          // Create account via backend to also create profile row (admin API)
+          const resp = await fetch('http://localhost:3000/api/auth/register', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(userData)
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, phone, password })
           });
-          
-          const data = await response.json();
-          
-          if (response.ok) {
-            // Store user data and token
-            localStorage.setItem('currentUser', JSON.stringify(data.user));
-            localStorage.setItem('authToken', data.token);
-            window.location.href = 'index.html';
-          } else {
-            alert(data.error || 'Registration failed');
-          }
+          const reg = await resp.json();
+          if (!resp.ok) return alert(reg.error || 'Registration failed');
+
+          // Immediately sign in to obtain access token
+          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) return alert(error.message || 'Auto login failed');
+          setAuthTokenFromSession(data.session);
+          window.location.href = 'index.html';
         }
-              } catch (error) {
-          console.error('Auth error:', error);
-          alert('Network error. Please try again.');
-        } finally {
-          console.log('Authentication attempt completed'); // Debug log
-        // Reset button state
-        if (isResetMode) {
-          submitButton.textContent = 'Send Reset Link';
-        } else {
-          submitButton.textContent = isLoginMode ? 'Sign In & Play' : 'Create Account & Start Playing';
-        }
+      } catch (err) {
+        console.error(err);
+        alert('Network error. Please try again.');
+      } finally {
+        submitButton.textContent = isResetMode ? 'Send Reset Link' : (isLoginMode ? 'Sign In & Play' : 'Create Account & Start Playing');
         submitButton.disabled = false;
       }
     });
@@ -200,6 +167,7 @@
 
   function showResetForm() {
     isResetMode = true;
+    isLoginMode = false;
     formTitle.textContent = 'Reset Password';
     formSubtitle.textContent = 'Enter your email to receive a reset link';
     submitButton.textContent = 'Send Reset Link';

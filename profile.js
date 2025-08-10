@@ -32,34 +32,43 @@
     }
 
     try {
-      // Get user profile
-      // Use configuration to get the correct API base URL
-      const baseUrl = window.appConfig ? window.appConfig.apiBaseUrl : 'http://localhost:3000/api';
-      const profileResponse = await fetch(`${baseUrl}/user/profile`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      // Get Supabase client
+      const supabase = window.supabaseClient.get();
+      if (!supabase) {
+        throw new Error('Supabase not available');
+      }
+
+      // Get user profile from Supabase
+      const { data: { user }, error: profileError } = await supabase.auth.getUser();
       
-      if (profileResponse.ok) {
-        const profileData = await profileResponse.json();
-        displayUserInfo(profileData.user);
+      if (profileError) {
+        throw profileError;
+      }
+
+      if (user) {
+        displayUserInfo(user);
       } else {
         userInfo.innerHTML = '<div class="error">Failed to load profile</div>';
       }
 
-      // Get summary (total games + best score)
-      const summaryResponse = await fetch(`${baseUrl}/scores/summary`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (summaryResponse.ok) {
-        const summary = await summaryResponse.json();
-        displayStats(summary);
-      } else {
-        statsList.innerHTML = '<div class="error">Failed to load statistics</div>';
+      // Get summary (total games + best score) from Supabase
+      const { data: scores, error: scoresError } = await supabase
+        .from('scores')
+        .select('score, created_at')
+        .eq('user_id', user.id)
+        .order('score', { ascending: false });
+
+      if (scoresError) {
+        throw scoresError;
       }
+
+      const summary = {
+        bestScore: scores.length > 0 ? scores[0].score : null,
+        lastUpdated: scores.length > 0 ? scores[0].created_at : null,
+        totalGames: scores.length
+      };
+
+      displayStats(summary);
     } catch (error) {
       console.error('Profile error:', error);
       userInfo.innerHTML = '<div class="error">Network error. Please try again.</div>';
@@ -69,9 +78,8 @@
   function displayUserInfo(user) {
     userInfo.innerHTML = `
       <div class="user-details">
-        <div class="user-name">${user.name}</div>
+        <div class="user-name">${user.user_metadata?.full_name || user.email || 'User'}</div>
         <div class="user-email">${user.email}</div>
-        <div class="user-phone">${user.phone}</div>
         <div class="user-joined">Member since ${new Date(user.created_at).toLocaleDateString()}</div>
       </div>
     `;

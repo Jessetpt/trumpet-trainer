@@ -862,43 +862,7 @@
             }
         }
 
-        async function loadLeaderboard() {
-            try {
-                const token = localStorage.getItem('authToken');
-                if (!token) {
-                    window.location.href = 'login.html';
-                    return;
-                }
 
-                // Use configuration to get the correct API base URL
-                const baseUrl = window.appConfig ? window.appConfig.apiBaseUrl : 'http://localhost:3000/api';
-                const url = new URL(`${baseUrl}/scores/leaderboard`);
-                
-                if (currentFilters.difficulty) {
-                    url.searchParams.set('mode', currentFilters.difficulty);
-                }
-                if (currentFilters.time_mode) {
-                    url.searchParams.set('time_mode', currentFilters.time_mode);
-                }
-
-                const response = await fetch(url.toString(), {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-
-                const data = await response.json();
-                renderLeaderboard(data.leaderboard || []);
-
-            } catch (error) {
-                console.error('Error loading leaderboard:', error);
-                showError(`Failed to load leaderboard: ${error.message}`);
-            }
-        }
 
         function renderLeaderboard(leaderboard) {
             const content = document.getElementById('leaderboard-content');
@@ -951,6 +915,8 @@
             loadLeaderboard();
         });
     </script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
     <script src="config.js"></script>
     <script src="leaderboard.js"></script>
 </body>

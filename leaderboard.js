@@ -61,34 +61,53 @@
     }
     
     try {
-      // Use configuration to get the correct API base URL
-      const baseUrl = window.appConfig ? window.appConfig.apiBaseUrl : 'http://localhost:3000/api';
-      const url = new URL(`${baseUrl}/scores/leaderboard`);
-      url.searchParams.set('mode', currentFilters.difficulty);
-      url.searchParams.set('time_mode', currentFilters.time_mode);
-      
-      const response = await fetch(url.toString(), { 
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Authorization': `Bearer ${token}`
-        }
+      // Get Supabase client
+      const supabase = window.supabaseClient.get();
+      if (!supabase) {
+        throw new Error('Supabase not available');
+      }
+
+      // Fetch leaderboard from Supabase
+      const { data, error } = await supabase
+        .from('scores')
+        .select(`
+          score,
+          correct,
+          mistakes,
+          best_streak,
+          avg_response,
+          accuracy,
+          created_at,
+          users!inner(username)
+        `)
+        .eq('mode', currentFilters.difficulty)
+        .eq('time_mode', currentFilters.time_mode)
+        .order('score', { ascending: false })
+        .limit(100);
+
+      if (error) {
+        throw error;
+      }
+
+      // Transform data to match expected format
+      const leaderboardData = data.map(score => ({
+        score: score.score,
+        correct: score.correct,
+        mistakes: score.mistakes,
+        best_streak: score.best_streak,
+        avg_response: score.avg_response,
+        accuracy: score.accuracy,
+        created_at: score.created_at,
+        username: score.users?.username || 'Anonymous'
+      }));
+
+      // Cache the successful response
+      leaderboardCache.set(cacheKey, {
+        data: leaderboardData,
+        timestamp: Date.now()
       });
       
-      if (response.ok) {
-        const data = await response.json();
-        // Cache the successful response
-        leaderboardCache.set(cacheKey, {
-          data: data.leaderboard,
-          timestamp: Date.now()
-        });
-        displayLeaderboard(data.leaderboard);
-      } else {
-        const content = document.getElementById('leaderboard-content');
-        if (content) {
-          content.innerHTML = `<div class="error">Failed to load leaderboard</div>`;
-        }
-      }
+      displayLeaderboard(leaderboardData);
     } catch (error) {
       console.error('Leaderboard error:', error);
       const content = document.getElementById('leaderboard-content');

@@ -468,38 +468,43 @@
     if (!token) return;
     
     try {
-      const response = await fetch('http://localhost:3000/api/scores', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
+      // Get Supabase client
+      const supabase = window.supabaseClient.get();
+      if (!supabase) {
+        console.error('Supabase not available');
+        return;
+      }
+
+      // Save score directly to Supabase
+      const { data, error } = await supabase
+        .from('scores')
+        .insert({
           score,
           correct,
           mistakes,
-          bestStreak,
-          avgResponse,
+          best_streak: bestStreak,
+          avg_response: avgResponse,
           accuracy,
           mode: currentDifficulty,
           time_mode: selectedTimeMode,
-          run_id: currentRunId || newRunId()
+          run_id: currentRunId || newRunId(),
+          user_id: JSON.parse(localStorage.getItem('currentUser')).id
         })
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Failed to save score:', error);
+      } else {
         console.log('Score saved successfully');
-        if (data && data.score) {
+        if (data) {
           localStorage.setItem('lastScore', JSON.stringify({
-            score: data.score.score,
+            score: data.score,
             mode: currentDifficulty,
             time_mode: selectedTimeMode,
-            created_at: data.score.created_at
+            created_at: data.created_at
           }));
         }
-      } else {
-        console.error('Failed to save score');
       }
     } catch (error) {
       console.error('Error saving score:', error);
@@ -510,13 +515,21 @@
 
   async function maybeShowLeaderboardPlacement(finalScore) {
     try {
-      const url = new URL('http://localhost:3000/api/scores/leaderboard');
-      url.searchParams.set('mode', currentDifficulty);
-      url.searchParams.set('time_mode', selectedTimeMode);
-      const resp = await fetch(url.toString());
-      if (!resp.ok) return;
-      const data = await resp.json();
-      const list = Array.isArray(data.leaderboard) ? data.leaderboard : [];
+      const supabase = window.supabaseClient.get();
+      if (!supabase) return;
+
+      // Get leaderboard from Supabase
+      const { data, error } = await supabase
+        .from('scores')
+        .select('score, user_id')
+        .eq('mode', currentDifficulty)
+        .eq('time_mode', selectedTimeMode)
+        .order('score', { ascending: false })
+        .limit(100);
+
+      if (error) return;
+      
+      const list = data || [];
       const idx = list.findIndex(s => Number(s.score) === Number(finalScore));
       if (idx >= 0 && cta) {
         const rank = idx + 1;

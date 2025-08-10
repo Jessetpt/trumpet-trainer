@@ -4,37 +4,555 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Trumpet Trainer — Profile</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎺</text></svg>">
+    <style>
+        :root {
+            /* Light theme colors */
+            --primary-orange: #ff6b35;
+            --primary-teal: #00b4d8;
+            --primary-blue: #0077b6;
+            --background: #ffffff;
+            --surface: #f8f9fa;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border: #dee2e6;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --card-bg: #ffffff;
+            --nav-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        .dark {
+            /* Dark theme colors */
+            --background: #0d1117;
+            --surface: #161b22;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --border: #30363d;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --card-bg: #21262d;
+            --nav-bg: rgba(13, 17, 23, 0.95);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            min-height: 100vh;
+        }
+
+        /* Global Navigation Bar */
+        .global-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--nav-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .nav-brand img {
+            height: 2rem;
+            width: auto;
+        }
+
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .profile-btn {
+            background: linear-gradient(135deg, var(--primary-teal), var(--primary-orange));
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, var(--primary-teal), var(--primary-orange));
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.3s ease;
+        }
+
+        .nav-btn:hover::before {
+            left: 100%;
+        }
+
+        .nav-btn:hover {
+            background: linear-gradient(135deg, var(--primary-orange) 0%, var(--primary-teal) 100%);
+            color: white;
+            border-color: transparent;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, var(--primary-orange) 0%, var(--primary-teal) 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+
+        .free-class-btn {
+            background: linear-gradient(135deg, var(--primary-orange), var(--primary-teal));
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .free-class-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(246, 131, 24, 0.3);
+        }
+
+        .theme-toggle {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.3s ease;
+        }
+
+        .theme-toggle:hover::before {
+            left: 100%;
+        }
+
+        .theme-toggle:hover {
+            background: linear-gradient(135deg, var(--primary-teal) 0%, var(--primary-orange) 100%);
+            color: white;
+            border-color: transparent;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 180, 216, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 5rem;
+            padding: 2rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-title {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary-orange);
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px var(--shadow);
+        }
+
+        .page-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        /* Profile Content */
+        .profile-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-orange), var(--primary-teal));
+        }
+
+        .profile-card {
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-card h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .profile-card h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .profile-card #brandLogo {
+            width: 120px;
+            height: auto;
+            display: block;
+            margin: 0 auto 2rem auto;
+        }
+
+        .user-info {
+            margin-bottom: 2rem;
+        }
+
+        .user-details {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-details::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-teal), var(--primary-orange));
+        }
+
+        .user-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .user-email, .user-phone, .user-joined {
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .stats-section {
+            margin-bottom: 2rem;
+        }
+
+        .stats-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-teal), var(--primary-orange));
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--shadow);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-orange);
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .cta {
+            background: linear-gradient(135deg, var(--primary-teal), var(--primary-orange));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 180, 216, 0.3);
+        }
+
+        .danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(220, 53, 69, 0.3);
+        }
+
+        .loading, .error, .empty {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .error {
+            color: #dc3545;
+        }
+
+        /* Dark mode overrides */
+        .dark .page-title {
+            color: var(--text-primary);
+            text-shadow: 0 0 10px rgba(32, 156, 189, 0.3);
+        }
+
+        .dark .profile-container::before {
+            background: linear-gradient(90deg, rgba(32, 156, 189, 0.8), rgba(246, 131, 24, 0.8));
+        }
+
+        .dark .user-details::before {
+            background: linear-gradient(90deg, rgba(32, 156, 189, 0.8), rgba(246, 131, 24, 0.8));
+        }
+
+        .dark .stat-item::before {
+            background: linear-gradient(90deg, rgba(32, 156, 189, 0.8), rgba(246, 131, 24, 0.8));
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .global-nav {
+                padding: 1rem;
+            }
+
+            .nav-brand {
+                font-size: 1.25rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+                margin-top: 4rem;
+            }
+
+            .page-title {
+                font-size: 2.5rem;
+            }
+
+            .profile-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .stats-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
   </head>
   <body>
-    <main id="profileApp">
-      <div class="profile-container">
-        <div class="profile-card">
-          <img id="brandLogo" alt="Logo" src="Untitled design.svg" onerror="this.style.display='none'" />
-          <h1>My Profile</h1>
-          
-          <div id="userInfo" class="user-info">
-            <div class="loading">Loading profile...</div>
-          </div>
-          
-          <div id="statsSection" class="stats-section">
-            <h2>My Statistics</h2>
-            <div id="statsList" class="stats-list">
-              <div class="loading">Loading statistics...</div>
-            </div>
-          </div>
-          
-          <div class="profile-actions">
-            <button id="backToGame" class="cta">Back to Game</button>
-            <button id="leaderboardBtn" class="cta">Leaderboard</button>
-            <button id="themeToggle" class="theme-toggle">🌙</button>
-            <button id="logoutBtn" class="danger">Logout</button>
-          </div>
+    <!-- Global Navigation Bar -->
+    <nav class="global-nav">
+        <a href="index.html" class="nav-brand">
+            <img id="nav-logo" src="Untitled design.svg" alt="Logo" onerror="this.style.display='none'" />
+            Trumpet Trainer
+        </a>
+        <div class="nav-controls">
+            <a href="index.html" class="nav-btn">🏠 Game</a>
+            <a href="leaderboard.html" class="nav-btn">🏆 Leaderboard</a>
+            <a href="profile.html" class="profile-btn active">👤 Profile</a>
+            <a href="free-class.html" class="free-class-btn">🎓 Free Trumpet Class</a>
+            <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">
+                🌙
+            </button>
         </div>
-      </div>
-    </main>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">👤 My Profile</h1>
+            <p class="page-subtitle">View your profile information and game statistics</p>
+        </div>
+
+        <div class="profile-container">
+            <div class="profile-card">
+                <img id="brandLogo" alt="Logo" src="Untitled design.svg" onerror="this.style.display='none'" />
+                
+                <div id="userInfo" class="user-info">
+                    <div class="loading">Loading profile...</div>
+                </div>
+                
+                <div id="statsSection" class="stats-section">
+                    <h2>My Statistics</h2>
+                    <div id="statsList" class="stats-list">
+                        <div class="loading">Loading statistics...</div>
+                    </div>
+                </div>
+                
+                <div class="profile-actions">
+                    <button id="backToGame" class="cta">🏠 Back to Game</button>
+                    <button id="leaderboardBtn" class="cta">🏆 Leaderboard</button>
+                    <button id="logoutBtn" class="danger">🚪 Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="config.js"></script>
     <script defer src="profile.js"></script>
+    <script>
+        // Dark Mode Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        
+        // Check for saved theme preference or default to light mode
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+        updateThemeIcon(savedTheme);
+        updateLogo(savedTheme);
+        
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateThemeIcon(isDark ? 'dark' : 'light');
+            updateLogo(isDark ? 'dark' : 'light');
+        });
+        
+        function updateThemeIcon(theme) {
+            themeToggle.innerHTML = theme === 'dark' ? '☀️' : '🌙';
+            themeToggle.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+        }
+        
+        function updateLogo(theme) {
+            const navLogo = document.getElementById('nav-logo');
+            if (navLogo) {
+                navLogo.src = theme === 'dark' ? 'Untitled design dark.svg' : 'Untitled design.svg';
+            }
+        }
+    </script>
   </body>
 </html> 

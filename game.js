@@ -383,17 +383,64 @@
     
     if (cta) {
       cta.innerHTML = `
-        <div style="text-align: left; margin-bottom: 16px;">
-          <div class="stat-blue"><strong>Final Score:</strong> ${score.toLocaleString()}</div>
-          <div class="stat-orange"><strong>Best Score:</strong> ${bestScore.toLocaleString()}</div>
-          <div class="stat-blue"><strong>Correct:</strong> ${numCorrect.toLocaleString()}</div>
-          <div class="stat-orange"><strong>Mistakes:</strong> ${numMistakes.toLocaleString()}</div>
-          <div class="stat-blue"><strong>Best Streak:</strong> ${bestStreak.toLocaleString()}</div>
-          <div class="stat-orange"><strong>Avg Response:</strong> ${avgResponse.toLocaleString()}ms</div>
-          <div class="stat-blue"><strong>Accuracy:</strong> ${accuracy}%</div>
+        <div style="
+          text-align: center; 
+          margin: 20px auto 16px auto;
+          padding: 12px;
+          background: linear-gradient(135deg, rgba(32, 156, 189, 0.1), rgba(246, 131, 24, 0.1));
+          border-radius: 10px;
+          border: 1px solid rgba(32, 156, 189, 0.2);
+          backdrop-filter: blur(10px);
+          max-width: 360px;
+        ">
+          <div style="
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin: 0 auto;
+          ">
+            <div class="stat-blue" style="text-align: center; padding: 6px; background: linear-gradient(135deg, rgba(32, 156, 189, 0.15), rgba(32, 156, 189, 0.05)); border-radius: 5px; border: 1px solid rgba(32, 156, 189, 0.3); font-size: 0.85em;">
+              <strong>Final Score:</strong><br>
+              <span style="font-size: 1em; color: var(--primary-teal);">${score.toLocaleString()}</span>
+            </div>
+            <div class="stat-orange" style="text-align: center; padding: 6px; background: linear-gradient(135deg, rgba(246, 131, 24, 0.15), rgba(246, 131, 24, 0.05)); border-radius: 5px; border: 1px solid rgba(246, 131, 24, 0.3); font-size: 0.85em;">
+              <strong>Best Score:</strong><br>
+              <span style="font-size: 1em; color: var(--primary-orange);">${bestScore.toLocaleString()}</span>
+            </div>
+            <div class="stat-blue" style="text-align: center; padding: 6px; background: linear-gradient(135deg, rgba(32, 156, 189, 0.15), rgba(32, 156, 189, 0.05)); border-radius: 5px; border: 1px solid rgba(32, 156, 189, 0.3); font-size: 0.85em;">
+              <strong>Correct:</strong><br>
+              <span style="font-size: 1em; color: var(--primary-teal);">${numCorrect.toLocaleString()}</span>
+            </div>
+            <div class="stat-orange" style="text-align: center; padding: 6px; background: linear-gradient(135deg, rgba(246, 131, 24, 0.15), rgba(246, 131, 24, 0.05)); border-radius: 5px; border: 1px solid rgba(246, 131, 24, 0.3); font-size: 0.85em;">
+              <strong>Mistakes:</strong><br>
+              <span style="font-size: 1em; color: var(--primary-orange);">${numMistakes.toLocaleString()}</span>
+            </div>
+            <div class="stat-blue" style="text-align: center; padding: 6px; background: linear-gradient(135deg, rgba(32, 156, 189, 0.15), rgba(32, 156, 189, 0.05)); border-radius: 5px; border: 1px solid rgba(32, 156, 189, 0.3); font-size: 0.85em;">
+              <strong>Best Streak:</strong><br>
+              <span style="font-size: 1em; color: var(--primary-teal);">${bestStreak.toLocaleString()}</span>
+            </div>
+            <div class="stat-orange" style="text-align: center; padding: 6px; background: linear-gradient(135deg, rgba(246, 131, 24, 0.15), rgba(246, 131, 24, 0.05)); border-radius: 5px; border: 1px solid rgba(246, 131, 24, 0.3); font-size: 0.85em;">
+              <strong>Accuracy:</strong><br>
+              <span style="font-size: 1em; color: var(--primary-orange);">${accuracy}%</span>
+            </div>
+          </div>
         </div>
-        <div style="display:flex; gap:8px;">
-          <button id="playAgainBtn" class="cta btn-orange">Play Again</button>
+        <div style="
+          display: flex; 
+          justify-content: center; 
+          margin-top: 12px;
+        ">
+          <button id="playAgainBtn" class="cta btn-orange" style="
+            background: linear-gradient(135deg, var(--primary-orange), var(--primary-teal));
+            border: none;
+            padding: 12px 24px;
+            font-size: 1em;
+            font-weight: 600;
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(246, 131, 24, 0.3);
+            transition: all 0.3s ease;
+            min-width: 140px;
+          ">Play Again</button>
         </div>
       `;
       const playAgain = document.getElementById('playAgainBtn');

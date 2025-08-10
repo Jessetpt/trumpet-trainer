@@ -458,6 +458,38 @@
     }
   }
 
+  async function saveNoteResponseToAnalytics(note, responseTimeMs, correct) {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+    
+    try {
+      const response = await fetch('http://localhost:3000/api/analytics/note-responses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          note_name: note.name,
+          midi_value: noteMidi(note.name),
+          response_time_ms: Math.round(responseTimeMs),
+          correct: correct,
+          difficulty: currentDifficulty,
+          time_mode: selectedTimeMode,
+          run_id: currentRunId || newRunId()
+        })
+      });
+      
+      if (response.ok) {
+        console.log('Note response saved to analytics');
+      } else {
+        console.error('Failed to save note response to analytics');
+      }
+    } catch (error) {
+      console.error('Error saving note response to analytics:', error);
+    }
+  }
+
   async function maybeShowLeaderboardPlacement(finalScore) {
     try {
       const url = new URL('http://localhost:3000/api/scores/leaderboard');
@@ -582,6 +614,9 @@
     const correct = arraysEqual(attempt, currentNote.valves);
     const now = performance.now();
     const elapsed = now - currentNoteStart;
+
+    // Save note response to analytics
+    saveNoteResponseToAnalytics(currentNote, elapsed, correct);
 
     if (correct) {
       // Score: base 100; time bonus; multiplier by streak

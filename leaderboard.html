@@ -1,52 +1,562 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Trumpet Trainer — Leaderboard</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <main id="leaderboardApp">
-      <div class="leaderboard-container">
-        <div class="leaderboard-card">
-          <img id="brandLogo" alt="Logo" src="Untitled design.svg" onerror="this.style.display='none'" />
-          <h1>Leaderboard</h1>
-          <p class="subtitle">Top players and their best scores</p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard - Trumpet Trainer</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎺</text></svg>">
+    <style>
+        :root {
+            /* Light theme colors */
+            --primary-orange: #ff6b35;
+            --primary-teal: #00b4d8;
+            --primary-blue: #0077b6;
+            --background: #ffffff;
+            --surface: #f8f9fa;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border: #dee2e6;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --card-bg: #ffffff;
+            --nav-bg: rgba(255, 255, 255, 0.95);
+        }
 
-          <div class="form-row" style="margin: 8px 0 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-            <div>
-              <label for="mode" style="font-size: 14px;">Mode:</label>
-              <select id="mode" style="padding: 6px 8px; border-radius: 8px;">
-                <option value="normal">Normal</option>
-                <option value="lead">Lead Trumpet</option>
-                <option value="hard">Hard Mode</option>
-                <option value="doublec">Double C</option>
-                <option value="ultra">Ultra Hard</option>
-              </select>
-            </div>
-            <div>
-              <label for="timeMode" style="font-size: 14px;">Time:</label>
-              <select id="timeMode" style="padding: 6px 8px; border-radius: 8px;">
-                <option value="30s">30s</option>
-                <option value="60s" selected>60s</option>
-                <option value="120s">120s</option>
-              </select>
-            </div>
-          </div>
-          
-          <div id="leaderboardList" class="leaderboard-list">
-            <div class="loading">Loading leaderboard...</div>
-          </div>
-          
-          <div class="leaderboard-actions">
-            <button id="backToGame" class="cta">Back to Game</button>
-            <button id="profileBtn" class="secondary">My Profile</button>
-          </div>
+        [data-theme="dark"] {
+            /* Dark theme colors */
+            --background: #0d1117;
+            --surface: #161b22;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --border: #30363d;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --card-bg: #21262d;
+            --nav-bg: rgba(13, 17, 23, 0.95);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            min-height: 100vh;
+        }
+
+        /* Global Navigation Bar */
+        .global-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--nav-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-orange);
+            text-decoration: none;
+        }
+
+        .nav-brand img {
+            height: 2rem;
+            width: auto;
+        }
+
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            background: var(--surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary-orange);
+            color: white;
+            border-color: var(--primary-orange);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .nav-btn.active {
+            background: var(--primary-orange);
+            color: white;
+            border-color: var(--primary-orange);
+        }
+
+        .theme-toggle {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary-teal);
+            color: white;
+            border-color: var(--primary-teal);
+            transform: translateY(-1px);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 5rem;
+            padding: 2rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-title {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary-orange);
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px var(--shadow);
+        }
+
+        .page-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        /* Filters Section */
+        .filters-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .filters-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .filter-group select {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface);
+            color: var(--text-primary);
+            font-size: 1rem;
+            min-width: 150px;
+            transition: all 0.2s ease;
+        }
+
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--primary-orange);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        /* Leaderboard Table */
+        .leaderboard-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px var(--shadow);
+        }
+
+        .leaderboard-header {
+            background: linear-gradient(135deg, var(--primary-orange), var(--primary-teal));
+            color: white;
+            padding: 1.5rem 2rem;
+            text-align: center;
+        }
+
+        .leaderboard-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .leaderboard-subtitle {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .leaderboard-table th {
+            background: var(--surface);
+            color: var(--text-primary);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .leaderboard-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .leaderboard-table tr:hover {
+            background: var(--surface);
+        }
+
+        .rank-cell {
+            font-weight: 700;
+            color: var(--primary-orange);
+            text-align: center;
+        }
+
+        .rank-1 { color: #ffd700; }
+        .rank-2 { color: #c0c0c0; }
+        .rank-3 { color: #cd7f32; }
+
+        .score-cell {
+            font-weight: 600;
+            color: var(--primary-teal);
+        }
+
+        .accuracy-cell {
+            font-weight: 500;
+        }
+
+        .date-cell {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Loading and Error States */
+        .loading, .error, .no-data {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .error {
+            color: #dc3545;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .global-nav {
+                padding: 1rem;
+            }
+
+            .nav-brand {
+                font-size: 1.25rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+                margin-top: 4rem;
+            }
+
+            .page-title {
+                font-size: 2.5rem;
+            }
+
+            .filter-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group select {
+                min-width: auto;
+            }
+
+            .leaderboard-table {
+                font-size: 0.9rem;
+            }
+
+            .leaderboard-table th,
+            .leaderboard-table td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+
+        /* Smooth transitions */
+        .filter-group select, .leaderboard-table tr {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Global Navigation Bar -->
+    <nav class="global-nav">
+        <a href="index.html" class="nav-brand">
+            <img src="Untitled design.svg" alt="Logo" onerror="this.style.display='none'" />
+            Trumpet Trainer
+        </a>
+        <div class="nav-controls">
+            <a href="index.html" class="nav-btn">🏠 Game</a>
+            <a href="leaderboard.html" class="nav-btn active">🏆 Leaderboard</a>
+            <a href="analytics.html" class="nav-btn">📊 Analytics</a>
+            <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">
+                🌙
+            </button>
         </div>
-      </div>
-    </main>
+    </nav>
 
-    <script defer src="leaderboard.js"></script>
-  </body>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">🏆 Leaderboard</h1>
+            <p class="page-subtitle">Top players and their best scores</p>
+        </div>
+
+        <div class="filters-section">
+            <h2 class="filters-title">Filter Results</h2>
+            <div class="filter-controls">
+                <div class="filter-group">
+                    <label for="difficulty-filter">Difficulty</label>
+                    <select id="difficulty-filter">
+                        <option value="">All Difficulties</option>
+                        <option value="normal">Normal</option>
+                        <option value="lead">Lead Trumpet</option>
+                        <option value="hard">Hard Mode</option>
+                        <option value="doublec">Double C</option>
+                        <option value="ultra">Ultra Hard</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="time-filter">Time Mode</label>
+                    <select id="time-filter">
+                        <option value="">All Times</option>
+                        <option value="30s">30 Seconds</option>
+                        <option value="60s">60 Seconds</option>
+                        <option value="120s">120 Seconds</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="leaderboard-container">
+            <div class="leaderboard-header">
+                <h2 class="leaderboard-title">Top Scores</h2>
+                <p class="leaderboard-subtitle">See how you rank against the best</p>
+            </div>
+            
+            <div id="leaderboard-content">
+                <div class="loading">Loading leaderboard data...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dark Mode Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        
+        // Check for saved theme preference or default to light mode
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        body.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+        
+        function updateThemeIcon(theme) {
+            themeToggle.innerHTML = theme === 'dark' ? '☀️' : '🌙';
+            themeToggle.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+        }
+        
+        // Leaderboard functionality
+        let currentFilters = {
+            difficulty: '',
+            time_mode: ''
+        };
+
+        function updateFilters() {
+            const difficultyFilter = document.getElementById('difficulty-filter');
+            const timeFilter = document.getElementById('time-filter');
+            
+            currentFilters = {
+                difficulty: difficultyFilter ? difficultyFilter.value : '',
+                time_mode: timeFilter ? timeFilter.value : ''
+            };
+        }
+
+        function bindFilterEvents() {
+            const difficultyFilter = document.getElementById('difficulty-filter');
+            const timeFilter = document.getElementById('time-filter');
+            
+            if (difficultyFilter) {
+                difficultyFilter.addEventListener('change', () => {
+                    updateFilters();
+                    loadLeaderboard();
+                });
+            }
+            if (timeFilter) {
+                timeFilter.addEventListener('change', () => {
+                    updateFilters();
+                    loadLeaderboard();
+                });
+            }
+        }
+
+        async function loadLeaderboard() {
+            try {
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Use configuration to get the correct API base URL
+                const baseUrl = window.appConfig ? window.appConfig.apiBaseUrl : 'http://localhost:3000/api';
+                const url = new URL(`${baseUrl}/scores/leaderboard`);
+                
+                if (currentFilters.difficulty) {
+                    url.searchParams.set('mode', currentFilters.difficulty);
+                }
+                if (currentFilters.time_mode) {
+                    url.searchParams.set('time_mode', currentFilters.time_mode);
+                }
+
+                const response = await fetch(url.toString(), {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                renderLeaderboard(data.leaderboard || []);
+
+            } catch (error) {
+                console.error('Error loading leaderboard:', error);
+                showError(`Failed to load leaderboard: ${error.message}`);
+            }
+        }
+
+        function renderLeaderboard(leaderboard) {
+            const content = document.getElementById('leaderboard-content');
+            
+            if (leaderboard.length === 0) {
+                content.innerHTML = '<div class="no-data">No scores found for the selected filters. Be the first to set a record!</div>';
+                return;
+            }
+
+            const table = `
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Player</th>
+                            <th>Score</th>
+                            <th>Correct</th>
+                            <th>Accuracy</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${leaderboard.map((entry, index) => `
+                            <tr>
+                                <td class="rank-cell rank-${index + 1}">${index + 1}</td>
+                                <td>${entry.users?.name || 'Anonymous'}</td>
+                                <td class="score-cell">${entry.score}</td>
+                                <td>${entry.correct}</td>
+                                <td class="accuracy-cell">${entry.accuracy}%</td>
+                                <td class="date-cell">${new Date(entry.created_at).toLocaleDateString()}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            content.innerHTML = table;
+        }
+
+        function showError(message) {
+            const content = document.getElementById('leaderboard-content');
+            content.innerHTML = `<div class="error">${message}</div>`;
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            bindFilterEvents();
+            loadLeaderboard();
+        });
+    </script>
+    <script src="config.js"></script>
+    <script src="leaderboard.js"></script>
+</body>
 </html> 

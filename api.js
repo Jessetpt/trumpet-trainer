@@ -1,7 +1,8 @@
 // API client for Trumpet Trainer backend
 class TrumpetTrainerAPI {
   constructor() {
-    this.baseURL = 'http://localhost:3000/api';
+    // Use configuration to get the correct API base URL
+    this.baseURL = window.appConfig ? window.appConfig.apiBaseUrl : 'http://localhost:3000/api';
     this.token = localStorage.getItem('authToken');
   }
 

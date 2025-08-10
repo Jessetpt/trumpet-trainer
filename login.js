@@ -125,7 +125,9 @@
         } else {
           if (!supabase) return alert('Supabase failed to load. Refresh and try again.');
           // Create account via backend to also create profile row (admin API)
-          const resp = await fetch('http://localhost:3000/api/auth/register', {
+          // Use configuration to get the correct API base URL
+          const baseUrl = window.appConfig ? window.appConfig.apiBaseUrl : 'http://localhost:3000/api';
+          const resp = await fetch(`${baseUrl}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, email, phone, password })

@@ -37,7 +37,9 @@
   async function loadLeaderboard(mode, timeMode) {
     leaderboardList.innerHTML = '<div class="loading">Loading leaderboard...</div>';
     try {
-      const url = new URL('http://localhost:3000/api/scores/leaderboard');
+      // Use configuration to get the correct API base URL
+      const baseUrl = window.appConfig ? window.appConfig.apiBaseUrl : 'http://localhost:3000/api';
+      const url = new URL(`${baseUrl}/scores/leaderboard`);
       url.searchParams.set('mode', mode);
       url.searchParams.set('time_mode', timeMode);
       url.searchParams.set('_t', Date.now().toString());

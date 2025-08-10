@@ -425,6 +425,102 @@ app.get('/api/analytics/note-averages', authenticateToken, async (req, res) => {
   }
 });
 
+// Analytics: individual note responses
+app.post('/api/analytics/note-responses', authenticateToken, async (req, res) => {
+  try {
+    const { note_name, midi_value, response_time_ms, correct, difficulty, time_mode, run_id } = req.body;
+    
+    if (!note_name || !midi_value || !run_id) {
+      return res.status(400).json({ error: 'note_name, midi_value, and run_id required' });
+    }
+
+    const { error } = await supabase.from('note_responses').insert({
+      user_id: req.user.userId,
+      run_id: String(run_id),
+      note_name: String(note_name),
+      midi_value: parseInt(midi_value, 10),
+      response_time_ms: Math.max(0, parseInt(response_time_ms, 10)),
+      correct: !!correct,
+      difficulty: String(difficulty || 'normal'),
+      time_mode: String(time_mode || '60s'),
+      created_at: new Date().toISOString()
+    });
+
+    if (error) {
+      console.error('Insert note_responses error:', error);
+      return res.status(500).json({ error: 'Failed to save note response' });
+    }
+
+    res.json({ ok: true, saved: true });
+  } catch (err) {
+    console.error('note-responses error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Analytics: get aggregated note responses for current user
+app.get('/api/analytics/note-responses', authenticateToken, async (req, res) => {
+  try {
+    const { difficulty, time_mode } = req.query;
+    
+    let query = supabase
+      .from('note_responses')
+      .select('note_name, midi_value, response_time_ms, correct')
+      .eq('user_id', req.user.userId);
+    
+    if (difficulty) {
+      query = query.eq('difficulty', String(difficulty));
+    }
+    if (time_mode) {
+      query = query.eq('time_mode', String(time_mode));
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      console.error('Select note_responses error:', error);
+      return res.status(500).json({ error: 'Failed to load note data' });
+    }
+
+    // Aggregate the data by note
+    const noteStats = new Map();
+    
+    for (const row of data) {
+      const key = row.note_name;
+      if (!noteStats.has(key)) {
+        noteStats.set(key, {
+          note_name: row.note_name,
+          midi_value: row.midi_value,
+          attempts: 0,
+          total_response_time: 0,
+          correct_attempts: 0
+        });
+      }
+      
+      const stats = noteStats.get(key);
+      stats.attempts += 1;
+      stats.total_response_time += row.response_time_ms;
+      if (row.correct) stats.correct_attempts += 1;
+    }
+
+    // Convert to array and calculate averages
+    const notes = Array.from(noteStats.values()).map(stats => ({
+      note_name: stats.note_name,
+      midi_value: stats.midi_value,
+      attempts: stats.attempts,
+      avg_response_time: Math.round(stats.total_response_time / stats.attempts),
+      accuracy_pct: Math.round((stats.correct_attempts / stats.attempts) * 100)
+    }));
+
+    // Sort by average response time (slowest first)
+    notes.sort((a, b) => b.avg_response_time - a.avg_response_time);
+
+    res.json({ notes });
+  } catch (err) {
+    console.error('Get note-responses error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Trumpet Trainer server running on port ${PORT}`);

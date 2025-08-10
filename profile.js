@@ -33,7 +33,9 @@
 
     try {
       // Get user profile
-      const profileResponse = await fetch('http://localhost:3000/api/user/profile', {
+      // Use configuration to get the correct API base URL
+      const baseUrl = window.appConfig ? window.appConfig.apiBaseUrl : 'http://localhost:3000/api';
+      const profileResponse = await fetch(`${baseUrl}/user/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -47,7 +49,7 @@
       }
 
       // Get summary (total games + best score)
-      const summaryResponse = await fetch('http://localhost:3000/api/scores/summary', {
+      const summaryResponse = await fetch(`${baseUrl}/scores/summary`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

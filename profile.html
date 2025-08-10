@@ -675,7 +675,7 @@
     <!-- Global Navigation Bar -->
     <nav class="global-nav">
         <a href="index.html" class="nav-brand">
-            <img id="nav-logo" src="Untitled design.svg" alt="Logo" onerror="this.style.display='none'" />
+            <img id="nav-logo" src="Untitled design.svg" alt="Logo" />
             Trumpet Trainer
         </a>
         <div class="nav-controls">
@@ -699,7 +699,7 @@
 
         <div class="profile-container">
             <div class="profile-card">
-                <img id="brandLogo" alt="Logo" src="Untitled design.svg" onerror="this.style.display='none'" />
+                <img id="brandLogo" alt="Logo" src="Untitled design.svg" />
                 
                 <div id="userInfo" class="user-info">
                     <div class="loading">Loading profile...</div>
@@ -725,42 +725,6 @@
     <script src="supabase.js"></script>
     <script src="config.js"></script>
     <script defer src="profile.js"></script>
-    <script>
-        // Dark Mode Toggle
-        const themeToggle = document.getElementById('theme-toggle');
-        
-        // Check for saved theme preference or default to light mode
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        if (savedTheme === 'dark') {
-            document.documentElement.classList.add('dark');
-        }
-        updateThemeIcon(savedTheme);
-        updateLogo(savedTheme);
-        
-        themeToggle.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            const isDark = document.documentElement.classList.contains('dark');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            updateThemeIcon(isDark ? 'dark' : 'light');
-            updateLogo(isDark ? 'dark' : 'light');
-        });
-        
-        function updateThemeIcon(theme) {
-            themeToggle.innerHTML = theme === 'dark' ? '☀️' : '🌙';
-            themeToggle.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
-        }
-        
-        function updateLogo(theme) {
-            const navLogo = document.getElementById('nav-logo');
-            if (navLogo) {
-                navLogo.src = theme === 'dark' ? 'Untitled design dark.svg' : 'Untitled design.svg';
-            }
-            // Also update the profile logo
-            const profileLogo = document.getElementById('brandLogo');
-            if (profileLogo) {
-                profileLogo.src = theme === 'dark' ? 'Untitled design dark.svg' : 'Untitled design.svg';
-            }
-        }
-    </script>
+    <script src="theme.js"></script>
   </body>
 </html> 

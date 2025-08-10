@@ -492,37 +492,6 @@
         </div>
     </main>
 
-    <script>
-        // Dark Mode Toggle
-        const themeToggle = document.getElementById('theme-toggle');
-        const navLogo = document.getElementById('nav-logo');
-        
-        // Check for saved theme preference or default to light mode
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        if (savedTheme === 'dark') {
-            document.documentElement.classList.add('dark');
-        }
-        updateThemeIcon(savedTheme);
-        updateLogo(savedTheme);
-        
-        themeToggle.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            const isDark = document.documentElement.classList.contains('dark');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            updateThemeIcon(isDark ? 'dark' : 'light');
-            updateLogo(isDark ? 'dark' : 'light');
-        });
-        
-        function updateThemeIcon(theme) {
-            themeToggle.innerHTML = theme === 'dark' ? '☀️' : '🌙';
-            themeToggle.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
-        }
-        
-        function updateLogo(theme) {
-            if (navLogo) {
-                navLogo.src = theme === 'dark' ? 'Untitled design dark.svg' : 'Untitled design.svg';
-            }
-        }
-    </script>
+    <script src="theme.js"></script>
 </body>
 </html> 

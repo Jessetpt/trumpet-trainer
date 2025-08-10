@@ -77,7 +77,9 @@
           best_streak,
           avg_response,
           accuracy,
-          created_at
+          created_at,
+          user_id,
+          users!scores_user_id_fkey(name, email)
         `)
         .eq('mode', currentFilters.difficulty)
         .eq('time_mode', currentFilters.time_mode)
@@ -97,7 +99,8 @@
         avg_response: score.avg_response,
         accuracy: score.accuracy,
         created_at: score.created_at,
-        username: 'Anonymous' // We'll add usernames later when we set up the users table
+        user_id: score.user_id,
+        username: score.users?.name || score.users?.email || 'Anonymous'
       }));
 
       // Cache the successful response

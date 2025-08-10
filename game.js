@@ -518,6 +518,10 @@
       const supabase = window.supabaseClient.get();
       if (!supabase) return;
 
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
       // Get leaderboard from Supabase
       const { data, error } = await supabase
         .from('scores')
@@ -530,16 +534,19 @@
       if (error) return;
       
       const list = data || [];
-      const idx = list.findIndex(s => Number(s.score) === Number(finalScore));
-      if (idx >= 0 && cta) {
-        const rank = idx + 1;
+      // Find the current user's score in the leaderboard
+      const userScore = list.find(s => s.user_id === user.id);
+      if (userScore && cta) {
+        const rank = list.findIndex(s => s.user_id === user.id) + 1;
         const niceMode = ({normal:'Normal', lead:'Lead Trumpet', hard:'Hard Mode', doublec:'Double C', ultra:'Ultra Hard'})[currentDifficulty] || currentDifficulty;
         const note = document.createElement('div');
         note.style.marginTop = '10px';
         note.innerHTML = `<span class="stat-orange"><strong>Leaderboard:</strong></span> <span class="stat-blue">You placed #${rank} in ${niceMode} — ${selectedTimeMode.toUpperCase()}</span>`;
         cta.appendChild(note);
       }
-    } catch {}
+    } catch (error) {
+      console.error('Error showing leaderboard placement:', error);
+    }
   }
 
   function layoutForNote(midi) {

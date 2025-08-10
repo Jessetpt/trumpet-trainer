@@ -702,6 +702,12 @@
 
   window.addEventListener('keydown', (e) => {
     if (e.repeat) return;
+    
+    // Prevent scrolling for all arrow keys
+    if (e.key.startsWith('Arrow')) {
+      e.preventDefault();
+    }
+    
     if (e.code === 'Space') {
       e.preventDefault();
       if (roundState === 'idle') {
@@ -719,6 +725,7 @@
     if (!isRunning) return;
 
     if (e.key === 'Enter' || e.key === 'ArrowUp') {
+      e.preventDefault(); // Prevent page scrolling
       pressed.clear();
       pressed.add(0);
       clearTimeout(evalTimer);
@@ -728,6 +735,7 @@
 
     const v = KEY_TO_VALVE.get(e.key);
     if (v) {
+      e.preventDefault(); // Prevent page scrolling for arrow keys
       if (pressed.has(0)) pressed.delete(0);
       pressed.add(v);
       clearTimeout(evalTimer);

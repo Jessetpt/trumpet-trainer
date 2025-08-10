@@ -647,19 +647,29 @@
   function applyThemeButtonLabel() {
     if (!themeToggle) return;
     const dark = document.documentElement.classList.contains('dark');
-    themeToggle.textContent = dark ? 'Light' : 'Dark';
+    themeToggle.textContent = dark ? '☀️' : '🌙';
   }
   
   function updateLogo() {
-    const logo = document.getElementById('brandLogo');
-    if (!logo) return;
+    const logos = document.querySelectorAll('#brandLogo');
+    if (!logos.length) return;
     const dark = document.documentElement.classList.contains('dark');
-    logo.src = dark ? 'Untitled design dark.svg' : 'Untitled design.svg';
+    logos.forEach(logo => {
+      logo.src = dark ? 'Untitled design dark.svg' : 'Untitled design.svg';
+    });
   }
   
+  // Initialize theme from localStorage
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    document.documentElement.classList.add('dark');
+  }
+
   if (themeToggle) {
     themeToggle.addEventListener('click', () => {
       document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
       applyThemeButtonLabel();
       updateLogo();
     });

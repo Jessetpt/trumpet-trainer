@@ -87,6 +87,35 @@
   color: var(--ink);
 }
 
+/* Dark mode overlay styling */
+:root.dark #overlay {
+  background: radial-gradient(1200px 600px at 50% 40%, color-mix(in srgb, var(--panel), var(--bg)), rgba(14, 15, 18, 0.98));
+}
+
+:root.dark .card {
+  background: var(--panel);
+  border-color: rgba(32, 156, 189, 0.2);
+  box-shadow: 
+    0 20px 40px rgba(0,0,0,0.4),
+    0 8px 16px rgba(0,0,0,0.3);
+}
+
+:root.dark .chips {
+  border-color: rgba(32, 156, 189, 0.3);
+  background: rgba(32, 156, 189, 0.1);
+}
+
+:root.dark .difficulty-selector select {
+  background: var(--panel);
+  border-color: rgba(32, 156, 189, 0.3);
+  color: var(--ink);
+}
+
+:root.dark .difficulty-selector select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(32, 156, 189, 0.2);
+}
+
 /* Brand utility buttons */
 .btn-blue {
   background: var(--accent);

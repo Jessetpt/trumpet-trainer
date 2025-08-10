@@ -145,16 +145,19 @@
           window.location.href = 'index.html';
         } else {
           if (!supabase) return alert('Supabase failed to load. Refresh and try again.');
-          // Create account via backend to also create profile row (admin API)
-          // Use configuration to get the correct API base URL
-          const baseUrl = window.appConfig ? window.appConfig.apiBaseUrl : 'http://localhost:3000/api';
-          const resp = await fetch(`${baseUrl}/auth/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, phone, password })
+          // Create account directly via Supabase
+          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              data: {
+                name,
+                phone
+              }
+            }
           });
-          const reg = await resp.json();
-          if (!resp.ok) return alert(reg.error || 'Registration failed');
+          
+          if (signUpError) return alert(signUpError.message || 'Registration failed');
 
           // Immediately sign in to obtain access token
           const { data, error } = await supabase.auth.signInWithPassword({ email, password });

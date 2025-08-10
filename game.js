@@ -310,15 +310,29 @@
 
   async function updateBestForCurrentSelection() {
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) return;
-      const url = new URL('http://localhost:3000/api/scores/best');
-      url.searchParams.set('mode', currentDifficulty);
-      url.searchParams.set('time_mode', selectedTimeMode);
-      const resp = await fetch(url.toString(), { headers: { 'Authorization': `Bearer ${token}` } });
-      if (!resp.ok) return;
-      const data = await resp.json();
-      bestScore = Number(data.bestScore || 0);
+      const currentUser = localStorage.getItem('currentUser');
+      if (!currentUser) return;
+      
+      const user = JSON.parse(currentUser);
+      if (!user || !user.id) return;
+
+      const supabase = window.supabaseClient.get();
+      if (!supabase) return;
+
+      // Get best score from Supabase
+      const { data, error } = await supabase
+        .from('scores')
+        .select('score')
+        .eq('user_id', user.id)
+        .eq('mode', currentDifficulty)
+        .eq('time_mode', selectedTimeMode)
+        .order('score', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (!error && data) {
+        bestScore = Number(data.score || 0);
+      }
     } catch {}
   }
 

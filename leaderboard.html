@@ -681,6 +681,8 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
+            // Initialize filters with default values
+            updateFilters();
             bindFilterEvents();
             loadLeaderboard();
         });

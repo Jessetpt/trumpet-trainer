@@ -92,6 +92,33 @@
   background: radial-gradient(1200px 600px at 50% 40%, color-mix(in srgb, var(--panel), var(--bg)), rgba(14, 15, 18, 0.98));
 }
 
+/* Start section styling */
+.start-section {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.overlay-theme-toggle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.overlay-theme-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
 :root.dark .card {
   background: var(--panel);
   border-color: rgba(32, 156, 189, 0.2);

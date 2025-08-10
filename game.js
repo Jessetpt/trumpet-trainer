@@ -19,6 +19,7 @@
   const statsEl = document.getElementById('stats');
   const valvesEl = document.getElementById('valves');
   const themeToggle = document.getElementById('themeToggle');
+  const overlayThemeToggle = document.getElementById('overlayThemeToggle');
   const logoutBtn = document.getElementById('logoutBtn');
   const startBtn = document.getElementById('startBtn');
   const timeModeSelect = document.getElementById('timeMode');
@@ -645,9 +646,15 @@
   
   // Theme toggle
   function applyThemeButtonLabel() {
-    if (!themeToggle) return;
     const dark = document.documentElement.classList.contains('dark');
-    themeToggle.textContent = dark ? '☀️' : '🌙';
+    const icon = dark ? '☀️' : '🌙';
+    
+    if (themeToggle) {
+      themeToggle.textContent = icon;
+    }
+    if (overlayThemeToggle) {
+      overlayThemeToggle.textContent = icon;
+    }
   }
   
   function updateLogo() {
@@ -665,17 +672,27 @@
     document.documentElement.classList.add('dark');
   }
 
-  if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-      document.documentElement.classList.toggle('dark');
-      const isDark = document.documentElement.classList.contains('dark');
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-      applyThemeButtonLabel();
-      updateLogo();
-    });
+  // Function to toggle theme
+  function toggleTheme() {
+    document.documentElement.classList.toggle('dark');
+    const isDark = document.documentElement.classList.contains('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
     applyThemeButtonLabel();
     updateLogo();
   }
+
+  // Add event listeners to both theme toggle buttons
+  if (themeToggle) {
+    themeToggle.addEventListener('click', toggleTheme);
+  }
+  
+  if (overlayThemeToggle) {
+    overlayThemeToggle.addEventListener('click', toggleTheme);
+  }
+  
+  // Initialize theme buttons and logo
+  applyThemeButtonLabel();
+  updateLogo();
 
   window.addEventListener('keydown', (e) => {
     if (e.repeat) return;

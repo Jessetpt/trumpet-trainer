@@ -465,9 +465,25 @@
   
   async function saveScoreToBackend(score, correct, mistakes, bestStreak, avgResponse, accuracy) {
     const token = localStorage.getItem('authToken');
-    if (!token) return;
+    if (!token) {
+      console.error('No auth token found');
+      return;
+    }
     
     try {
+      // Get current user ID from localStorage (more reliable)
+      const currentUser = localStorage.getItem('currentUser');
+      if (!currentUser) {
+        console.error('No current user found');
+        return;
+      }
+
+      const user = JSON.parse(currentUser);
+      if (!user || !user.id) {
+        console.error('Invalid user data');
+        return;
+      }
+
       // Get Supabase client
       const supabase = window.supabaseClient.get();
       if (!supabase) {
@@ -488,39 +504,57 @@
           mode: currentDifficulty,
           time_mode: selectedTimeMode,
           run_id: currentRunId || newRunId(),
-          user_id: JSON.parse(localStorage.getItem('currentUser')).id
+          user_id: user.id
         })
         .select()
         .single();
 
       if (error) {
         console.error('Failed to save score:', error);
-      } else {
-        console.log('Score saved successfully');
-        if (data) {
-          localStorage.setItem('lastScore', JSON.stringify({
-            score: data.score,
-            mode: currentDifficulty,
-            time_mode: selectedTimeMode,
-            created_at: data.created_at
-          }));
-        }
+        return;
       }
+
+      console.log('Score saved successfully:', data);
+      
+      // Store last score info for leaderboard highlighting
+      if (data) {
+        localStorage.setItem('lastScore', JSON.stringify({
+          score: data.score,
+          mode: currentDifficulty,
+          time_mode: selectedTimeMode,
+          created_at: data.created_at,
+          user_id: user.id
+        }));
+      }
+
+      // Show leaderboard placement after successful save
+      await maybeShowLeaderboardPlacement(score);
+      
     } catch (error) {
       console.error('Error saving score:', error);
     }
   }
 
-
-
   async function maybeShowLeaderboardPlacement(finalScore) {
     try {
-      const supabase = window.supabaseClient.get();
-      if (!supabase) return;
+      // Get current user ID from localStorage
+      const currentUser = localStorage.getItem('currentUser');
+      if (!currentUser) {
+        console.error('No current user found for leaderboard placement');
+        return;
+      }
 
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const user = JSON.parse(currentUser);
+      if (!user || !user.id) {
+        console.error('Invalid user data for leaderboard placement');
+        return;
+      }
+
+      const supabase = window.supabaseClient.get();
+      if (!supabase) {
+        console.error('Supabase not available for leaderboard placement');
+        return;
+      }
 
       // Get leaderboard from Supabase
       const { data, error } = await supabase
@@ -531,18 +565,42 @@
         .order('score', { ascending: false })
         .limit(100);
 
-      if (error) return;
+      if (error) {
+        console.error('Error fetching leaderboard for placement:', error);
+        return;
+      }
       
       const list = data || [];
+      
       // Find the current user's score in the leaderboard
       const userScore = list.find(s => s.user_id === user.id);
       if (userScore && cta) {
         const rank = list.findIndex(s => s.user_id === user.id) + 1;
         const niceMode = ({normal:'Normal', lead:'Lead Trumpet', hard:'Hard Mode', doublec:'Double C', ultra:'Ultra Hard'})[currentDifficulty] || currentDifficulty;
+        
+        // Create placement message
         const note = document.createElement('div');
         note.style.marginTop = '10px';
-        note.innerHTML = `<span class="stat-orange"><strong>Leaderboard:</strong></span> <span class="stat-blue">You placed #${rank} in ${niceMode} — ${selectedTimeMode.toUpperCase()}</span>`;
+        note.style.padding = '8px';
+        note.style.borderRadius = '6px';
+        note.style.backgroundColor = 'rgba(32, 156, 189, 0.1)';
+        note.style.border = '1px solid var(--primary-teal)';
+        
+        note.innerHTML = `
+          <span class="stat-orange"><strong>🏆 Leaderboard:</strong></span> 
+          <span class="stat-blue">You placed #${rank} in ${niceMode} — ${selectedTimeMode.toUpperCase()}</span>
+        `;
+        
+        // Remove any existing placement message
+        const existingNote = cta.querySelector('[data-placement-message]');
+        if (existingNote) {
+          existingNote.remove();
+        }
+        
+        note.setAttribute('data-placement-message', 'true');
         cta.appendChild(note);
+        
+        console.log(`Leaderboard placement: #${rank} in ${currentDifficulty} ${selectedTimeMode}`);
       }
     } catch (error) {
       console.error('Error showing leaderboard placement:', error);

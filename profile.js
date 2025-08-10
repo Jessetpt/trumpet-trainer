@@ -23,7 +23,7 @@
   // Initialize theme
   updateLogo();
 
-  // Load user profile
+  // Load user profile with improved error handling
   async function loadProfile() {
     const token = localStorage.getItem('authToken');
     if (!token) {
@@ -38,74 +38,215 @@
         throw new Error('Supabase not available');
       }
 
-      // Get user profile from Supabase
-      const { data: { user }, error: profileError } = await supabase.auth.getUser();
-      
-      if (profileError) {
-        throw profileError;
+      // Get current user from localStorage first (more reliable)
+      const currentUser = localStorage.getItem('currentUser');
+      if (!currentUser) {
+        throw new Error('User session not found');
       }
 
-      if (user) {
-        displayUserInfo(user);
-      } else {
-        userInfo.innerHTML = '<div class="error">Failed to load profile</div>';
+      const user = JSON.parse(currentUser);
+      if (!user || !user.id) {
+        throw new Error('Invalid user data');
       }
 
-      // Get summary (total games + best score) from Supabase
+      // Display user info immediately
+      displayUserInfo(user);
+
+      // Get comprehensive stats from Supabase
       const { data: scores, error: scoresError } = await supabase
         .from('scores')
-        .select('score, created_at')
+        .select(`
+          score,
+          correct,
+          mistakes,
+          best_streak,
+          avg_response,
+          accuracy,
+          mode,
+          time_mode,
+          created_at
+        `)
         .eq('user_id', user.id)
         .order('score', { ascending: false });
 
       if (scoresError) {
+        console.error('Scores error:', scoresError);
         throw scoresError;
       }
 
-      const summary = {
-        bestScore: scores.length > 0 ? scores[0].score : null,
-        lastUpdated: scores.length > 0 ? scores[0].created_at : null,
-        totalGames: scores.length
-      };
+      // Calculate comprehensive statistics
+      const stats = calculateComprehensiveStats(scores || []);
+      displayStats(stats);
 
-      displayStats(summary);
     } catch (error) {
       console.error('Profile error:', error);
-      userInfo.innerHTML = '<div class="error">Network error. Please try again.</div>';
+      userInfo.innerHTML = '<div class="error">Failed to load profile. Please try refreshing the page.</div>';
+      statsList.innerHTML = '<div class="error">Failed to load statistics.</div>';
     }
   }
 
   function displayUserInfo(user) {
+    const displayName = user.user_metadata?.full_name || user.email || 'User';
+    const email = user.email || 'No email';
+    const joinDate = user.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown';
+    
     userInfo.innerHTML = `
       <div class="user-details">
-        <div class="user-name">${user.user_metadata?.full_name || user.email || 'User'}</div>
-        <div class="user-email">${user.email}</div>
-        <div class="user-joined">Member since ${new Date(user.created_at).toLocaleDateString()}</div>
+        <div class="user-name">${displayName}</div>
+        <div class="user-email">${email}</div>
+        <div class="user-joined">Member since ${joinDate}</div>
       </div>
     `;
   }
 
-  function displayStats(summary) {
-    const { bestScore, lastUpdated, totalGames } = summary;
-    const best = bestScore ? Number(bestScore).toLocaleString() : 'No scores yet';
-    const games = Number(totalGames || 0).toLocaleString();
-    
-    statsList.innerHTML = `
+  function calculateComprehensiveStats(scores) {
+    if (!scores || scores.length === 0) {
+      return {
+        totalGames: 0,
+        bestScore: null,
+        bestScoreMode: null,
+        bestScoreTime: null,
+        averageScore: 0,
+        totalCorrect: 0,
+        totalMistakes: 0,
+        averageAccuracy: 0,
+        lastPlayed: null,
+        modeBreakdown: {}
+      };
+    }
+
+    // Calculate overall stats
+    const totalGames = scores.length;
+    const bestScore = Math.max(...scores.map(s => s.score));
+    const bestScoreEntry = scores.find(s => s.score === bestScore);
+    const averageScore = Math.round(scores.reduce((sum, s) => sum + s.score, 0) / totalGames);
+    const totalCorrect = scores.reduce((sum, s) => sum + (s.correct || 0), 0);
+    const totalMistakes = scores.reduce((sum, s) => sum + (s.mistakes || 0), 0);
+    const averageAccuracy = Math.round(scores.reduce((sum, s) => sum + (s.accuracy || 0), 0) / totalGames);
+    const lastPlayed = new Date(Math.max(...scores.map(s => new Date(s.created_at))));
+
+    // Calculate mode breakdown
+    const modeBreakdown = {};
+    scores.forEach(score => {
+      const key = `${score.mode}-${score.time_mode}`;
+      if (!modeBreakdown[key]) {
+        modeBreakdown[key] = {
+          mode: score.mode,
+          timeMode: score.time_mode,
+          games: 0,
+          bestScore: 0,
+          averageScore: 0
+        };
+      }
+      
+      modeBreakdown[key].games++;
+      modeBreakdown[key].bestScore = Math.max(modeBreakdown[key].bestScore, score.score);
+      modeBreakdown[key].averageScore += score.score;
+    });
+
+    // Calculate averages for each mode
+    Object.values(modeBreakdown).forEach(mode => {
+      mode.averageScore = Math.round(mode.averageScore / mode.games);
+    });
+
+    return {
+      totalGames,
+      bestScore,
+      bestScoreMode: bestScoreEntry?.mode || null,
+      bestScoreTime: bestScoreEntry?.time_mode || null,
+      averageScore,
+      totalCorrect,
+      totalMistakes,
+      averageAccuracy,
+      lastPlayed,
+      modeBreakdown
+    };
+  }
+
+  function displayStats(stats) {
+    const { 
+      totalGames, 
+      bestScore, 
+      bestScoreMode, 
+      bestScoreTime, 
+      averageScore, 
+      totalCorrect, 
+      totalMistakes, 
+      averageAccuracy, 
+      lastPlayed,
+      modeBreakdown 
+    } = stats;
+
+    if (totalGames === 0) {
+      statsList.innerHTML = `
+        <div class="stat-item">
+          <div class="stat-label">No Games Yet</div>
+          <div class="stat-value">Play your first game to see stats!</div>
+        </div>
+      `;
+      return;
+    }
+
+    let statsHTML = `
+      <div class="stat-item">
+        <div class="stat-label">Total Games</div>
+        <div class="stat-value">${totalGames.toLocaleString()}</div>
+      </div>
+      
       <div class="stat-item">
         <div class="stat-label">Best Score</div>
-        <div class="stat-value">${best}</div>
+        <div class="stat-value">${bestScore.toLocaleString()}</div>
+        ${bestScoreMode && bestScoreTime ? `<div class="stat-detail">${bestScoreMode} - ${bestScoreTime}</div>` : ''}
       </div>
-      ${lastUpdated ? `
-        <div class="stat-item">
-          <div class="stat-label">Last Updated</div>
-          <div class="stat-value">${new Date(lastUpdated).toLocaleDateString()}</div>
-        </div>
-      ` : ''}
+      
       <div class="stat-item">
-        <div class="stat-label">Games Played</div>
-        <div class="stat-value">${games}</div>
+        <div class="stat-label">Average Score</div>
+        <div class="stat-value">${averageScore.toLocaleString()}</div>
+      </div>
+      
+      <div class="stat-item">
+        <div class="stat-label">Total Correct</div>
+        <div class="stat-value">${totalCorrect.toLocaleString()}</div>
+      </div>
+      
+      <div class="stat-item">
+        <div class="stat-label">Total Mistakes</div>
+        <div class="stat-value">${totalMistakes.toLocaleString()}</div>
+      </div>
+      
+      <div class="stat-item">
+        <div class="stat-label">Average Accuracy</div>
+        <div class="stat-value">${averageAccuracy}%</div>
       </div>
     `;
+
+    // Add last played date if available
+    if (lastPlayed) {
+      statsHTML += `
+        <div class="stat-item">
+          <div class="stat-label">Last Played</div>
+          <div class="stat-value">${lastPlayed.toLocaleDateString()}</div>
+        </div>
+      `;
+    }
+
+    // Add mode breakdown if there are multiple modes
+    const modeKeys = Object.keys(modeBreakdown);
+    if (modeKeys.length > 1) {
+      statsHTML += `
+        <div class="stat-item stat-breakdown">
+          <div class="stat-label">Mode Breakdown</div>
+          <div class="stat-value">
+            ${modeKeys.map(key => {
+              const mode = modeBreakdown[key];
+              return `${mode.mode} ${mode.timeMode}: ${mode.games} games, best: ${mode.bestScore.toLocaleString()}`;
+            }).join('<br>')}
+          </div>
+        </div>
+      `;
+    }
+
+    statsList.innerHTML = statsHTML;
   }
 
   // Navigation

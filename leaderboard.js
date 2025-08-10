@@ -34,17 +34,80 @@
     document.documentElement.classList.add('dark');
   }
 
-  function getLastScoreFor(mode, timeMode) {
+  // Get current user ID for highlighting
+  function getCurrentUserId() {
     try {
-      const raw = localStorage.getItem('lastScore');
-      if (!raw) return null;
-      const obj = JSON.parse(raw);
-      if (obj && obj.mode === mode && (!timeMode || obj.time_mode === timeMode)) return obj;
-    } catch {}
+      const currentUser = localStorage.getItem('currentUser');
+      if (currentUser) {
+        const user = JSON.parse(currentUser);
+        return user.id;
+      }
+    } catch (error) {
+      console.error('Error parsing current user:', error);
+    }
     return null;
   }
 
-  // Load leaderboard with caching
+  // Initialize Supabase client
+  function initSupabase() {
+    try {
+      console.log('🔍 Checking Supabase availability...');
+      console.log('window.supabase:', typeof window.supabase);
+      console.log('window.supabaseClient:', typeof window.supabaseClient);
+      
+      // Check if Supabase is available
+      if (typeof window.supabase === 'undefined') {
+        console.error('❌ Supabase client not loaded');
+        return false;
+      }
+
+      // Get Supabase client from window.supabaseClient
+      if (typeof window.supabaseClient === 'undefined' || typeof window.supabaseClient.get !== 'function') {
+        console.error('❌ Supabase client wrapper not available');
+        return false;
+      }
+
+      const supabase = window.supabaseClient.get();
+      if (!supabase) {
+        console.error('❌ Failed to get Supabase client');
+        return false;
+      }
+
+      console.log('✅ Supabase client initialized successfully');
+      return true;
+    } catch (error) {
+      console.error('❌ Supabase initialization error:', error);
+      return false;
+    }
+  }
+
+  // Wait for Supabase to be ready
+  function waitForSupabase(maxAttempts = 10) {
+    return new Promise((resolve, reject) => {
+      let attempts = 0;
+      
+      const checkSupabase = () => {
+        attempts++;
+        
+        if (initSupabase()) {
+          resolve(true);
+          return;
+        }
+        
+        if (attempts >= maxAttempts) {
+          reject(new Error('Supabase failed to initialize after multiple attempts'));
+          return;
+        }
+        
+        // Wait 500ms before next attempt
+        setTimeout(checkSupabase, 500);
+      };
+      
+      checkSupabase();
+    });
+  }
+
+  // Load leaderboard with caching and improved error handling
   async function loadLeaderboard() {
     const cacheKey = `${currentFilters.difficulty}-${currentFilters.time_mode}`;
     const cached = leaderboardCache.get(cacheKey);
@@ -61,13 +124,30 @@
     }
     
     try {
+      // Wait for Supabase to be ready
+      await waitForSupabase();
+
       // Get Supabase client
       const supabase = window.supabaseClient.get();
       if (!supabase) {
-        throw new Error('Supabase not available');
+        throw new Error('Failed to get Supabase client');
       }
 
-      // Fetch leaderboard from Supabase
+      // Test the connection by making a simple query
+      console.log('🧪 Testing Supabase connection...');
+      const { data: testData, error: testError } = await supabase
+        .from('scores')
+        .select('count', { count: 'exact', head: true })
+        .limit(1);
+
+      if (testError) {
+        console.error('❌ Supabase connection test failed:', testError);
+        throw new Error(`Database connection failed: ${testError.message}`);
+      }
+
+      console.log('✅ Supabase connection test successful');
+
+      // Fetch leaderboard from Supabase with better error handling
       const { data, error } = await supabase
         .from('scores')
         .select(`
@@ -87,6 +167,7 @@
         .limit(100);
 
       if (error) {
+        console.error('Supabase error:', error);
         throw error;
       }
 
@@ -114,7 +195,27 @@
       console.error('Leaderboard error:', error);
       const content = document.getElementById('leaderboard-content');
       if (content) {
-        content.innerHTML = '<div class="error">Network error. Please try again.</div>';
+        let errorMessage = 'Failed to load leaderboard.';
+        let errorDetails = '';
+        
+        if (error.message.includes('Supabase client not available')) {
+          errorMessage = 'Supabase connection failed. Please refresh the page.';
+          errorDetails = 'The database connection is not available.';
+        } else if (error.message.includes('fetch')) {
+          errorMessage = 'Network error. Please check your connection.';
+          errorDetails = 'Unable to connect to the server.';
+        } else {
+          errorDetails = error.message || 'Unknown error';
+        }
+        
+        content.innerHTML = `
+          <div class="error">
+            <p>${errorMessage}</p>
+            ${errorDetails ? `<p class="error-details">${errorDetails}</p>` : ''}
+            <button onclick="loadLeaderboard()" class="retry-btn">Retry</button>
+            <button onclick="location.reload()" class="retry-btn">Refresh Page</button>
+          </div>
+        `;
       }
     }
   }
@@ -123,10 +224,10 @@
     const content = document.getElementById('leaderboard-content');
     if (!content) return;
 
-    const myLast = getLastScoreFor(currentFilters.difficulty, currentFilters.time_mode);
+    const currentUserId = getCurrentUserId();
     
     if (!scores || scores.length === 0) {
-      content.innerHTML = '<div class="no-data">No scores yet. Be the first to play!</div>';
+      content.innerHTML = '<div class="no-data">No scores yet for this mode. Be the first to play!</div>';
       return;
     }
 
@@ -145,7 +246,7 @@
         <tbody>
           ${scores.map((score, index) => {
             const rank = index + 1;
-            const isMe = myLast && Number(score.score) === Number(myLast.score);
+            const isMe = currentUserId && score.user_id === currentUserId;
             const rowClass = isMe ? 'my-score' : '';
             
             return `
@@ -185,8 +286,6 @@
       });
     }
   }
-
-
 
   // Initialize page
   function initialize() {

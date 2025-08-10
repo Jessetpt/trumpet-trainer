@@ -35,6 +35,17 @@ window.appConfig = config;
 // Initialize Supabase when config loads
 if (typeof window.supabaseClient !== 'undefined') {
   window.supabaseClient.init(config.supabase.url, config.supabase.anonKey);
+} else {
+  // If supabaseClient isn't available yet, wait for it
+  const checkSupabase = () => {
+    if (typeof window.supabaseClient !== 'undefined') {
+      window.supabaseClient.init(config.supabase.url, config.supabase.anonKey);
+      console.log('✅ Supabase initialized from config.js');
+    } else {
+      setTimeout(checkSupabase, 100);
+    }
+  };
+  checkSupabase();
 }
 
 // Log configuration in development

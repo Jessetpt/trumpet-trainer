@@ -59,6 +59,34 @@
   opacity: 0.3;
 }
 
+/* Dark mode game page overrides */
+:root.dark #app {
+  background: var(--bg);
+}
+
+:root.dark #app::before {
+  opacity: 0.3;
+}
+
+:root.dark #board {
+  background: var(--panel);
+  border-color: rgba(32, 156, 189, 0.2);
+  box-shadow: 
+    0 20px 40px rgba(0,0,0,0.3),
+    0 8px 16px rgba(0,0,0,0.2);
+}
+
+:root.dark #stats {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(32, 156, 189, 0.2);
+}
+
+:root.dark .valve {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(32, 156, 189, 0.3);
+  color: var(--ink);
+}
+
 /* Brand utility buttons */
 .btn-blue {
   background: var(--accent);
@@ -92,6 +120,27 @@ body {
   display: grid;
   place-items: center;
   padding: 24px;
+  background: linear-gradient(135deg, 
+    rgba(32, 156, 189, 0.05) 0%, 
+    rgba(246, 131, 24, 0.05) 25%, 
+    rgba(32, 156, 189, 0.05) 50%, 
+    rgba(246, 131, 24, 0.05) 75%, 
+    rgba(32, 156, 189, 0.05) 100%);
+  position: relative;
+}
+
+#app::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(32, 156, 189, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(246, 131, 24, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(32, 156, 189, 0.05) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 #board {
@@ -109,10 +158,13 @@ body {
   padding: 10px 16px 44px 16px; /* ensure inner content stays within container */
 }
 
+
+
 #board.error {
   border-color: var(--bad);
   box-shadow: 0 10px 30px rgba(0,0,0,0.06), 0 0 0 3px rgba(239, 68, 68, 0.7);
 }
+
 #board.correct {
   border-color: #27ae60;
   box-shadow: 0 10px 30px rgba(0,0,0,0.06), 0 0 0 3px rgba(39, 174, 96, 0.7);
@@ -127,18 +179,44 @@ body {
   align-items: center;
 }
 
-#stats { color: var(--ink); opacity: 0.9; font-weight: 600; font-variant-numeric: tabular-nums; justify-self: start; display: grid; grid-auto-rows: 1.6em; gap: 2px; text-align: left; max-width: 220px; margin-left: 16px; }
+#stats { 
+  color: var(--ink); 
+  opacity: 0.9; 
+  font-weight: 600; 
+  font-variant-numeric: tabular-nums; 
+  justify-self: start; 
+  display: grid; 
+  grid-auto-rows: 1.6em; 
+  gap: 2px; 
+  text-align: left; 
+  max-width: 220px; 
+  margin-left: 16px; 
+}
 .stat-row { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px; }
 
 #valves { display: flex; gap: 10px; align-items: center; justify-self: start; }
 .valve {
-  width: 34px; height: 34px; border-radius: 999px;
+  width: 48px; height: 48px; border-radius: 50%;
   display: grid; place-items: center;
-  background: rgba(0,0,0,0.06);
-  color: var(--ink); font-weight: 700;
+  background: linear-gradient(145deg, #ffffff 0%, rgba(255,255,255,0.9) 100%);
+  color: var(--ink); 
+  font-weight: 700;
+  font-size: 18px;
+  border: 2px solid rgba(32, 156, 189, 0.2);
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 12px rgba(32, 156, 189, 0.1),
+    0 2px 4px rgba(0,0,0,0.05);
 }
 /* No pre-highlight of correct answer; only show what user presses */
-.valve.active { background: var(--accent); color: white; }
+.valve.active { 
+  background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%); 
+  color: white; 
+  border-color: var(--accent);
+  box-shadow: 
+    0 8px 20px rgba(32, 156, 189, 0.3),
+    0 4px 8px rgba(0,0,0,0.1);
+}
 
 #overlay {
   position: fixed;
@@ -257,27 +335,87 @@ body {
 
 #themeToggle {
   position: absolute;
-  bottom: 10px;
-  right: 10px;
-  border: 1px solid rgba(0,0,0,0.15);
-  background: var(--panel);
-  color: var(--ink);
-  padding: 6px 10px;
-  border-radius: 8px;
+  bottom: 16px;
+  right: 16px;
+  border: none;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 12px;
   cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 12px rgba(32, 156, 189, 0.3),
+    0 2px 4px rgba(0,0,0,0.1);
 }
 
 #logoutBtn {
   position: absolute;
-  bottom: 10px;
-  left: 10px;
-  border: 1px solid rgba(0,0,0,0.15);
-  background: var(--panel);
-  color: var(--ink);
-  padding: 6px 10px;
-  border-radius: 8px;
+  bottom: 16px;
+  left: 16px;
+  border: none;
+  background: linear-gradient(135deg, var(--bad) 0%, var(--accent) 100%);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 12px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 12px rgba(246, 131, 24, 0.3),
+    0 2px 4px rgba(0,0,0,0.1);
+}
+
+#logoutBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 20px rgba(246, 131, 24, 0.4),
+    0 4px 8px rgba(0,0,0,0.15);
+}
+
+#themeToggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 20px rgba(32, 156, 189, 0.4),
+    0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Bottom navigation buttons styling */
+.nav-button {
+  appearance: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 12px 20px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 12px rgba(32, 156, 189, 0.3),
+    0 2px 4px rgba(0,0,0,0.1);
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.nav-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 20px rgba(32, 156, 189, 0.4),
+    0 4px 8px rgba(0,0,0,0.15);
+}
+
+.nav-button:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 4px 12px rgba(32, 156, 189, 0.3),
+    0 2px 4px rgba(0,0,0,0.1);
 }
 
 #brandMark { position: absolute; left: 12px; top: 10px; height: 26px; width: auto; }

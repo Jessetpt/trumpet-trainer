@@ -720,14 +720,14 @@
     });
   }
 
-  // Add leaderboard and profile buttons (bottom right, next to theme toggle)
+  // Add navigation buttons (bottom right, next to theme toggle)
   const buttonContainer = document.createElement('div');
-  buttonContainer.style.cssText = 'position: absolute; bottom: 10px; right: 80px; display: flex; gap: 12px; align-items: center;';
+  buttonContainer.style.cssText = 'position: absolute; bottom: 16px; right: 100px; display: flex; gap: 12px; align-items: center;';
   document.getElementById('board').appendChild(buttonContainer);
 
   const profileBtn = document.createElement('button');
   profileBtn.textContent = 'Profile';
-  profileBtn.style.cssText = 'border: 1px solid rgba(0,0,0,0.15); background: var(--panel); color: var(--ink); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; min-width: 60px; height: 28px; display: flex; align-items: center; justify-content: center;';
+  profileBtn.className = 'nav-button';
   profileBtn.addEventListener('click', () => {
     window.location.href = 'profile.html';
   });
@@ -735,11 +735,19 @@
 
   const leaderboardBtn = document.createElement('button');
   leaderboardBtn.textContent = 'Leaderboard';
-  leaderboardBtn.style.cssText = 'border: 1px solid rgba(0,0,0,0.15); background: var(--panel); color: var(--ink); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; min-width: 80px; height: 28px; display: flex; align-items: center; justify-content: center;';
+  leaderboardBtn.className = 'nav-button';
   leaderboardBtn.addEventListener('click', () => {
     window.location.href = 'leaderboard.html';
   });
   buttonContainer.appendChild(leaderboardBtn);
+
+  const analyticsBtn = document.createElement('button');
+  analyticsBtn.textContent = 'Analytics';
+  analyticsBtn.className = 'nav-button';
+  analyticsBtn.addEventListener('click', () => {
+    window.location.href = 'analytics.html';
+  });
+  buttonContainer.appendChild(analyticsBtn);
 
   // Difficulty selector
   const difficultySelect = document.getElementById('difficulty');

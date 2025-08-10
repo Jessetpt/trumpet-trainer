@@ -425,7 +425,7 @@ app.get('/api/analytics/note-averages', authenticateToken, async (req, res) => {
   }
 });
 
-// Analytics: individual note responses
+// Analytics: individual note responses (kept for backward compatibility)
 app.post('/api/analytics/note-responses', authenticateToken, async (req, res) => {
   try {
     const { note_name, midi_value, response_time_ms, correct, difficulty, time_mode, run_id } = req.body;
@@ -454,6 +454,49 @@ app.post('/api/analytics/note-responses', authenticateToken, async (req, res) =>
     res.json({ ok: true, saved: true });
   } catch (err) {
     console.error('note-responses error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Analytics: batch note responses (more efficient)
+app.post('/api/analytics/note-responses/batch', authenticateToken, async (req, res) => {
+  try {
+    const { responses } = req.body;
+    
+    if (!responses || !Array.isArray(responses) || responses.length === 0) {
+      return res.status(400).json({ error: 'responses array required' });
+    }
+
+    // Validate each response
+    for (const response of responses) {
+      if (!response.note_name || !response.midi_value || !response.run_id) {
+        return res.status(400).json({ error: 'Each response must have note_name, midi_value, and run_id' });
+      }
+    }
+
+    // Prepare batch insert data
+    const batchData = responses.map(response => ({
+      user_id: req.user.userId,
+      run_id: String(response.run_id),
+      note_name: String(response.note_name),
+      midi_value: parseInt(response.midi_value, 10),
+      response_time_ms: Math.max(0, parseInt(response.response_time_ms, 10)),
+      correct: !!response.correct,
+      difficulty: String(response.difficulty || 'normal'),
+      time_mode: String(response.time_mode || '60s'),
+      created_at: new Date().toISOString()
+    }));
+
+    const { error } = await supabase.from('note_responses').insert(batchData);
+
+    if (error) {
+      console.error('Batch insert note_responses error:', error);
+      return res.status(500).json({ error: 'Failed to save note response batch' });
+    }
+
+    res.json({ ok: true, saved: responses.length });
+  } catch (err) {
+    console.error('batch note-responses error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

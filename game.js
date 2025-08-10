@@ -370,11 +370,16 @@
     setStartButtonLabel();
   }
 
-  function finishRound() {
+  async function finishRound() {
     isRunning = false;
     roundState = 'finished';
     if (overlay) overlay.classList.remove('hidden');
     if (startBtn) { startBtn.style.display = 'none'; }
+    
+    // Send any remaining note responses in the batch
+    if (noteResponseBatch.length > 0) {
+      await sendNoteResponseBatch();
+    }
     
     const avgResponse = numCorrect > 0 ? Math.round(totalResponseMs / numCorrect) : 0;
     const accuracy = numCorrect + numMistakes > 0 ? Math.round(100 * numCorrect / (numCorrect + numMistakes)) : 0;
@@ -458,35 +463,71 @@
     }
   }
 
+  // Batch note responses to avoid overwhelming the server
+  let noteResponseBatch = [];
+  let batchTimeout = null;
+
   async function saveNoteResponseToAnalytics(note, responseTimeMs, correct) {
+    // Add to batch instead of sending immediately
+    noteResponseBatch.push({
+      note_name: note.name,
+      midi_value: noteMidi(note.name),
+      response_time_ms: Math.round(responseTimeMs),
+      correct: correct,
+      difficulty: currentDifficulty,
+      time_mode: selectedTimeMode,
+      run_id: currentRunId || newRunId()
+    });
+
+    // Clear existing timeout and set new one
+    if (batchTimeout) {
+      clearTimeout(batchTimeout);
+    }
+
+    // Send batch after 2 seconds of inactivity, or when batch gets large
+    batchTimeout = setTimeout(() => {
+      sendNoteResponseBatch();
+    }, 2000);
+
+    // Also send immediately if batch gets too large (more than 20 notes)
+    if (noteResponseBatch.length >= 20) {
+      sendNoteResponseBatch();
+    }
+  }
+
+  async function sendNoteResponseBatch() {
+    if (noteResponseBatch.length === 0) return;
+    
     const token = localStorage.getItem('authToken');
     if (!token) return;
+
+    const batchToSend = [...noteResponseBatch];
+    noteResponseBatch = [];
+    
+    if (batchTimeout) {
+      clearTimeout(batchTimeout);
+      batchTimeout = null;
+    }
     
     try {
-      const response = await fetch('http://localhost:3000/api/analytics/note-responses', {
+      const response = await fetch('http://localhost:3000/api/analytics/note-responses/batch', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          note_name: note.name,
-          midi_value: noteMidi(note.name),
-          response_time_ms: Math.round(responseTimeMs),
-          correct: correct,
-          difficulty: currentDifficulty,
-          time_mode: selectedTimeMode,
-          run_id: currentRunId || newRunId()
+          responses: batchToSend
         })
       });
       
       if (response.ok) {
-        console.log('Note response saved to analytics');
+        console.log(`Batch of ${batchToSend.length} note responses saved to analytics`);
       } else {
-        console.error('Failed to save note response to analytics');
+        console.error('Failed to save note response batch to analytics');
       }
     } catch (error) {
-      console.error('Error saving note response to analytics:', error);
+      console.error('Error saving note response batch to analytics:', error);
     }
   }
 

@@ -77,8 +77,7 @@
           best_streak,
           avg_response,
           accuracy,
-          created_at,
-          users!inner(username)
+          created_at
         `)
         .eq('mode', currentFilters.difficulty)
         .eq('time_mode', currentFilters.time_mode)
@@ -98,7 +97,7 @@
         avg_response: score.avg_response,
         accuracy: score.accuracy,
         created_at: score.created_at,
-        username: score.users?.username || 'Anonymous'
+        username: 'Anonymous' // We'll add usernames later when we set up the users table
       }));
 
       // Cache the successful response
@@ -149,7 +148,7 @@
             return `
               <tr class="${rowClass}" ${isMe ? 'style="outline: 2px solid var(--primary-teal); border-radius: 8px; background: rgba(32,156,189,0.08);"' : ''}>
                 <td class="rank-cell rank-${rank}">${rank}</td>
-                <td>${score.users?.name || 'Anonymous'}${isMe ? ' (You)' : ''}</td>
+                <td>${score.username || 'Anonymous'}${isMe ? ' (You)' : ''}</td>
                 <td class="score-cell">${score.score.toLocaleString()}</td>
                 <td>${score.correct}</td>
                 <td class="accuracy-cell">${score.accuracy}%</td>

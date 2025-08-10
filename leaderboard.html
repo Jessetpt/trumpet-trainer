@@ -851,13 +851,13 @@
             if (difficultyFilter) {
                 difficultyFilter.addEventListener('change', () => {
                     updateFilters();
-                    loadLeaderboard();
+                    // loadLeaderboard is now in leaderboard.js
                 });
             }
             if (timeFilter) {
                 timeFilter.addEventListener('change', () => {
                     updateFilters();
-                    loadLeaderboard();
+                    // loadLeaderboard is now in leaderboard.js
                 });
             }
         }
@@ -912,7 +912,7 @@
             // Initialize filters with default values
             updateFilters();
             bindFilterEvents();
-            loadLeaderboard();
+            // loadLeaderboard is now in leaderboard.js
         });
     </script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>

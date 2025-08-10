@@ -226,7 +226,7 @@ body {
   box-shadow: 0 10px 30px rgba(0,0,0,0.06), 0 0 0 3px rgba(39, 174, 96, 0.7);
 }
 
-#vf { margin: 16px 16px 0 16px; }
+#vf { margin: 16px 16px 0 -12px; }
 
 #hud {
   margin: 8px 16px 8px 16px;

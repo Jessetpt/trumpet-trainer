@@ -122,15 +122,18 @@
   }
 
   // Theme toggle
-  const themeToggle = document.createElement('button');
-  themeToggle.textContent = '🌙';
-  themeToggle.className = 'theme-toggle';
-  themeToggle.addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-    updateLogo();
-    themeToggle.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
-  });
-  document.body.appendChild(themeToggle);
+  const themeToggle = document.getElementById('themeToggle');
+  if (themeToggle) {
+    // Set initial theme icon
+    const isDark = document.documentElement.classList.contains('dark');
+    themeToggle.textContent = isDark ? '☀️' : '🌙';
+    
+    themeToggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      updateLogo();
+      themeToggle.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+    });
+  }
 
   // Load profile on page load
   loadProfile();

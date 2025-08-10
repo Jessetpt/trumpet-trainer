@@ -97,6 +97,23 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.3s ease;
+        }
+
+        .nav-btn:hover::before {
+            left: 100%;
         }
 
         .nav-btn:hover {
@@ -155,6 +172,19 @@
             color: var(--primary-orange);
             margin-bottom: 1rem;
             text-shadow: 2px 2px 4px var(--shadow);
+            position: relative;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-orange), var(--primary-teal));
+            border-radius: 2px;
         }
 
         .page-subtitle {
@@ -171,6 +201,18 @@
             padding: 2rem;
             margin-bottom: 3rem;
             box-shadow: 0 4px 12px var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .filters-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-orange), var(--primary-teal));
         }
 
         .filters-title {
@@ -210,12 +252,17 @@
             font-size: 1rem;
             min-width: 150px;
             transition: all 0.2s ease;
+            cursor: pointer;
         }
 
         .filter-group select:focus {
             outline: none;
             border-color: var(--primary-orange);
             box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        .filter-group select:hover {
+            border-color: var(--primary-teal);
         }
 
         .apply-btn {
@@ -228,6 +275,23 @@
             cursor: pointer;
             transition: all 0.2s ease;
             font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .apply-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .apply-btn:hover::before {
+            left: 100%;
         }
 
         .apply-btn:hover {
@@ -253,6 +317,7 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 12px var(--shadow);
         }
 
         .stat-card::before {
@@ -268,6 +333,7 @@
         .stat-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 20px 40px var(--shadow);
+            border-color: var(--primary-teal);
         }
 
         .stat-number {
@@ -296,6 +362,24 @@
             background: linear-gradient(135deg, var(--primary-orange), var(--primary-teal));
             color: white;
             padding: 1.5rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .table-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
 
         .table-title {
@@ -442,7 +526,7 @@
     <!-- Global Navigation Bar -->
     <nav class="global-nav">
         <a href="index.html" class="nav-brand">
-            <img src="Untitled design.svg" alt="Logo" onerror="this.style.display='none'" />
+            <img id="nav-logo" src="Untitled design.svg" alt="Logo" onerror="this.style.display='none'" />
             Trumpet Trainer
         </a>
         <div class="nav-controls">
@@ -524,11 +608,13 @@
         // Dark Mode Toggle
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
+        const navLogo = document.getElementById('nav-logo');
         
         // Check for saved theme preference or default to light mode
         const savedTheme = localStorage.getItem('theme') || 'light';
         body.setAttribute('data-theme', savedTheme);
         updateThemeIcon(savedTheme);
+        updateLogo(savedTheme);
         
         themeToggle.addEventListener('click', () => {
             const currentTheme = body.getAttribute('data-theme');
@@ -537,11 +623,18 @@
             body.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
             updateThemeIcon(newTheme);
+            updateLogo(newTheme);
         });
         
         function updateThemeIcon(theme) {
             themeToggle.innerHTML = theme === 'dark' ? '☀️' : '🌙';
             themeToggle.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+        }
+        
+        function updateLogo(theme) {
+            if (navLogo) {
+                navLogo.src = theme === 'dark' ? 'Untitled design dark.svg' : 'Untitled design.svg';
+            }
         }
         
         // Analytics functionality

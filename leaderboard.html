@@ -114,6 +114,25 @@
             transform: scale(1.05);
         }
 
+        .free-class-btn {
+            background: linear-gradient(135deg, var(--primary-orange), var(--primary-teal));
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .free-class-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(246, 131, 24, 0.3);
+        }
+
         .nav-btn {
             background: linear-gradient(135deg, var(--primary-teal), var(--primary-orange));
             color: white;
@@ -513,6 +532,7 @@
             <a href="leaderboard.html" class="nav-btn active">🏆 Leaderboard</a>
             <a href="analytics.html" class="nav-btn">📊 Analytics</a>
             <a href="profile.html" class="profile-btn">👤 Profile</a>
+            <a href="free-class.html" class="free-class-btn">🎓 Free Trumpet Class</a>
             <button class="refresh-btn" id="refresh-btn" title="Refresh data">🔄</button>
             <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">
                 🌙

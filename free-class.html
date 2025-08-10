@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Trumpet Class - Trumpet Trainer</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --primary-teal: #209cbd;
+            --primary-orange: #f68318;
+            --surface: #ffffff;
+            --surface-dark: #1a1a1a;
+            --text-primary: #000000;
+            --text-primary-dark: #ffffff;
+            --text-secondary: #666666;
+            --text-secondary-dark: #cccccc;
+            --border: #e0e0e0;
+            --border-dark: #333333;
+            --accent: #209cbd;
+            --accent-dark: #17a8d1;
+        }
+
+        .dark {
+            --surface: var(--surface-dark);
+            --text-primary: var(--text-primary-dark);
+            --text-secondary: var(--text-secondary-dark);
+            --border: var(--border-dark);
+            --accent: var(--accent-dark);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: var(--surface);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .nav {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .nav-logo {
+            height: 40px;
+            width: auto;
+        }
+
+        .brand-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-teal), var(--primary-orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, var(--primary-teal), var(--primary-orange));
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, var(--primary-orange), var(--primary-teal));
+        }
+
+        .profile-btn {
+            background: linear-gradient(135deg, var(--primary-teal), var(--primary-orange));
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .free-class-btn {
+            background: linear-gradient(135deg, var(--primary-orange), var(--primary-teal));
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .free-class-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(246, 131, 24, 0.3);
+        }
+
+        .theme-toggle {
+            background: var(--surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--border);
+        }
+
+        .main-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .hero-section {
+            margin-bottom: 4rem;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, var(--primary-orange), var(--primary-teal));
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(246, 131, 24, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(246, 131, 24, 0.4);
+        }
+
+        .benefits-section {
+            text-align: left;
+            max-width: 600px;
+            margin: 0 auto 3rem auto;
+        }
+
+        .benefits-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .benefit-icon {
+            font-size: 1.5rem;
+            color: var(--primary-orange);
+            flex-shrink: 0;
+            margin-top: 0.25rem;
+        }
+
+        .benefit-text {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .highlight {
+            color: var(--primary-teal);
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.125rem;
+            }
+            
+            .nav {
+                padding: 1rem;
+            }
+            
+            .main-content {
+                padding: 2rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <a href="index.html" class="nav-brand">
+            <img id="nav-logo" src="Untitled design.svg" alt="Trumpet Trainer Logo" class="nav-logo">
+            <span class="brand-text">Trumpet Trainer</span>
+        </a>
+        <div class="nav-controls">
+            <a href="index.html" class="nav-btn">🏠 Game</a>
+            <a href="leaderboard.html" class="nav-btn">🏆 Leaderboard</a>
+            <a href="analytics.html" class="nav-btn">📊 Analytics</a>
+            <a href="profile.html" class="profile-btn">👤 Profile</a>
+            <a href="free-class.html" class="free-class-btn active">🎓 Free Trumpet Class</a>
+            <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">
+                🌙
+            </button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="hero-section">
+            <h1 class="hero-title">
+                How to Fix Your Sound, Range, and Endurance to Play the Trumpet Confidently and Consistently
+                <span class="highlight">(Even If You've Been Struggling for Years)</span>
+            </h1>
+            
+            <p class="hero-subtitle">
+                Stop the cycle of good days and bad days. Learn to play with predictable results every time you pick up your horn.
+            </p>
+            
+            <a href="https://www.toot-your-own-horn.com/trumpet-masterclass-1" class="cta-button" target="_blank" rel="noopener noreferrer">
+                Watch the Free Class Now
+            </a>
+        </div>
+
+        <div class="benefits-section">
+            <h2 class="benefits-title">What You'll Learn</h2>
+            
+            <div class="benefit-item">
+                <div class="benefit-icon">🎯</div>
+                <div class="benefit-text">
+                    <strong>Practice Less—But the Right Way.</strong> Identify and eliminate the hidden habits that keep you stuck, so you spend less time in the practice room and more time making the music you love.
+                </div>
+            </div>
+            
+            <div class="benefit-item">
+                <div class="benefit-icon">🚀</div>
+                <div class="benefit-text">
+                    <strong>Unlock Your Upper Register.</strong> Supercharge your tone and endurance so you never feel worn out or inconsistent even on your toughest days.
+                </div>
+            </div>
+            
+            <div class="benefit-item">
+                <div class="benefit-icon">⏰</div>
+                <div class="benefit-text">
+                    <strong>Play Effortlessly Even On A Busy Schedule.</strong> Use a time-saving system that prevents setbacks and injuries. Perfect if you've been off the horn for a while, so every session feels smooth and reliable.
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="https://www.toot-your-own-horn.com/trumpet-masterclass-1" class="cta-button" target="_blank" rel="noopener noreferrer">
+                Watch the Free Class Now
+            </a>
+        </div>
+    </main>
+
+    <script>
+        // Dark Mode Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const navLogo = document.getElementById('nav-logo');
+        
+        // Check for saved theme preference or default to light mode
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+        updateThemeIcon(savedTheme);
+        updateLogo(savedTheme);
+        
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateThemeIcon(isDark ? 'dark' : 'light');
+            updateLogo(isDark ? 'dark' : 'light');
+        });
+        
+        function updateThemeIcon(theme) {
+            themeToggle.innerHTML = theme === 'dark' ? '☀️' : '🌙';
+            themeToggle.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+        }
+        
+        function updateLogo(theme) {
+            if (navLogo) {
+                navLogo.src = theme === 'dark' ? 'Untitled design dark.svg' : 'Untitled design.svg';
+            }
+        }
+    </script>
+</body>
+</html> 

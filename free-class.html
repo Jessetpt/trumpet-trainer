@@ -254,6 +254,175 @@
                 padding: 2rem 1rem;
             }
         }
+
+        /* Mobile-First Mobile Styles */
+        @media (max-width: 768px) {
+            /* Mobile Navigation */
+            .nav {
+                padding: 0.75rem 1rem;
+                flex-direction: column;
+                gap: 0.75rem;
+                height: auto;
+                min-height: 80px;
+            }
+
+            .nav-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.5rem;
+            }
+
+            .nav-btn, .profile-btn, .free-class-btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+                min-width: 80px;
+                text-align: center;
+            }
+
+            .theme-toggle {
+                width: 44px;
+                height: 44px;
+                min-width: 44px;
+            }
+
+            /* Mobile Layout */
+            .main-content {
+                margin-top: 6rem;
+                padding: 1rem;
+            }
+
+            /* Mobile Hero Section */
+            .hero-section {
+                text-align: center;
+                margin-bottom: 2rem;
+            }
+
+            .hero-title {
+                font-size: 1.5rem;
+                line-height: 1.3;
+                margin-bottom: 1rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+                line-height: 1.5;
+                margin-bottom: 1.5rem;
+            }
+
+            .cta-button {
+                width: 100%;
+                padding: 1rem;
+                font-size: 1.1rem;
+                border-radius: 12px;
+                min-height: 56px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Mobile Benefits Section */
+            .benefits-section {
+                margin-bottom: 2rem;
+            }
+
+            .benefits-title {
+                font-size: 1.25rem;
+                margin-bottom: 1rem;
+            }
+
+            .benefit-item {
+                flex-direction: column;
+                text-align: center;
+                padding: 1rem;
+                margin-bottom: 1rem;
+                border-radius: 12px;
+            }
+
+            .benefit-icon {
+                font-size: 2rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .benefit-text {
+                font-size: 0.9rem;
+                line-height: 1.5;
+            }
+
+            .benefit-text strong {
+                display: block;
+                margin-bottom: 0.5rem;
+                font-size: 1rem;
+            }
+        }
+
+        /* Extra Small Mobile Devices */
+        @media (max-width: 480px) {
+            .nav {
+                padding: 0.5rem;
+            }
+
+            .nav-brand {
+                font-size: 1.1rem;
+            }
+
+            .nav-controls {
+                gap: 0.25rem;
+            }
+
+            .nav-btn, .profile-btn, .free-class-btn {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+                min-width: 70px;
+            }
+
+            .main-content {
+                margin-top: 7rem;
+                padding: 0 0.5rem;
+            }
+
+            .hero-title {
+                font-size: 1.25rem;
+            }
+
+            .hero-subtitle {
+                font-size: 0.9rem;
+            }
+
+            .benefit-item {
+                padding: 0.75rem;
+            }
+
+            .benefit-text {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Landscape Mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .nav {
+                flex-direction: row;
+                height: 60px;
+                min-height: 60px;
+            }
+
+            .main-content {
+                margin-top: 4rem;
+            }
+
+            .hero-title {
+                font-size: 1.75rem;
+            }
+
+            .benefit-item {
+                flex-direction: row;
+                text-align: left;
+            }
+
+            .benefit-icon {
+                margin-bottom: 0;
+                margin-right: 0.5rem;
+            }
+        }
     </style>
 </head>
 <body>

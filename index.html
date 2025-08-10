@@ -210,6 +210,259 @@
                 margin-top: 2.5rem;
             }
         }
+
+        /* Mobile-First Mobile Styles */
+        @media (max-width: 768px) {
+            /* Mobile Navigation */
+            .global-nav {
+                padding: 0.75rem 1rem;
+                flex-direction: column;
+                gap: 0.75rem;
+                height: auto;
+                min-height: 80px;
+            }
+
+            .nav-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.5rem;
+            }
+
+            .nav-btn, .profile-btn, .free-class-btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+                min-width: 80px;
+                text-align: center;
+            }
+
+            .theme-toggle {
+                width: 44px;
+                height: 44px;
+                min-width: 44px;
+            }
+
+            /* Mobile Game Layout */
+            #app {
+                margin-top: 6rem;
+                padding: 0 1rem;
+            }
+
+            #board {
+                width: 100%;
+                max-width: 100%;
+                padding: 1rem;
+                box-sizing: border-box;
+            }
+
+            #brandLogo {
+                height: 3rem;
+                margin-bottom: 1rem;
+            }
+
+            /* Mobile HUD */
+            #hud {
+                flex-direction: column;
+                gap: 1rem;
+                margin-top: 1rem;
+            }
+
+            #valves {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.5rem;
+                width: 100%;
+            }
+
+            #valves button {
+                padding: 1rem;
+                font-size: 1.2rem;
+                min-height: 60px;
+                border-radius: 12px;
+            }
+
+            #stats {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+                width: 100%;
+            }
+
+            #stats div {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+                text-align: center;
+                border-radius: 8px;
+            }
+
+            /* Mobile Overlay */
+            #overlay {
+                padding: 1rem;
+            }
+
+            #overlay .card {
+                padding: 1.5rem;
+                margin: 1rem;
+                max-width: 100%;
+                border-radius: 16px;
+            }
+
+            #overlay h1 {
+                font-size: 1.75rem;
+                margin-bottom: 0.75rem;
+            }
+
+            #overlay p {
+                font-size: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            /* Mobile Chips */
+            .chips {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+                margin: 1rem 0;
+            }
+
+            .chip {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+                text-align: center;
+                border-radius: 8px;
+            }
+
+            /* Mobile Difficulty Selector */
+            .difficulty-selector {
+                flex-direction: column;
+                gap: 1rem;
+                margin: 1rem 0;
+            }
+
+            .difficulty-selector > div {
+                width: 100%;
+            }
+
+            .difficulty-selector label {
+                display: block;
+                margin-bottom: 0.5rem;
+                font-weight: 500;
+            }
+
+            .difficulty-selector select {
+                width: 100%;
+                padding: 0.75rem;
+                border-radius: 8px;
+                border: 1px solid var(--border);
+                background: var(--surface);
+                color: var(--text-primary);
+                font-size: 1rem;
+            }
+
+            /* Mobile Buttons */
+            .cta, #startBtn {
+                width: 100%;
+                padding: 1rem;
+                font-size: 1.1rem;
+                border-radius: 12px;
+                min-height: 56px;
+            }
+
+            /* Mobile VexFlow Canvas */
+            #vf {
+                width: 100% !important;
+                height: auto !important;
+                max-height: 200px;
+                overflow: hidden;
+            }
+
+            /* Mobile Logout Button */
+            #logoutBtn {
+                position: fixed;
+                top: 6rem;
+                right: 1rem;
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+                border-radius: 8px;
+                z-index: 100;
+            }
+
+            /* Mobile Theme Toggle */
+            #themeToggle {
+                position: fixed;
+                top: 6rem;
+                left: 1rem;
+                width: 44px;
+                height: 44px;
+                z-index: 100;
+            }
+        }
+
+        /* Extra Small Mobile Devices */
+        @media (max-width: 480px) {
+            .global-nav {
+                padding: 0.5rem;
+            }
+
+            .nav-brand {
+                font-size: 1.1rem;
+            }
+
+            .nav-controls {
+                gap: 0.25rem;
+            }
+
+            .nav-btn, .profile-btn, .free-class-btn {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+                min-width: 70px;
+            }
+
+            #app {
+                margin-top: 7rem;
+                padding: 0 0.5rem;
+            }
+
+            #board {
+                padding: 0.5rem;
+            }
+
+            .chips {
+                grid-template-columns: 1fr;
+            }
+
+            #overlay .card {
+                padding: 1rem;
+                margin: 0.5rem;
+            }
+        }
+
+        /* Landscape Mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .global-nav {
+                flex-direction: row;
+                height: 60px;
+                min-height: 60px;
+            }
+
+            #app {
+                margin-top: 4rem;
+            }
+
+            #hud {
+                flex-direction: row;
+                gap: 1rem;
+            }
+
+            #valves {
+                grid-template-columns: repeat(3, 1fr);
+                max-width: 200px;
+            }
+
+            #stats {
+                grid-template-columns: repeat(2, 1fr);
+                max-width: 200px;
+            }
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
   </head>

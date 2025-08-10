@@ -486,6 +486,188 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Mobile-First Mobile Styles */
+        @media (max-width: 768px) {
+            /* Mobile Navigation */
+            .global-nav {
+                padding: 0.75rem 1rem;
+                flex-direction: column;
+                gap: 0.75rem;
+                height: auto;
+                min-height: 80px;
+            }
+
+            .nav-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.5rem;
+            }
+
+            .nav-btn, .profile-btn, .free-class-btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+                min-width: 80px;
+                text-align: center;
+            }
+
+            .theme-toggle {
+                width: 44px;
+                height: 44px;
+                min-width: 44px;
+            }
+
+            /* Mobile Profile Layout */
+            .main-content {
+                margin-top: 6rem;
+                padding: 0 1rem;
+            }
+
+            .page-header {
+                text-align: center;
+                margin-bottom: 1.5rem;
+            }
+
+            .page-title {
+                font-size: 1.75rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .page-subtitle {
+                font-size: 1rem;
+            }
+
+            .profile-container {
+                max-width: 100%;
+            }
+
+            .profile-card {
+                padding: 1.5rem;
+                border-radius: 16px;
+            }
+
+            #brandLogo {
+                height: 3rem;
+                margin-bottom: 1rem;
+            }
+
+            /* Mobile User Info */
+            .user-info {
+                text-align: center;
+                margin-bottom: 1.5rem;
+            }
+
+            .user-name {
+                font-size: 1.5rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .user-email, .user-phone, .user-joined {
+                font-size: 0.9rem;
+                margin-bottom: 0.5rem;
+            }
+
+            /* Mobile Stats */
+            .stats-section h2 {
+                font-size: 1.5rem;
+                text-align: center;
+                margin-bottom: 1rem;
+            }
+
+            .stats-list {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .stat-item {
+                padding: 1rem;
+                border-radius: 12px;
+            }
+
+            .stat-label {
+                font-size: 0.8rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            /* Mobile Actions */
+            .profile-actions {
+                flex-direction: column;
+                gap: 0.75rem;
+                margin-top: 1.5rem;
+            }
+
+            .cta, .danger {
+                width: 100%;
+                padding: 1rem;
+                font-size: 1rem;
+                border-radius: 12px;
+                min-height: 56px;
+                justify-content: center;
+            }
+        }
+
+        /* Extra Small Mobile Devices */
+        @media (max-width: 480px) {
+            .global-nav {
+                padding: 0.5rem;
+            }
+
+            .nav-brand {
+                font-size: 1.1rem;
+            }
+
+            .nav-controls {
+                gap: 0.25rem;
+            }
+
+            .nav-btn, .profile-btn, .free-class-btn {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+                min-width: 70px;
+            }
+
+            .main-content {
+                margin-top: 7rem;
+                padding: 0 0.5rem;
+            }
+
+            .profile-card {
+                padding: 1rem;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .stats-list {
+                gap: 0.5rem;
+            }
+
+            .stat-item {
+                padding: 0.75rem;
+            }
+        }
+
+        /* Landscape Mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .global-nav {
+                flex-direction: row;
+                height: 60px;
+                min-height: 60px;
+            }
+
+            .main-content {
+                margin-top: 4rem;
+            }
+
+            .stats-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
   </head>
   <body>

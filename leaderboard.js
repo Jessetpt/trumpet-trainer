@@ -22,6 +22,12 @@
 
   // Initialize theme
   updateLogo();
+  
+  // Check for saved theme preference and apply it
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    document.documentElement.classList.add('dark');
+  }
 
   function getLastScoreFor(mode, timeMode) {
     try {
@@ -119,16 +125,7 @@
     timeModeSelect.addEventListener('change', reload);
   }
 
-  // Theme toggle
-  const themeToggle = document.createElement('button');
-  themeToggle.textContent = '🌙';
-  themeToggle.className = 'theme-toggle';
-  themeToggle.addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-    updateLogo();
-    themeToggle.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
-  });
-  document.body.appendChild(themeToggle);
+
 
   // Load leaderboard on page load
   reload();

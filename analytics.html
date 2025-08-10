@@ -21,7 +21,7 @@
             --nav-bg: rgba(255, 255, 255, 0.95);
         }
 
-        [data-theme="dark"] {
+        .dark {
             /* Dark theme colors */
             --background: #0d1117;
             --surface: #161b22;
@@ -607,23 +607,22 @@
     <script>
         // Dark Mode Toggle
         const themeToggle = document.getElementById('theme-toggle');
-        const body = document.body;
         const navLogo = document.getElementById('nav-logo');
         
         // Check for saved theme preference or default to light mode
         const savedTheme = localStorage.getItem('theme') || 'light';
-        body.setAttribute('data-theme', savedTheme);
+        if (savedTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
         updateThemeIcon(savedTheme);
         updateLogo(savedTheme);
         
         themeToggle.addEventListener('click', () => {
-            const currentTheme = body.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
-            body.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon(newTheme);
-            updateLogo(newTheme);
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateThemeIcon(isDark ? 'dark' : 'light');
+            updateLogo(isDark ? 'dark' : 'light');
         });
         
         function updateThemeIcon(theme) {

@@ -456,6 +456,14 @@ body {
   pointer-events: none;
 }
 
+/* Login page theme toggle positioning */
+body > .theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
 .login-container {
   width: 100%;
   max-width: 450px;

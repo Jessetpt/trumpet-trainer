@@ -251,7 +251,9 @@
                 width: 100%;
                 max-width: 100%;
                 padding: 1rem;
+                padding-top: 3rem;
                 box-sizing: border-box;
+                position: relative;
             }
 
             #brandLogo {
@@ -377,23 +379,26 @@
 
             /* Mobile Logout Button */
             #logoutBtn {
-                position: fixed;
-                top: 6rem;
-                right: 1rem;
-                padding: 0.75rem 1rem;
-                font-size: 0.9rem;
-                border-radius: 8px;
-                z-index: 100;
+                position: absolute;
+                top: 0.5rem;
+                right: 0.5rem;
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+                border-radius: 6px;
+                z-index: 10;
+                background: rgba(220, 53, 69, 0.9);
+                color: white;
+                border: none;
             }
 
             /* Mobile Theme Toggle */
             #themeToggle {
-                position: fixed;
-                top: 6rem;
-                left: 1rem;
-                width: 44px;
-                height: 44px;
-                z-index: 100;
+                position: absolute;
+                top: 0.5rem;
+                left: 0.5rem;
+                width: 36px;
+                height: 36px;
+                z-index: 10;
             }
         }
 

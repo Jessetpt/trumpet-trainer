@@ -492,8 +492,6 @@
     <main id="app">
       <div id="board">
         <img id="brandLogo" alt="Logo" src="Untitled design.svg" onerror="this.style.display='none'" />
-        <button id="themeToggle" class="theme-toggle" aria-label="Toggle light/dark mode"></button>
-        <button id="logoutBtn" aria-label="Sign out">Sign Out</button>
         <div id="vf"></div>
         <div id="hud">
           <div id="valves"></div>
@@ -536,7 +534,6 @@
             </div>
           </div>
           <div class="start-section">
-            <button id="overlayThemeToggle" class="theme-toggle overlay-theme-toggle" aria-label="Toggle light/dark mode">🌙</button>
             <button id="startBtn" class="cta">Start 60s Round</button>
           </div>
           <p id="cta" class="hint">Press Space to start</p>
@@ -563,18 +560,6 @@
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
             updateNavThemeIcon(isDark ? 'dark' : 'light');
             updateNavLogo(isDark ? 'dark' : 'light');
-            
-            // Also update the existing theme toggle in the game
-            const gameThemeToggle = document.getElementById('themeToggle');
-            if (gameThemeToggle) {
-                gameThemeToggle.innerHTML = isDark ? '☀️' : '🌙';
-            }
-            
-            // Update the overlay theme toggle
-            const overlayThemeToggle = document.getElementById('overlayThemeToggle');
-            if (overlayThemeToggle) {
-                overlayThemeToggle.innerHTML = isDark ? '☀️' : '🌙';
-            }
         });
         
         function updateNavThemeIcon(theme) {

@@ -761,29 +761,6 @@
     });
   }
 
-  // Add navigation buttons (bottom right, next to theme toggle)
-  const buttonContainer = document.createElement('div');
-  buttonContainer.style.cssText = 'position: absolute; bottom: 16px; right: 100px; display: flex; gap: 12px; align-items: center;';
-  document.getElementById('board').appendChild(buttonContainer);
-
-  const profileBtn = document.createElement('button');
-  profileBtn.textContent = 'Profile';
-  profileBtn.className = 'nav-button';
-  profileBtn.addEventListener('click', () => {
-    window.location.href = 'profile.html';
-  });
-  buttonContainer.appendChild(profileBtn);
-
-  const leaderboardBtn = document.createElement('button');
-  leaderboardBtn.textContent = 'Leaderboard';
-  leaderboardBtn.className = 'nav-button';
-  leaderboardBtn.addEventListener('click', () => {
-    window.location.href = 'leaderboard.html';
-  });
-  buttonContainer.appendChild(leaderboardBtn);
-
-
-
   // Difficulty selector
   const difficultySelect = document.getElementById('difficulty');
   if (difficultySelect) {

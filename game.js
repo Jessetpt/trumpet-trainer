@@ -394,7 +394,6 @@
         </div>
         <div style="display:flex; gap:8px;">
           <button id="playAgainBtn" class="cta btn-orange">Play Again</button>
-          <a id="toLeaderboardBtn" class="cta btn-blue" href="leaderboard.html" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center; padding:8px 12px; border-radius:8px;">Leaderboard</a>
         </div>
       `;
       const playAgain = document.getElementById('playAgainBtn');

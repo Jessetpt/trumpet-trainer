@@ -1,10 +1,56 @@
 (() => {
-  // Check if user is logged in
-  const token = localStorage.getItem('authToken');
-  if (!token) {
-    window.location.href = 'login.html';
-    return;
+  // Wait for authentication to be ready before checking login status
+  async function waitForAuth() {
+    // Wait for Supabase client to be ready
+    if (window.supabaseClient && typeof window.supabaseClient.isReady === 'function') {
+      let attempts = 0;
+      while (!window.supabaseClient.isReady() && attempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
+    }
+    
+    // Check if user is logged in
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      // Try to restore session from Supabase
+      if (window.supabaseClient && window.supabaseClient.get) {
+        const supabase = window.supabaseClient.get();
+        if (supabase) {
+          try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session && session.user) {
+              // Session exists, restore user data
+              const userData = {
+                id: session.user.id,
+                email: session.user.email,
+                name: session.user.user_metadata?.name || session.user.email,
+                phone: session.user.user_metadata?.phone || ''
+              };
+              localStorage.setItem('currentUser', JSON.stringify(userData));
+              localStorage.setItem('authToken', session.access_token);
+              console.log('✅ Session restored in profile.js:', userData);
+              return; // User is now logged in
+            }
+          } catch (error) {
+            console.error('Error restoring session:', error);
+          }
+        }
+      }
+      
+      // No valid session, redirect to login
+      window.location.href = 'login.html';
+      return;
+    }
   }
+  
+  // Initialize authentication check and load profile
+  waitForAuth().then(() => {
+    // Only load profile if authentication was successful
+    if (localStorage.getItem('authToken')) {
+      loadProfile();
+    }
+  });
 
   const userInfo = document.getElementById('userInfo');
   const statsList = document.getElementById('statsList');
@@ -23,6 +69,23 @@
   // Initialize theme
   updateLogo();
 
+  // Wait for Supabase client to be ready
+  async function waitForSupabase() {
+    let attempts = 0;
+    const maxAttempts = 50; // 5 seconds max wait
+    
+    while (!window.supabaseClient || !window.supabaseClient.isReady()) {
+      if (attempts >= maxAttempts) {
+        console.error('Supabase client not ready after 5 seconds');
+        return null;
+      }
+      await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
+    }
+    
+    return window.supabaseClient.get();
+  }
+
   // Load user profile with improved error handling
   async function loadProfile() {
     const token = localStorage.getItem('authToken');
@@ -32,8 +95,8 @@
     }
 
     try {
-      // Get Supabase client
-      const supabase = window.supabaseClient.get();
+      // Wait for Supabase client to be ready
+      const supabase = await waitForSupabase();
       if (!supabase) {
         throw new Error('Supabase not available');
       }
@@ -62,7 +125,7 @@
           best_streak,
           avg_response,
           accuracy,
-          mode,
+          game_mode,
           time_mode,
           created_at
         `)
@@ -128,11 +191,11 @@
     // Calculate mode breakdown
     const modeBreakdown = {};
     scores.forEach(score => {
-      const key = `${score.mode}-${score.time_mode}`;
-      if (!modeBreakdown[key]) {
-        modeBreakdown[key] = {
-          mode: score.mode,
-          timeMode: score.time_mode,
+              const key = `${score.game_mode}-${score.time_mode}`;
+        if (!modeBreakdown[key]) {
+          modeBreakdown[key] = {
+            mode: score.game_mode,
+            timeMode: score.time_mode,
           games: 0,
           bestScore: 0,
           averageScore: 0
@@ -152,7 +215,7 @@
     return {
       totalGames,
       bestScore,
-      bestScoreMode: bestScoreEntry?.mode || null,
+              bestScoreMode: bestScoreEntry?.game_mode || null,
       bestScoreTime: bestScoreEntry?.time_mode || null,
       averageScore,
       totalCorrect,
@@ -284,6 +347,4 @@
     });
   }
 
-  // Load profile on page load
-  loadProfile();
 })(); 

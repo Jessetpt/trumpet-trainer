@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard Test - Trumpet Trainer</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 8px; }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        .info { background: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Leaderboard Test Page</h1>
+    
+    <div class="test-section info">
+        <h3>Test Instructions</h3>
+        <p>This page tests the leaderboard functionality step by step. Make sure you're logged in first!</p>
+        <ol>
+            <li>Check if you're logged in</li>
+            <li>Test Supabase connection</li>
+            <li>Test leaderboard loading</li>
+            <li>Check for any errors</li>
+        </ol>
+    </div>
+    
+    <div class="test-section">
+        <h3>1. Authentication Check</h3>
+        <div id="auth-status">Checking...</div>
+        <button onclick="checkAuth()" class="btn-primary">Check Auth Status</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>2. Supabase Connection Test</h3>
+        <div id="supabase-status">Waiting...</div>
+        <button onclick="testSupabase()" class="btn-primary">Test Supabase</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>3. Leaderboard Test</h3>
+        <div id="leaderboard-status">Waiting...</div>
+        <button onclick="testLeaderboard()" class="btn-primary">Test Leaderboard</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>4. Console Logs</h3>
+        <div id="console-logs"></div>
+        <button onclick="clearLogs()" class="btn-danger">Clear Logs</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>5. Quick Actions</h3>
+        <button onclick="goToLeaderboard()" class="btn-success">Go to Leaderboard</button>
+        <button onclick="goToGame()" class="btn-success">Go to Game</button>
+        <button onclick="goToLogin()" class="btn-primary">Go to Login</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+    <script src="supabase.js"></script>
+    <script src="config.js"></script>
+    <script src="leaderboard.js"></script>
+    
+    <script>
+        // Capture console logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addLog(message, type = 'log') {
+            const logsDiv = document.getElementById('console-logs');
+            const logEntry = document.createElement('div');
+            logEntry.style.margin = '5px 0';
+            logEntry.style.padding = '5px';
+            logEntry.style.borderRadius = '3px';
+            logEntry.style.fontSize = '12px';
+            logEntry.style.fontFamily = 'monospace';
+            
+            switch(type) {
+                case 'error':
+                    logEntry.style.background = '#f8d7da';
+                    logEntry.style.color = '#721c24';
+                    break;
+                case 'warn':
+                    logEntry.style.background = '#fff3cd';
+                    logEntry.style.color = '#856404';
+                    break;
+                default:
+                    logEntry.style.background = '#d1ecf1';
+                    logEntry.style.color = '#0c5460';
+            }
+            
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logsDiv.appendChild(logEntry);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addLog(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addLog(args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addLog(args.join(' '), 'warn');
+        };
+        
+        // Test functions
+        function checkAuth() {
+            const authDiv = document.getElementById('auth-status');
+            const token = localStorage.getItem('authToken');
+            const currentUser = localStorage.getItem('currentUser');
+            
+            if (token && currentUser) {
+                try {
+                    const user = JSON.parse(currentUser);
+                    authDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Logged in as: ${user.name || user.email}<br>
+                            User ID: ${user.id}<br>
+                            Token: ${token.substring(0, 20)}...
+                        </div>
+                    `;
+                } catch (e) {
+                    authDiv.innerHTML = `
+                        <div class="error">
+                            ❌ Error parsing user data: ${e.message}
+                        </div>
+                    `;
+                }
+            } else {
+                authDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Not logged in<br>
+                        Token: ${token ? 'Present' : 'Missing'}<br>
+                        User: ${currentUser ? 'Present' : 'Missing'}
+                    </div>
+                `;
+            }
+        }
+        
+        async function testSupabase() {
+            const statusDiv = document.getElementById('supabase-status');
+            statusDiv.innerHTML = 'Testing...';
+            
+            try {
+                if (window.testLeaderboardConnection) {
+                    const result = await window.testLeaderboardConnection();
+                    if (result) {
+                        statusDiv.innerHTML = '<div class="success">✅ Supabase connection successful!</div>';
+                    } else {
+                        statusDiv.innerHTML = '<div class="error">❌ Supabase connection failed</div>';
+                    }
+                } else {
+                    statusDiv.innerHTML = '<div class="error">❌ testLeaderboardConnection function not available</div>';
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error">❌ Test error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testLeaderboard() {
+            const statusDiv = document.getElementById('leaderboard-status');
+            statusDiv.innerHTML = 'Testing...';
+            
+            try {
+                // Check if loadLeaderboard function exists
+                if (typeof loadLeaderboard === 'function') {
+                    statusDiv.innerHTML = '<div class="info">🔄 Loading leaderboard...</div>';
+                    
+                    // Create a temporary div for the leaderboard
+                    const tempDiv = document.createElement('div');
+                    tempDiv.id = 'leaderboard-content';
+                    document.body.appendChild(tempDiv);
+                    
+                    // Try to load the leaderboard
+                    await loadLeaderboard();
+                    
+                    // Check if we got any content
+                    const content = tempDiv.innerHTML;
+                    if (content && !content.includes('Loading') && !content.includes('error')) {
+                        statusDiv.innerHTML = '<div class="success">✅ Leaderboard loaded successfully!</div>';
+                    } else {
+                        statusDiv.innerHTML = `<div class="info">ℹ️ Leaderboard result: ${content.substring(0, 100)}...</div>`;
+                    }
+                    
+                    // Clean up
+                    document.body.removeChild(tempDiv);
+                } else {
+                    statusDiv.innerHTML = '<div class="error">❌ loadLeaderboard function not available</div>';
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error">❌ Leaderboard test error: ${error.message}</div>`;
+            }
+        }
+        
+        function clearLogs() {
+            document.getElementById('console-logs').innerHTML = '';
+        }
+        
+        function goToLeaderboard() {
+            window.open('leaderboard.html', '_blank');
+        }
+        
+        function goToGame() {
+            window.open('index.html', '_blank');
+        }
+        
+        function goToLogin() {
+            window.open('login.html', '_blank');
+        }
+        
+        // Auto-run auth check on page load
+        window.addEventListener('load', () => {
+            setTimeout(checkAuth, 1000);
+        });
+    </script>
+</body>
+</html> 

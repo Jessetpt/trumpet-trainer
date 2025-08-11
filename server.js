@@ -247,7 +247,7 @@ app.get('/api/scores/best', authenticateToken, async (req, res) => {
 
     // Filter by mode and time_mode if provided
     if (mode) {
-      query = query.eq('mode', String(mode).toLowerCase());
+      query = query.eq('game_mode', String(mode).toLowerCase());
     }
     if (time_mode) {
       query = query.eq('time_mode', String(time_mode).toLowerCase());
@@ -332,7 +332,7 @@ app.get('/api/scores/leaderboard', async (req, res) => {
         created_at,
         users!inner(name)
       `)
-      .eq('mode', requested)
+      .eq('game_mode', requested)
       .eq('time_mode', timeFilter)
       .order('score', { ascending: false })
       .limit(50);

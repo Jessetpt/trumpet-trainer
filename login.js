@@ -1,12 +1,38 @@
 (() => {
-  // Initialize Supabase client
-  const supabaseUrl = 'https://ooiowourmbkmhrhuaybl.supabase.co';
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vaW93b3VybWJrbWhyaHVheWJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2MzE1NjYsImV4cCI6MjA3MDIwNzU2Nn0.Jbv5EKbQ4TZmWP-mVZoXymguXXS_8Fw4Kgm0DM4GU0o';
+  // Use shared Supabase client to avoid conflicts
   let supabase = null;
-  if (!window.supabase || !window.supabase.createClient) {
-    console.error('Supabase UMD not loaded. Check CSP and CDN include.');
-  } else {
-    supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+  
+  // Function to get Supabase client
+  async function getSupabase() {
+    if (supabase) return supabase;
+    
+    // Try to get from shared client first
+    if (window.supabaseClient && typeof window.supabaseClient.get === 'function') {
+      // Wait for the shared client to be ready
+      if (window.supabaseClient.isReady && !window.supabaseClient.isReady()) {
+        // Wait up to 5 seconds for it to be ready
+        let attempts = 0;
+        while (!window.supabaseClient.isReady() && attempts < 50) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          attempts++;
+        }
+      }
+      
+      supabase = window.supabaseClient.get();
+      if (supabase) return supabase;
+    }
+    
+    // Fallback to creating our own if shared one isn't available
+    const supabaseUrl = 'https://ooiowourmbkmhrhuaybl.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vaW93b3VybWJrbWhyaHVheWJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2MzE1NjYsImV4cCI6MjA3MDIwNzU2Nn0.Jbv5EKbQ4TZmWP-mVZoXymguXXS_8Fw4Kgm0DM4GU0o';
+    
+    if (!window.supabase || !window.supabase.createClient) {
+      console.error('Supabase UMD not loaded. Check CSP and CDN include.');
+      return null;
+    } else {
+      supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+      return supabase;
+    }
   }
 
   const loginForm = document.getElementById('loginForm');
@@ -42,6 +68,11 @@
   if (isMobileDevice()) {
     showMobileMessage();
   }
+
+  // Check for existing session when page loads
+  (async () => {
+    await checkExistingSession();
+  })();
 
   // Theme handling
   function updateLogo() {
@@ -105,11 +136,59 @@
       }
   }
 
+  // Check if user is already logged in and restore session
+  async function checkExistingSession() {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+
+    try {
+      const supabaseClient = await getSupabase();
+      if (!supabaseClient) return;
+      
+      // Get the current session
+      const { data: { session }, error } = await supabaseClient.auth.getSession();
+      if (error || !session) {
+        console.log('No valid session found, clearing stored data');
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('currentUser');
+        return;
+      }
+
+      // Always restore user data if we have a valid session
+      if (session.user) {
+        const userData = {
+          id: session.user.id,
+          email: session.user.email,
+          name: session.user.user_metadata?.name || session.user.email,
+          phone: session.user.user_metadata?.phone || ''
+        };
+        localStorage.setItem('currentUser', JSON.stringify(userData));
+        console.log('✅ Existing session restored:', userData);
+      }
+    } catch (error) {
+      console.error('Error checking existing session:', error);
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('currentUser');
+    }
+  }
+
   // Store access token for API calls
   function setAuthTokenFromSession(session) {
     const accessToken = session?.access_token;
     if (accessToken) {
       localStorage.setItem('authToken', accessToken);
+      
+      // Also store the current user data for the leaderboard and game
+      if (session.user) {
+        const userData = {
+          id: session.user.id,
+          email: session.user.email,
+          name: session.user.user_metadata?.name || session.user.email,
+          phone: session.user.user_metadata?.phone || ''
+        };
+        localStorage.setItem('currentUser', JSON.stringify(userData));
+        console.log('✅ User data stored:', userData);
+      }
     }
   }
 
@@ -128,8 +207,9 @@
 
       try {
         if (isResetMode) {
-          if (!supabase) return alert('Supabase failed to load. Refresh and try again.');
-          const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          const supabaseClient = await getSupabase();
+          if (!supabaseClient) return alert('Supabase failed to load. Refresh and try again.');
+          const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
             redirectTo: window.location.origin + '/reset-password.html'
           });
           if (error) return alert(error.message || 'Password reset failed');
@@ -138,15 +218,17 @@
           isLoginMode = true;
           toggleMode();
         } else if (isLoginMode) {
-          if (!supabase) return alert('Supabase failed to load. Refresh and try again.');
-          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+          const supabaseClient = await getSupabase();
+          if (!supabaseClient) return alert('Supabase failed to load. Refresh and try again.');
+          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
           if (error) return alert(error.message || 'Login failed');
           setAuthTokenFromSession(data.session);
           window.location.href = 'index.html';
         } else {
-          if (!supabase) return alert('Supabase failed to load. Refresh and try again.');
+          const supabaseClient = await getSupabase();
+          if (!supabaseClient) return alert('Supabase failed to load. Refresh and try again.');
           // Create account directly via Supabase
-          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
             email,
             password,
             options: {
@@ -160,7 +242,7 @@
           if (signUpError) return alert(signUpError.message || 'Registration failed');
 
           // Immediately sign in to obtain access token
-          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
           if (error) return alert(error.message || 'Auto login failed');
           setAuthTokenFromSession(data.session);
           window.location.href = 'index.html';

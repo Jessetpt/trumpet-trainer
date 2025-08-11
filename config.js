@@ -17,20 +17,24 @@ const config = {
 window.appConfig = config;
 
 // Initialize Supabase when config loads
-if (typeof window.supabaseClient !== 'undefined') {
-  window.supabaseClient.init(config.supabase.url, config.supabase.anonKey);
-} else {
-  // If supabaseClient isn't available yet, wait for it
-  const checkSupabase = () => {
-    if (typeof window.supabaseClient !== 'undefined') {
-      window.supabaseClient.init(config.supabase.url, config.supabase.anonKey);
-      console.log('✅ Supabase initialized from config.js');
+function initializeSupabase() {
+  if (typeof window.supabaseClient !== 'undefined') {
+    console.log('🔧 Config: supabaseClient available, initializing...');
+    const result = window.supabaseClient.init(config.supabase.url, config.supabase.anonKey);
+    if (result) {
+      console.log('✅ Config: Supabase initialized successfully');
     } else {
-      setTimeout(checkSupabase, 100);
+      console.error('❌ Config: Failed to initialize Supabase');
     }
-  };
-  checkSupabase();
+  } else {
+    console.log('⏳ Config: supabaseClient not available yet, waiting...');
+    // If supabaseClient isn't available yet, wait for it
+    setTimeout(initializeSupabase, 100);
+  }
 }
+
+// Start initialization
+initializeSupabase();
 
 // Log configuration in development
 if (config.isDevelopment) {

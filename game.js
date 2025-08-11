@@ -4,26 +4,69 @@
 */
 
 (() => {
-  // Check if user is logged in
-  const token = localStorage.getItem('authToken');
-  const currentUser = localStorage.getItem('currentUser');
-  if (!token && !currentUser) {
-    window.location.href = 'login.html';
-    return;
+  // Wait for authentication to be ready before checking login status
+  async function waitForAuth() {
+    // Check if user is logged in
+    const token = localStorage.getItem('authToken');
+    const currentUser = localStorage.getItem('currentUser');
+    
+    if (!token && !currentUser) {
+      // Try to restore session from Supabase
+      if (window.supabaseClient && window.supabaseClient.get) {
+        const supabase = window.supabaseClient.get();
+        if (supabase) {
+          try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session && session.user) {
+              // Session exists, restore user data
+              const userData = {
+                id: session.user.id,
+                email: session.user.email,
+                name: session.user.user_metadata?.name || session.user.email,
+                phone: session.user.user_metadata?.phone || ''
+              };
+              localStorage.setItem('currentUser', JSON.stringify(userData));
+              localStorage.setItem('authToken', session.access_token);
+              console.log('✅ Session restored in game.js:', userData);
+              return; // User is now logged in
+            }
+          } catch (error) {
+            console.error('Error restoring session:', error);
+          }
+        }
+      }
+      
+      // No valid session, redirect to login
+      console.log('🔐 No valid session found, redirecting to login');
+      window.location.href = 'login.html';
+      return;
+    }
+    
+    console.log('✅ User already authenticated, proceeding with game');
   }
+  
+  // Initialize authentication check and game
+  waitForAuth().then(() => {
+    // Only initialize game if authentication was successful
+    if (localStorage.getItem('authToken')) {
+      console.log('🎮 Initializing game after successful authentication');
+      initializeGame();
+    }
+  });
 
-  const overlay = document.getElementById('overlay');
-  const cta = document.getElementById('cta');
-  const vfDiv = document.getElementById('vf');
-  const boardEl = document.getElementById('board');
-  const statsEl = document.getElementById('stats');
-  const valvesEl = document.getElementById('valves');
-  const themeToggle = document.getElementById('themeToggle');
-  const overlayThemeToggle = document.getElementById('overlayThemeToggle');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const startBtn = document.getElementById('startBtn');
-  const timeModeSelect = document.getElementById('timeMode');
-  let selectedTimeMode = (timeModeSelect && timeModeSelect.value) || '60s';
+  function initializeGame() {
+    const overlay = document.getElementById('overlay');
+    const cta = document.getElementById('cta');
+    const vfDiv = document.getElementById('vf');
+    const boardEl = document.getElementById('board');
+    const statsEl = document.getElementById('stats');
+    const valvesEl = document.getElementById('valves');
+    const themeToggle = document.getElementById('themeToggle');
+    const overlayThemeToggle = document.getElementById('overlayThemeToggle');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const startBtn = document.getElementById('startBtn');
+    const timeModeSelect = document.getElementById('timeMode');
+    let selectedTimeMode = (timeModeSelect && timeModeSelect.value) || '60s';
 
   function secondsForTimeMode(tm) {
     if (tm === '30s') return 30;
@@ -316,7 +359,8 @@
       const user = JSON.parse(currentUser);
       if (!user || !user.id) return;
 
-      const supabase = window.supabaseClient.get();
+      // Wait for Supabase client to be ready
+      const supabase = await waitForSupabase();
       if (!supabase) return;
 
       // Get best score from Supabase
@@ -324,7 +368,7 @@
         .from('scores')
         .select('score')
         .eq('user_id', user.id)
-        .eq('mode', currentDifficulty)
+        .eq('game_mode', currentDifficulty)
         .eq('time_mode', selectedTimeMode)
         .order('score', { ascending: false })
         .limit(1)
@@ -469,14 +513,30 @@
     
     if (!hasPostedScore) {
       hasPostedScore = true;
-      // Save score to backend and then check leaderboard placement
+      // Save score to backend (leaderboard placement will be handled by saveScoreToBackend)
       saveScoreToBackend(score, numCorrect, numMistakes, bestStreak, avgResponse, accuracy)
-        .then(() => maybeShowLeaderboardPlacement(score))
         .catch(() => {});
     }
     setStartButtonLabel();
   }
   
+  // Wait for Supabase client to be ready
+  async function waitForSupabase() {
+    let attempts = 0;
+    const maxAttempts = 50; // 5 seconds max wait
+    
+    while (!window.supabaseClient || !window.supabaseClient.isReady()) {
+      if (attempts >= maxAttempts) {
+        console.error('Supabase client not ready after 5 seconds');
+        return null;
+      }
+      await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
+    }
+    
+    return window.supabaseClient.get();
+  }
+
   async function saveScoreToBackend(score, correct, mistakes, bestStreak, avgResponse, accuracy) {
     const token = localStorage.getItem('authToken');
     if (!token) {
@@ -498,12 +558,16 @@
         return;
       }
 
-      // Get Supabase client
-      const supabase = window.supabaseClient.get();
+      // Wait for Supabase client to be ready
+      const supabase = await waitForSupabase();
       if (!supabase) {
         console.error('Supabase not available');
         return;
       }
+
+      // Get the current time mode from the selector to ensure we have the right value
+      const currentTimeMode = timeModeSelect ? timeModeSelect.value : selectedTimeMode;
+      console.log('🔍 Using time mode for score saving:', currentTimeMode);
 
       // Save score directly to Supabase
       const { data, error } = await supabase
@@ -515,8 +579,8 @@
           best_streak: bestStreak,
           avg_response: avgResponse,
           accuracy,
-          mode: currentDifficulty,
-          time_mode: selectedTimeMode,
+          game_mode: currentDifficulty,
+          time_mode: currentTimeMode,
           run_id: currentRunId || newRunId(),
           user_id: user.id
         })
@@ -534,8 +598,8 @@
       if (data) {
         localStorage.setItem('lastScore', JSON.stringify({
           score: data.score,
-          mode: currentDifficulty,
-          time_mode: selectedTimeMode,
+          game_mode: currentDifficulty,
+          time_mode: currentTimeMode,
           created_at: data.created_at,
           user_id: user.id
         }));
@@ -564,18 +628,23 @@
         return;
       }
 
-      const supabase = window.supabaseClient.get();
+      // Wait for Supabase client to be ready
+      const supabase = await waitForSupabase();
       if (!supabase) {
         console.error('Supabase not available for leaderboard placement');
         return;
       }
 
-      // Get leaderboard from Supabase
+      // Get the current time mode from the selector to ensure we have the right value
+      const currentTimeMode = timeModeSelect ? timeModeSelect.value : selectedTimeMode;
+      console.log('🔍 Using time mode for leaderboard query:', currentTimeMode);
+
+      // Get leaderboard from Supabase including the current user's score
       const { data, error } = await supabase
         .from('scores')
         .select('score, user_id')
-        .eq('mode', currentDifficulty)
-        .eq('time_mode', selectedTimeMode)
+        .eq('game_mode', currentDifficulty)
+        .eq('time_mode', currentTimeMode)
         .order('score', { ascending: false })
         .limit(100);
 
@@ -585,11 +654,35 @@
       }
       
       const list = data || [];
+      console.log('🔍 Raw leaderboard data received:', list);
+      console.log('🔍 Total scores in leaderboard:', list.length);
+      console.log('🔍 Current user ID:', user.id);
       
       // Find the current user's score in the leaderboard
-      const userScore = list.find(s => s.user_id === user.id);
+      // We need to find the score that matches the finalScore we're ranking
+      const userScore = list.find(s => s.user_id === user.id && s.score === finalScore);
+      console.log('🔍 User score found in leaderboard:', userScore);
+      
+      // If we can't find the exact score, log all user scores to debug
+      if (!userScore) {
+        const allUserScores = list.filter(s => s.user_id === user.id);
+        console.log('🔍 All user scores in leaderboard:', allUserScores);
+        console.log('🔍 Looking for score:', finalScore);
+      }
+      
       if (userScore && cta) {
-        const rank = list.findIndex(s => s.user_id === user.id) + 1;
+        console.log('🔍 Final score to rank:', finalScore);
+        console.log('🔍 User score from leaderboard:', userScore.score);
+        
+        // Calculate the actual rank by counting how many scores are higher than the user's score
+        let rank = 1;
+        for (const score of list) {
+          if (score.score > userScore.score) {
+            rank++;
+          }
+        }
+        console.log('🔍 Calculated rank:', rank);
+        
         const niceMode = ({normal:'Normal', lead:'Lead Trumpet', hard:'Hard Mode', doublec:'Double C', ultra:'Ultra Hard'})[currentDifficulty] || currentDifficulty;
         
         // Create placement message
@@ -602,7 +695,7 @@
         
         note.innerHTML = `
           <span class="stat-orange"><strong>🏆 Leaderboard:</strong></span> 
-          <span class="stat-blue">You placed #${rank} in ${niceMode} — ${selectedTimeMode.toUpperCase()}</span>
+          <span class="stat-blue">You placed #${rank} in ${niceMode} — ${currentTimeMode.toUpperCase()}</span>
         `;
         
         // Remove any existing placement message
@@ -614,7 +707,33 @@
         note.setAttribute('data-placement-message', 'true');
         cta.appendChild(note);
         
-        console.log(`Leaderboard placement: #${rank} in ${currentDifficulty} ${selectedTimeMode}`);
+        console.log(`Leaderboard placement: #${rank} in ${currentDifficulty} ${currentTimeMode}`);
+      } else if (cta) {
+        // If user's score isn't in the top 100, show a generic message
+        const niceMode = ({normal:'Normal', lead:'Lead Trumpet', hard:'Hard Mode', doublec:'Double C', ultra:'Ultra Hard'})[currentDifficulty] || currentDifficulty;
+        
+        const note = document.createElement('div');
+        note.style.marginTop = '10px';
+        note.style.padding = '8px';
+        note.style.borderRadius = '6px';
+        note.style.backgroundColor = 'rgba(246, 131, 24, 0.1)';
+        note.style.border = '1px solid var(--primary-orange)';
+        
+        note.innerHTML = `
+          <span class="stat-orange"><strong>🎯 Score Saved!</strong></span> 
+          <span class="stat-blue">Your score of ${finalScore.toLocaleString()} has been saved to the ${niceMode} leaderboard!</span>
+        `;
+        
+        // Remove any existing placement message
+        const existingNote = cta.querySelector('[data-placement-message]');
+        if (existingNote) {
+          existingNote.remove();
+        }
+        
+        note.setAttribute('data-placement-message', 'true');
+        cta.appendChild(note);
+        
+        console.log(`Score saved: ${finalScore} in ${currentDifficulty} ${currentTimeMode}`);
       }
     } catch (error) {
       console.error('Error showing leaderboard placement:', error);
@@ -924,14 +1043,15 @@
     });
   }
 
-  // Boot
-  resetRound();
-  setStartButtonLabel();
-  if (startBtn) startBtn.addEventListener('click', () => {
-    if (roundState === 'idle') startRound();
-    else if (roundState === 'running') { if (isRunning) pauseRound(); else resumeRound(); }
-    else if (roundState === 'finished') { resetRound(); startRound(); }
-  });
-  requestAnimationFrame(tick);
+    // Boot
+    resetRound();
+    setStartButtonLabel();
+    if (startBtn) startBtn.addEventListener('click', () => {
+      if (roundState === 'idle') startRound();
+      else if (roundState === 'running') { if (isRunning) pauseRound(); else resumeRound(); }
+      else if (roundState === 'finished') { resetRound(); startRound(); }
+    });
+    requestAnimationFrame(tick);
+  }
 })();
 

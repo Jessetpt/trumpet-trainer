@@ -3,23 +3,30 @@
 
 // Initialize Supabase client
 let supabase = null;
+let isInitialized = false;
 
 // Function to initialize Supabase with credentials
 function initSupabase(url, anonKey) {
   if (typeof window !== 'undefined' && window.supabase) {
     // If Supabase is already loaded globally
     supabase = window.supabase.createClient(url, anonKey);
+    isInitialized = true;
     console.log('✅ Supabase initialized successfully');
+    
+    // Also set the global variable for compatibility
+    window.supabaseClient = window.supabaseClient || {};
+    window.supabaseClient.supabase = supabase;
+    
+    return supabase;
   } else {
     console.error('Supabase not loaded. Please include the Supabase client script.');
     return null;
   }
-  return supabase;
 }
 
 // Function to get Supabase client
 function getSupabase() {
-  if (!supabase) {
+  if (!isInitialized || !supabase) {
     console.error('Supabase not initialized. Call initSupabase() first.');
     return null;
   }
@@ -29,5 +36,6 @@ function getSupabase() {
 // Export for use in other files
 window.supabaseClient = {
   init: initSupabase,
-  get: getSupabase
+  get: getSupabase,
+  isReady: () => isInitialized
 }; 

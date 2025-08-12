@@ -53,11 +53,14 @@
         throw new Error('Failed to initialize Supabase');
       }
 
+      console.log('🔧 Setting Supabase session...');
       // Set the session manually
       const { data, error } = await supabaseClient.auth.setSession({
         access_token: accessToken,
         refresh_token: refreshToken
       });
+
+      console.log('📨 Session response:', { data, error });
 
       if (error) {
         console.error('❌ Session error:', error);
@@ -68,7 +71,7 @@
         console.log('✅ Email confirmed successfully!');
         showSuccess();
       } else {
-        console.log('❌ Email not confirmed');
+        console.log('❌ Email not confirmed, user data:', data.user);
         throw new Error('Email confirmation failed');
       }
 
@@ -92,9 +95,13 @@
   }
 
   // Start confirmation process when page loads
+  console.log('🔍 Page loaded with params:', { type, accessToken: accessToken ? 'Present' : 'Missing' });
+  
   if (type === 'signup' && accessToken) {
+    console.log('✅ Starting confirmation process...');
     confirmEmail();
   } else {
+    console.log('❌ Invalid parameters:', { type, hasToken: !!accessToken });
     showError('Invalid confirmation link. Please check your email and try again.');
   }
 })(); 

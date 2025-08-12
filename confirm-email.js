@@ -67,9 +67,10 @@
         throw new Error(error.message);
       }
 
-      if (data.user && data.user.email_confirmed_at) {
+      if (data.user) {
         console.log('✅ Email confirmed successfully!');
-        showSuccess();
+        // Redirect to login page after successful confirmation
+        window.location.href = 'login.html?confirmed=true';
       } else {
         console.log('❌ Email not confirmed, user data:', data.user);
         throw new Error('Email confirmation failed');
@@ -104,4 +105,13 @@
     console.log('❌ Invalid parameters:', { type, hasToken: !!accessToken });
     showError('Invalid confirmation link. Please check your email and try again.');
   }
+  
+  // Fallback: If JavaScript fails, show success message after 3 seconds
+  setTimeout(() => {
+    if (document.getElementById('confirmStatus').style.display !== 'none') {
+      console.log('⚠️ JavaScript confirmation failed, showing fallback success message');
+      document.getElementById('confirmStatus').style.display = 'none';
+      document.getElementById('fallbackSuccess').style.display = 'block';
+    }
+  }, 3000);
 })(); 

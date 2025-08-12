@@ -196,6 +196,7 @@
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      console.log('🎯 Form submitted! Current mode:', { isLoginMode, isResetMode });
       const formData = new FormData(loginForm);
       const email = formData.get('email');
       const password = formData.get('password');
@@ -225,9 +226,12 @@
           setAuthTokenFromSession(data.session);
           window.location.href = 'index.html';
         } else {
+          console.log('🚀 Starting signup process...');
           const supabaseClient = await getSupabase();
+          console.log('🔧 Supabase client:', supabaseClient);
           if (!supabaseClient) return alert('Supabase failed to load. Refresh and try again.');
           
+          console.log('📧 Attempting signup with email:', email);
           // Create account via Supabase
           const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
             email,
@@ -240,15 +244,22 @@
             }
           });
           
-          if (signUpError) return alert(signUpError.message || 'Registration failed');
+          console.log('📨 Signup response:', { signUpData, signUpError });
+          
+          if (signUpError) {
+            console.error('❌ Signup error:', signUpError);
+            return alert(signUpError.message || 'Registration failed');
+          }
 
           // Check if email confirmation is required
           if (signUpData.user && !signUpData.user.email_confirmed_at) {
+            console.log('✅ Account created, email confirmation required');
             alert('Account created successfully! Please check your email and click the confirmation link before signing in.');
             // Switch to login mode so user can sign in after confirming email
             isLoginMode = true;
             toggleMode();
           } else {
+            console.log('✅ Account created, email already confirmed');
             // If email is already confirmed (rare), proceed to login
             alert('Account created successfully! You can now sign in.');
             isLoginMode = true;

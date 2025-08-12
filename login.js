@@ -245,6 +245,8 @@
           });
           
           console.log('📨 Signup response:', { signUpData, signUpError });
+          console.log('📨 Signup data details:', JSON.stringify(signUpData, null, 2));
+          console.log('📨 Signup error details:', JSON.stringify(signUpError, null, 2));
           
           if (signUpError) {
             console.error('❌ Signup error:', signUpError);

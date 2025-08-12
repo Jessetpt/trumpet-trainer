@@ -45,7 +45,7 @@
   const passwordLabel = document.querySelector('label[for="password"]');
   const forgotPasswordLink = document.getElementById('forgotPassword');
 
-  let isLoginMode = false;
+  let isLoginMode = true;
   let isResetMode = false;
 
   // Mobile detection
@@ -68,6 +68,9 @@
   if (isMobileDevice()) {
     showMobileMessage();
   }
+
+  // Initialize the page in sign-in mode
+  toggleMode();
 
   // Check for existing session when page loads
   (async () => {

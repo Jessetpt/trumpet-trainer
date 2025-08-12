@@ -211,7 +211,7 @@
           const supabaseClient = await getSupabase();
           if (!supabaseClient) return alert('Supabase failed to load. Refresh and try again.');
           const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-            redirectTo: 'https://trumpet-trainer.com/reset-password.html'
+            redirectTo: 'https://trumpet-trainer.com'
           });
           if (error) return alert(error.message || 'Password reset failed');
           alert('Password reset link sent to your email!');
@@ -241,7 +241,7 @@
                 name,
                 phone
               },
-              emailRedirectTo: 'https://trumpet-trainer.com/login.html'
+              emailRedirectTo: 'https://trumpet-trainer.com/confirm-email.html'
             }
           });
           

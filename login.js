@@ -70,7 +70,29 @@
   }
 
   // Initialize the page in sign-in mode
-  toggleMode();
+  if (isLoginMode) {
+    // Set the page to show sign-in form
+    formTitle.textContent = 'Welcome Back';
+    formSubtitle.textContent = 'Sign in to continue your trumpet training';
+    submitButton.textContent = 'Sign In & Play';
+    passwordLabel.textContent = 'Password';
+    passwordField.placeholder = 'Enter your password';
+    showLoginLink.textContent = 'Create new account';
+    
+    // Hide name and phone fields
+    const nameField = document.getElementById('name');
+    const phoneField = document.getElementById('phone');
+    if (nameField && phoneField) {
+      document.querySelector('label[for="name"]').parentElement.style.display = 'none';
+      document.querySelector('label[for="phone"]').parentElement.style.display = 'none';
+      nameField.removeAttribute('required');
+      phoneField.removeAttribute('required');
+    }
+    
+    // Show password and forgot password
+    document.querySelector('label[for="password"]').parentElement.style.display = 'grid';
+    forgotPasswordLink.style.display = 'block';
+  }
 
   // Check for existing session when page loads
   (async () => {

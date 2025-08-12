@@ -227,7 +227,8 @@
         } else {
           const supabaseClient = await getSupabase();
           if (!supabaseClient) return alert('Supabase failed to load. Refresh and try again.');
-          // Create account directly via Supabase
+          
+          // Create account via Supabase
           const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
             email,
             password,
@@ -241,11 +242,18 @@
           
           if (signUpError) return alert(signUpError.message || 'Registration failed');
 
-          // Immediately sign in to obtain access token
-          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-          if (error) return alert(error.message || 'Auto login failed');
-          setAuthTokenFromSession(data.session);
-          window.location.href = 'index.html';
+          // Check if email confirmation is required
+          if (signUpData.user && !signUpData.user.email_confirmed_at) {
+            alert('Account created successfully! Please check your email and click the confirmation link before signing in.');
+            // Switch to login mode so user can sign in after confirming email
+            isLoginMode = true;
+            toggleMode();
+          } else {
+            // If email is already confirmed (rare), proceed to login
+            alert('Account created successfully! You can now sign in.');
+            isLoginMode = true;
+            toggleMode();
+          }
         }
       } catch (err) {
         console.error(err);

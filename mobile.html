@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net https://ooiowourmbkmhrhuaybl.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://ooiowourmbkmhrhuaybl.supabase.co https://*.supabase.co;">
+    <title>Trumpet Trainer - Mobile</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎺</text></svg>">
+    <link rel="stylesheet" href="mobile-styles.css" />
+    <style>
+        :root {
+            /* Light theme colors */
+            --primary-orange: #ff6b35;
+            --primary-teal: #00b4d8;
+            --primary-blue: #0077b6;
+            --background: #ffffff;
+            --surface: #f8f9fa;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border: #dee2e6;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --card-bg: #ffffff;
+            --nav-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        .dark {
+            /* Dark theme colors */
+            --background: #0d1117;
+            --surface: #161b22;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --border: #30363d;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --card-bg: #21262d;
+            --nav-bg: rgba(13, 17, 23, 0.95);
+        }
+
+        /* Mobile-first styles */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        /* Game Container */
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 100vw;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Game Board */
+        .game-board {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: var(--surface);
+            border-radius: 0;
+        }
+
+        /* Note Display */
+        .note-display {
+            text-align: center;
+            margin: 1rem 0;
+            min-height: 8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #staffContainer {
+            width: 100%;
+            max-width: 300px;
+            height: 120px;
+        }
+
+        /* Mobile Controls */
+        .mobile-controls {
+            display: grid;
+            grid-template-areas: 
+                ". up ."
+                "left center right";
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 1.5rem;
+            padding: 2rem 3rem 2rem 1rem;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            justify-items: center;
+        }
+
+        .control-btn {
+            width: 100px;
+            height: 100px;
+            border: none;
+            border-radius: 50%;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, var(--primary-teal), var(--primary-orange));
+            box-shadow: 0 6px 12px var(--shadow);
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        .control-btn.up { grid-area: up; }
+        .control-btn.left { grid-area: left; }
+        .control-btn.center { grid-area: center; }
+        .control-btn.right { grid-area: right; }
+
+        /* Game Info */
+        .game-info {
+            padding: 1rem;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, var(--primary-teal), var(--primary-orange));
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 0.5rem;
+            box-shadow: 0 4px 8px var(--shadow);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .control-btn {
+                width: 90px;
+                height: 90px;
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Game Board -->
+        <div class="game-board">
+            <div class="note-display" id="noteDisplay">
+                <div id="staffContainer"></div>
+            </div>
+        </div>
+
+        <!-- Mobile Controls -->
+        <div class="mobile-controls">
+            <button class="control-btn up" id="btn0" data-valve="0">0</button>
+            <button class="control-btn left" id="btn1" data-valve="1">1</button>
+            <button class="control-btn center" id="btn2" data-valve="2">2</button>
+            <button class="control-btn right" id="btn3" data-valve="3">3</button>
+        </div>
+
+        <!-- Game Info -->
+        <div class="game-info">
+            <button class="start-btn" id="startBtn">Start Game</button>
+            <div class="stats">
+                <span id="score">Score: 0</span>
+                <span id="accuracy">Accuracy: 0%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
+    <script src="supabase.js"></script>
+    <script src="config.js"></script>
+    <script src="mobile-game.js"></script>
+    <script src="theme.js"></script>
+</body>
+</html> 

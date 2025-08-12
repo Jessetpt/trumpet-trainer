@@ -1,0 +1,74 @@
+/* Mobile-specific styles for Trumpet Trainer */
+
+/* Prevent text selection on buttons */
+.control-btn {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Touch feedback */
+.control-btn:active {
+    background: linear-gradient(135deg, var(--primary-orange), var(--primary-teal));
+}
+
+/* Game state indicators */
+.game-running .note-display {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Correct/incorrect feedback */
+.correct {
+    background: #28a745 !important;
+    transform: scale(1.1);
+}
+
+.incorrect {
+    background: #dc3545 !important;
+    transform: scale(0.9);
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Mobile-specific spacing */
+@media (max-height: 700px) {
+    .game-board {
+        padding: 0.5rem;
+    }
+    
+    .mobile-controls {
+        padding: 1rem;
+    }
+    
+    .game-info {
+        padding: 0.5rem;
+    }
+}
+
+/* Landscape warning (optional) */
+@media (orientation: landscape) and (max-height: 500px) {
+    .game-container::before {
+        content: "Please rotate to portrait mode for best experience";
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: var(--primary-orange);
+        color: white;
+        text-align: center;
+        padding: 0.5rem;
+        z-index: 1000;
+    }
+} 

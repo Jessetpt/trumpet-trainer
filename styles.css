@@ -983,6 +983,41 @@ body > .theme-toggle {
   padding: 0 20px;
 }
 
+/* Email confirmation page styles */
+.confirm-status {
+  text-align: center;
+  padding: 2rem;
+}
+
+.loading-spinner {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.success-message, .error-message {
+  text-align: center;
+  padding: 2rem;
+}
+
+.success-icon, .error-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.success-icon {
+  color: #4caf50;
+}
+
+.error-icon {
+  color: #f44336;
+}
+
 /* Mobile Message Styles */
 .mobile-message {
   position: fixed;

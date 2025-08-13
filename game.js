@@ -443,7 +443,7 @@
       cta.innerHTML = `
         <div style="
           text-align: center; 
-          margin: 20px auto 16px auto;
+          margin: 5px auto 16px auto;
           padding: 12px;
           background: linear-gradient(135deg, rgba(32, 156, 189, 0.1), rgba(246, 131, 24, 0.1));
           border-radius: 10px;

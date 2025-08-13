@@ -460,8 +460,8 @@ body {
   font-size: 14px;
   transition: all 0.3s ease;
   box-shadow: 
-    0 4px 12px rgba(32, 156, 189, 0.3),
-    0 2px 4px rgba(0,0,0,0.1);
+    0 8px 20px rgba(32, 156, 189, 0.3),
+    0 4px 8px rgba(0,0,0,0.1);
   text-decoration: none;
   display: inline-block;
   text-align: center;
@@ -469,16 +469,12 @@ body {
 
 .nav-button:hover {
   transform: translateY(-2px);
-  box-shadow: 
-    0 8px 20px rgba(32, 156, 189, 0.4),
-    0 4px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 12px 25px rgba(32, 156, 189, 0.4);
 }
 
 .nav-button:active {
   transform: translateY(0);
-  box-shadow: 
-    0 4px 12px rgba(32, 156, 189, 0.3),
-    0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 10px rgba(32, 156, 189, 0.3);
 }
 
 #brandMark { position: absolute; left: 12px; top: 10px; height: 26px; width: auto; }

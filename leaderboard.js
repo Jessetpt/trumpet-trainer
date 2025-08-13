@@ -70,29 +70,45 @@
     return false;
   }
 
-  // Wait for Supabase to be ready
-  function waitForSupabase(maxAttempts = 30) {
+  // Wait for Supabase to be ready with improved reliability
+  function waitForSupabase(maxAttempts = 50) {
     return new Promise((resolve, reject) => {
       let attempts = 0;
       
       const checkSupabase = () => {
         attempts++;
         
+        // Check multiple ways Supabase might be available
         if (typeof window.supabaseClient !== 'undefined' && 
             typeof window.supabaseClient.get === 'function' && 
             window.supabaseClient.isReady && 
             window.supabaseClient.isReady()) {
-          console.log('✅ Supabase client ready');
+          console.log('✅ Supabase client ready via supabaseClient');
+          resolve(true);
+          return;
+        }
+        
+        // Also check if Supabase is available globally
+        if (typeof window.supabase !== 'undefined' && 
+            typeof window.supabase.createClient === 'function') {
+          console.log('✅ Supabase available globally, initializing...');
+          // Initialize if not already done
+          if (!window.supabaseClient || !window.supabaseClient.isReady || !window.supabaseClient.isReady()) {
+            window.appConfig = window.appConfig || {};
+            if (window.appConfig.supabase) {
+              window.supabaseClient.init(window.appConfig.supabase.url, window.appConfig.supabase.anonKey);
+            }
+          }
           resolve(true);
           return;
         }
         
         if (attempts >= maxAttempts) {
-          reject(new Error('Supabase failed to initialize after multiple attempts'));
+          reject(new Error(`Supabase failed to initialize after ${maxAttempts} attempts. Check if Supabase script is loaded.`));
           return;
         }
         
-        setTimeout(checkSupabase, 300);
+        setTimeout(checkSupabase, 200);
       };
       
       checkSupabase();
@@ -156,9 +172,11 @@
         throw new Error('Database connection not available');
       }
 
-      // Fetch leaderboard data
+      // Fetch leaderboard data with fallback for column names
       console.log('📥 Fetching leaderboard data...');
-      const { data, error } = await supabase
+      
+      // Try the new column names first, fallback to old if needed
+      let { data, error } = await supabase
         .from('scores')
         .select(`
           score,
@@ -176,6 +194,42 @@
         .eq('time_mode', currentFilters.time_mode)
         .order('score', { ascending: false })
         .limit(100);
+
+      // If that fails, try with the old 'mode' column
+      if (error && error.message.includes('column') && error.message.includes('does not exist')) {
+        console.log('🔄 Trying fallback query with old column names...');
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('scores')
+          .select(`
+            score,
+            correct,
+            mistakes,
+            best_streak,
+            avg_response,
+            accuracy,
+            created_at,
+            user_id,
+            mode
+          `)
+          .eq('mode', currentFilters.difficulty)
+          .order('score', { ascending: false })
+          .limit(100);
+        
+        if (fallbackError) {
+          throw fallbackError;
+        }
+        
+        // Transform fallback data to match expected format
+        data = fallbackData.map(score => ({
+          ...score,
+          game_mode: score.mode || 'normal',
+          time_mode: '60s' // Default for old scores
+        }));
+        
+        console.log('✅ Using fallback query with old column names');
+      } else if (error) {
+        throw error;
+      }
 
       if (error) {
         console.error('❌ Database error:', error);

@@ -77,7 +77,7 @@
     submitButton.textContent = 'Sign In & Play';
     passwordLabel.textContent = 'Password';
     passwordField.placeholder = 'Enter your password';
-    showLoginLink.textContent = 'Create new account';
+    showLoginLink.textContent = 'Create New Account';
     
     // Hide name and phone fields
     const nameField = document.getElementById('name');
@@ -121,7 +121,7 @@
         submitButton.textContent = 'Sign In & Play';
         passwordLabel.textContent = 'Password';
         passwordField.placeholder = 'Enter your password';
-        showLoginLink.textContent = 'Create new account';
+        showLoginLink.textContent = 'Create New Account';
         
         // Hide name and phone fields and remove required attribute
         const nameField = document.getElementById('name');

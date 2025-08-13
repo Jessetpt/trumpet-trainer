@@ -639,24 +639,30 @@ body > .theme-toggle {
 
 .login-footer {
   border-top: 1px solid rgba(32, 156, 189, 0.15);
-  padding-top: 12px;
-  margin-top: 12px;
+  padding-top: 16px;
+  margin-top: 16px;
+  text-align: center;
 }
 
 .login-footer a {
   color: var(--accent);
   text-decoration: none;
   font-weight: 600;
+  font-size: 14px;
   transition: all 0.3s ease;
-  padding: 8px 16px;
+  padding: 10px 20px;
   border-radius: 8px;
   background: linear-gradient(135deg, rgba(32, 156, 189, 0.1) 0%, rgba(246, 131, 24, 0.1) 100%);
+  border: 1px solid rgba(32, 156, 189, 0.2);
+  display: inline-block;
+  min-width: 200px;
 }
 
 .login-footer a:hover {
   background: linear-gradient(135deg, rgba(32, 156, 189, 0.2) 0%, rgba(246, 131, 24, 0.2) 100%);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(32, 156, 189, 0.2);
+  border-color: rgba(32, 156, 189, 0.4);
 }
 
 .forgot-password {

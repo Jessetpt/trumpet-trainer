@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Connection Test - Trumpet Trainer</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: #f5f5f5;
+        }
+        .test-section { 
+            margin: 20px 0; 
+            padding: 20px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success { 
+            background: #d4edda; 
+            border-color: #c3e6cb; 
+            color: #155724;
+        }
+        .error { 
+            background: #f8d7da; 
+            border-color: #f5c6cb; 
+            color: #721c24;
+        }
+        .info { 
+            background: #d1ecf1; 
+            border-color: #bee5eb; 
+            color: #0c5460;
+        }
+        .warning {
+            background: #fff3cd;
+            border-color: #ffeaa7;
+            color: #856404;
+        }
+        button { 
+            padding: 12px 24px; 
+            margin: 8px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        pre { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 5px; 
+            overflow-x: auto; 
+            border: 1px solid #e9ecef;
+            font-size: 12px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-ok { background: #28a745; }
+        .status-error { background: #dc3545; }
+        .status-warning { background: #ffc107; }
+        .status-pending { background: #6c757d; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Database Connection Test</h1>
+    <p>This page tests your Supabase database connection and schema to diagnose leaderboard issues.</p>
+    
+    <div class="test-section info">
+        <h3>📋 Test Instructions</h3>
+        <p>Run these tests in order to diagnose your leaderboard issues:</p>
+        <ol>
+            <li><strong>Connection Test</strong> - Check if Supabase is accessible</li>
+            <li><strong>Schema Test</strong> - Check if your database has the right columns</li>
+            <li><strong>Data Test</strong> - Check if you have any scores in the database</li>
+            <li><strong>Full Test</strong> - Test the complete leaderboard functionality</li>
+        </ol>
+    </div>
+    
+    <div class="test-section">
+        <h3>1. 🔌 Database Connection Test</h3>
+        <div id="connection-status">
+            <span class="status-indicator status-pending"></span>
+            Waiting to test...
+        </div>
+        <button onclick="testConnection()" class="btn-primary">Test Connection</button>
+        <div id="connection-details"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>2. 🗄️ Database Schema Test</h3>
+        <div id="schema-status">
+            <span class="status-indicator status-pending"></span>
+            Waiting to test...
+        </div>
+        <button onclick="testSchema()" class="btn-primary">Test Schema</button>
+        <div id="schema-details"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>3. 📊 Data Availability Test</h3>
+        <div id="data-status">
+            <span class="status-indicator status-pending"></span>
+            Waiting to test...
+        </div>
+        <button onclick="testData()" class="btn-primary">Test Data</button>
+        <div id="data-details"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>4. 🏆 Full Leaderboard Test</h3>
+        <div id="leaderboard-status">
+            <span class="status-indicator status-pending"></span>
+            Waiting to test...
+        </div>
+        <button onclick="testLeaderboard()" class="btn-primary">Test Leaderboard</button>
+        <div id="leaderboard-details"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>5. 🚀 Quick Actions</h3>
+        <button onclick="goToLeaderboard()" class="btn-success">Go to Leaderboard</button>
+        <button onclick="goToGame()" class="btn-success">Go to Game</button>
+        <button onclick="goToLogin()" class="btn-primary">Go to Login</button>
+        <button onclick="runAllTests()" class="btn-warning">Run All Tests</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/dist/umd/supabase.js"></script>
+    <script src="supabase.js"></script>
+    <script src="config.js"></script>
+    
+    <script>
+        let supabaseClient = null;
+        
+        // Initialize Supabase
+        async function initSupabase() {
+            try {
+                if (window.supabaseClient && window.supabaseClient.init) {
+                    const result = window.supabaseClient.init(window.appConfig.supabase.url, window.appConfig.supabase.anonKey);
+                    if (result) {
+                        supabaseClient = result;
+                        return true;
+                    }
+                }
+                return false;
+            } catch (error) {
+                console.error('Supabase init error:', error);
+                return false;
+            }
+        }
+        
+        // Test 1: Database Connection
+        async function testConnection() {
+            const statusDiv = document.getElementById('connection-status');
+            const detailsDiv = document.getElementById('connection-details');
+            
+            statusDiv.innerHTML = '<span class="status-indicator status-pending"></span>Testing connection...';
+            detailsDiv.innerHTML = '';
+            
+            try {
+                // Initialize Supabase
+                const initSuccess = await initSupabase();
+                if (!initSuccess) {
+                    throw new Error('Failed to initialize Supabase client');
+                }
+                
+                // Test basic connection
+                const { data, error } = await supabaseClient
+                    .from('scores')
+                    .select('count', { count: 'exact', head: true })
+                    .limit(1);
+                
+                if (error) {
+                    throw error;
+                }
+                
+                statusDiv.innerHTML = '<span class="status-indicator status-ok"></span>✅ Connection successful!';
+                detailsDiv.innerHTML = `
+                    <div class="success">
+                        <p><strong>✅ Supabase connection established</strong></p>
+                        <p>Project URL: ${window.appConfig.supabase.url}</p>
+                        <p>Response time: Good</p>
+                    </div>
+                `;
+                
+            } catch (error) {
+                statusDiv.innerHTML = '<span class="status-indicator status-error"></span>❌ Connection failed';
+                detailsDiv.innerHTML = `
+                    <div class="error">
+                        <p><strong>❌ Connection failed:</strong></p>
+                        <p>${error.message}</p>
+                        <p><strong>Troubleshooting:</strong></p>
+                        <ul>
+                            <li>Check your Supabase URL and API key</li>
+                            <li>Verify your project is active</li>
+                            <li>Check if Row Level Security is blocking access</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+        
+        // Test 2: Database Schema
+        async function testSchema() {
+            const statusDiv = document.getElementById('schema-status');
+            const detailsDiv = document.getElementById('schema-details');
+            
+            statusDiv.innerHTML = '<span class="status-indicator status-pending"></span>Testing schema...';
+            detailsDiv.innerHTML = '';
+            
+            try {
+                if (!supabaseClient) {
+                    throw new Error('Supabase client not initialized. Run connection test first.');
+                }
+                
+                // Check what columns exist in the scores table
+                const { data: columns, error } = await supabaseClient
+                    .rpc('get_table_columns', { table_name: 'scores' })
+                    .select('*');
+                
+                if (error) {
+                    // Fallback: try to describe table structure
+                    const { data: sampleData, error: sampleError } = await supabaseClient
+                        .from('scores')
+                        .select('*')
+                        .limit(1);
+                    
+                    if (sampleError) {
+                        throw sampleError;
+                    }
+                    
+                    // Extract column names from sample data
+                    const columnNames = Object.keys(sampleData[0] || {});
+                    
+                    statusDiv.innerHTML = '<span class="status-indicator status-warning"></span>⚠️ Schema check (limited)';
+                    detailsDiv.innerHTML = `
+                        <div class="warning">
+                            <p><strong>⚠️ Schema check completed (limited info):</strong></p>
+                            <p>Found columns: ${columnNames.join(', ')}</p>
+                            <p><strong>Note:</strong> This is a limited check. Some columns may be missing.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Check for required columns
+                const requiredColumns = ['score', 'user_id', 'created_at'];
+                const optionalColumns = ['game_mode', 'time_mode', 'mode'];
+                
+                const missingRequired = requiredColumns.filter(col => !columns.includes(col));
+                const hasNewColumns = optionalColumns.some(col => columns.includes(col));
+                
+                if (missingRequired.length > 0) {
+                    statusDiv.innerHTML = '<span class="status-indicator status-error"></span>❌ Schema issues found';
+                    detailsDiv.innerHTML = `
+                        <div class="error">
+                            <p><strong>❌ Critical schema issues:</strong></p>
+                            <p>Missing required columns: ${missingRequired.join(', ')}</p>
+                            <p><strong>Action required:</strong> Fix your database schema</p>
+                        </div>
+                    `;
+                } else if (hasNewColumns) {
+                    statusDiv.innerHTML = '<span class="status-indicator status-ok"></span>✅ Schema looks good';
+                    detailsDiv.innerHTML = `
+                        <div class="success">
+                            <p><strong>✅ Schema check passed!</strong></p>
+                            <p>All required columns present</p>
+                            <p>New columns detected: ${optionalColumns.filter(col => columns.includes(col)).join(', ')}</p>
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = '<span class="status-indicator status-warning"></span>⚠️ Schema needs update';
+                    detailsDiv.innerHTML = `
+                        <div class="warning">
+                            <p><strong>⚠️ Schema needs update:</strong></p>
+                            <p>Basic columns present, but missing new columns for filtering</p>
+                            <p><strong>Action:</strong> Run the database update script</p>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                statusDiv.innerHTML = '<span class="status-indicator status-error"></span>❌ Schema test failed';
+                detailsDiv.innerHTML = `
+                    <div class="error">
+                        <p><strong>❌ Schema test failed:</strong></p>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Test 3: Data Availability
+        async function testData() {
+            const statusDiv = document.getElementById('data-status');
+            const detailsDiv = document.getElementById('data-details');
+            
+            statusDiv.innerHTML = '<span class="status-indicator status-pending"></span>Testing data...';
+            detailsDiv.innerHTML = '';
+            
+            try {
+                if (!supabaseClient) {
+                    throw new Error('Supabase client not initialized. Run connection test first.');
+                }
+                
+                // Count total scores
+                const { count, error: countError } = await supabaseClient
+                    .from('scores')
+                    .select('*', { count: 'exact', head: true });
+                
+                if (countError) {
+                    throw countError;
+                }
+                
+                // Get sample scores
+                const { data: sampleScores, error: sampleError } = await supabaseClient
+                    .from('scores')
+                    .select('*')
+                    .limit(5);
+                
+                if (sampleError) {
+                    throw sampleError;
+                }
+                
+                if (count === 0) {
+                    statusDiv.innerHTML = '<span class="status-indicator status-warning"></span>⚠️ No scores found';
+                    detailsDiv.innerHTML = `
+                        <div class="warning">
+                            <p><strong>⚠️ No scores in database:</strong></p>
+                            <p>Total scores: 0</p>
+                            <p><strong>Action:</strong> Play a game to create some scores first</p>
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = '<span class="status-indicator status-ok"></span>✅ Data found';
+                    detailsDiv.innerHTML = `
+                        <div class="success">
+                            <p><strong>✅ Data check passed!</strong></p>
+                            <p>Total scores: ${count}</p>
+                            <p><strong>Sample scores:</strong></p>
+                            <pre>${JSON.stringify(sampleScores, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                statusDiv.innerHTML = '<span class="status-indicator status-error"></span>❌ Data test failed';
+                detailsDiv.innerHTML = `
+                    <div class="error">
+                        <p><strong>❌ Data test failed:</strong></p>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Test 4: Full Leaderboard Test
+        async function testLeaderboard() {
+            const statusDiv = document.getElementById('leaderboard-status');
+            const detailsDiv = document.getElementById('leaderboard-details');
+            
+            statusDiv.innerHTML = '<span class="status-indicator status-pending"></span>Testing leaderboard...';
+            detailsDiv.innerHTML = '';
+            
+            try {
+                if (!supabaseClient) {
+                    throw new Error('Supabase client not initialized. Run connection test first.');
+                }
+                
+                // Try to fetch leaderboard data
+                const { data, error } = await supabaseClient
+                    .from('scores')
+                    .select('*')
+                    .order('score', { ascending: false })
+                    .limit(10);
+                
+                if (error) {
+                    throw error;
+                }
+                
+                if (data.length === 0) {
+                    statusDiv.innerHTML = '<span class="status-indicator status-warning"></span>⚠️ Leaderboard empty';
+                    detailsDiv.innerHTML = `
+                        <div class="warning">
+                            <p><strong>⚠️ Leaderboard is empty:</strong></p>
+                            <p>No scores to display</p>
+                            <p><strong>Action:</strong> Play a game to create scores</p>
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = '<span class="status-indicator status-ok"></span>✅ Leaderboard working';
+                    detailsDiv.innerHTML = `
+                        <div class="success">
+                            <p><strong>✅ Leaderboard test passed!</strong></p>
+                            <p>Successfully fetched ${data.length} scores</p>
+                            <p><strong>Top score:</strong> ${data[0].score}</p>
+                            <p><strong>Sample data:</strong></p>
+                            <pre>${JSON.stringify(data.slice(0, 3), null, 2)}</pre>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                statusDiv.innerHTML = '<span class="status-indicator status-error"></span>❌ Leaderboard test failed';
+                detailsDiv.innerHTML = `
+                    <div class="error">
+                        <p><strong>❌ Leaderboard test failed:</strong></p>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Run all tests
+        async function runAllTests() {
+            console.log('🚀 Running all tests...');
+            await testConnection();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await testSchema();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await testData();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await testLeaderboard();
+        }
+        
+        // Navigation functions
+        function goToLeaderboard() {
+            window.open('leaderboard.html', '_blank');
+        }
+        
+        function goToGame() {
+            window.open('index.html', '_blank');
+        }
+        
+        function goToLogin() {
+            window.open('login.html', '_blank');
+        }
+        
+        // Auto-initialize on page load
+        window.addEventListener('load', () => {
+            setTimeout(initSupabase, 1000);
+        });
+    </script>
+</body>
+</html> 

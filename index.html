@@ -36,30 +36,38 @@
         }
 
         /* Global Navigation Bar */
-        .global-nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: var(--nav-bg);
-            backdrop-filter: blur(10px);
+        .nav {
+            background: var(--surface);
             border-bottom: 1px solid var(--border);
-            z-index: 1000;
             padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.3s ease;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .nav-brand {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 1rem;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .nav-logo {
+            height: 40px;
+            width: auto;
+        }
+
+        .brand-text {
             font-size: 1.5rem;
             font-weight: 700;
-            color: var(--text-primary);
-            text-decoration: none;
+            background: linear-gradient(135deg, var(--accent), var(--bad));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .nav-brand img {
@@ -74,7 +82,7 @@
         }
 
         .profile-btn {
-            background: linear-gradient(135deg, var(--primary-teal), var(--primary-orange));
+            background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
             color: white;
             border: none;
             padding: 0.5rem 1rem;
@@ -88,19 +96,20 @@
         }
 
         .nav-btn {
-            background: linear-gradient(135deg, var(--primary-teal), var(--primary-orange));
+            background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
             color: white;
             border: none;
             padding: 0.5rem 1rem;
-            border-radius: 8px;
+            border-radius: 12px;
             text-decoration: none;
-            font-weight: 500;
-            transition: all 0.2s ease;
+            font-weight: 600;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 0.5rem;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 8px 20px rgba(32, 156, 189, 0.3), 0 4px 8px rgba(0,0,0,0.1);
         }
 
         .nav-btn::before {
@@ -119,22 +128,22 @@
         }
 
         .nav-btn:hover {
-            background: linear-gradient(135deg, var(--primary-orange) 0%, var(--primary-teal) 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
             color: white;
             border-color: transparent;
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+            box-shadow: 0 12px 25px rgba(32, 156, 189, 0.4);
         }
 
         .nav-btn.active {
-            background: linear-gradient(135deg, var(--primary-orange) 0%, var(--primary-teal) 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
             color: white;
             border-color: transparent;
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+            box-shadow: 0 4px 10px rgba(32, 156, 189, 0.3);
         }
 
         .free-class-btn {
-            background: linear-gradient(135deg, var(--primary-orange), var(--primary-teal));
+            background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
             color: white;
             border: none;
             padding: 0.5rem 1rem;
@@ -149,7 +158,7 @@
 
         .free-class-btn:hover {
             transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(246, 131, 24, 0.3);
+            box-shadow: 0 4px 12px rgba(32, 156, 189, 0.3);
         }
 
         .theme-toggle {
@@ -185,21 +194,21 @@
         }
 
         .theme-toggle:hover {
-            background: linear-gradient(135deg, var(--primary-teal) 0%, var(--primary-orange) 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
             color: white;
             border-color: transparent;
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 180, 216, 0.3);
+            box-shadow: 0 8px 20px rgba(32, 156, 189, 0.3);
         }
 
         /* Adjust game board positioning for navigation */
         #app {
-            margin-top: 3rem;
+            margin-top: 1rem;
         }
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            .global-nav {
+            .nav {
                 padding: 1rem;
             }
 
@@ -215,7 +224,7 @@
         /* Mobile-First Mobile Styles */
         @media (max-width: 768px) {
             /* Mobile Navigation */
-            .global-nav {
+            .nav {
                 padding: 0.75rem 1rem;
                 flex-direction: column;
                 gap: 0.75rem;
@@ -474,10 +483,10 @@
   </head>
   <body>
     <!-- Global Navigation Bar -->
-    <nav class="global-nav">
+    <nav class="nav">
         <a href="index.html" class="nav-brand">
-            <img id="nav-logo" src="Untitled design.svg" alt="Logo" onerror="this.style.display='none'" />
-            Trumpet Trainer
+            <img id="nav-logo" src="Untitled design.svg" alt="Logo" onerror="this.style.display='none'" class="nav-logo">
+            <span class="brand-text">Trumpet Trainer</span>
         </a>
         <div class="nav-controls">
             <a href="index.html" class="nav-btn active">🏠 Game</a>

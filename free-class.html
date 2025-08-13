@@ -79,7 +79,7 @@
         }
 
         .nav-btn {
-            background: linear-gradient(135deg, var(--primary-teal), var(--primary-orange));
+            background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
             color: white;
             border: none;
             padding: 0.5rem 1rem;
@@ -97,11 +97,11 @@
         }
 
         .nav-btn.active {
-            background: linear-gradient(135deg, var(--primary-orange), var(--primary-teal));
+            background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
         }
 
         .profile-btn {
-            background: linear-gradient(135deg, var(--primary-teal), var(--primary-orange));
+            background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
             color: white;
             border: none;
             padding: 0.5rem 1rem;
@@ -115,7 +115,7 @@
         }
 
         .free-class-btn {
-            background: linear-gradient(135deg, var(--primary-orange), var(--primary-teal));
+            background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
             color: white;
             border: none;
             padding: 0.5rem 1rem;
@@ -130,7 +130,7 @@
 
         .free-class-btn:hover {
             transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(246, 131, 24, 0.3);
+            box-shadow: 0 4px 12px rgba(32, 156, 189, 0.3);
         }
 
         .theme-toggle {
@@ -144,7 +144,11 @@
         }
 
         .theme-toggle:hover {
-            background: var(--border);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
+            color: white;
+            border-color: transparent;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(32, 156, 189, 0.3);
         }
 
         .main-content {

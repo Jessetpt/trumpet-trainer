@@ -12,6 +12,8 @@
             --primary-orange: #ff6b35;
             --primary-teal: #00b4d8;
             --primary-blue: #0077b6;
+            --accent: #209cbd;
+            --bad: #f68318;
             --background: #ffffff;
             --surface: #f8f9fa;
             --text-primary: #212529;
@@ -49,30 +51,38 @@
         }
 
         /* Global Navigation Bar */
-        .global-nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: var(--nav-bg);
-            backdrop-filter: blur(10px);
+        .nav {
+            background: var(--surface);
             border-bottom: 1px solid var(--border);
-            z-index: 1000;
             padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.3s ease;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .nav-brand {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 1rem;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .nav-logo {
+            height: 40px;
+            width: auto;
+        }
+
+        .brand-text {
             font-size: 1.5rem;
             font-weight: 700;
-            color: var(--text-primary);
-            text-decoration: none;
+            background: linear-gradient(135deg, var(--accent), var(--bad));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .nav-brand img {
@@ -87,7 +97,7 @@
         }
 
         .profile-btn {
-            background: linear-gradient(135deg, var(--primary-teal), var(--primary-orange));
+            background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
             color: white;
             border: none;
             padding: 0.5rem 1rem;
@@ -103,7 +113,7 @@
 
 
         .free-class-btn {
-            background: linear-gradient(135deg, var(--primary-orange), var(--primary-teal));
+            background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
             color: white;
             border: none;
             padding: 0.5rem 1rem;
@@ -118,11 +128,11 @@
 
         .free-class-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(246, 131, 24, 0.3);
+            box-shadow: 0 8px 20px rgba(32, 156, 189, 0.3);
         }
 
         .nav-btn {
-            background: linear-gradient(135deg, var(--primary-teal), var(--primary-orange));
+            background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
             color: white;
             border: none;
             padding: 0.5rem 1rem;
@@ -153,18 +163,18 @@
         }
 
         .nav-btn:hover {
-            background: linear-gradient(135deg, var(--primary-orange) 0%, var(--primary-teal) 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
             color: white;
             border-color: transparent;
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+            box-shadow: 0 8px 20px rgba(32, 156, 189, 0.3);
         }
 
         .nav-btn.active {
-            background: linear-gradient(135deg, var(--primary-orange) 0%, var(--primary-teal) 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
             color: white;
             border-color: transparent;
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+            box-shadow: 0 4px 12px rgba(32, 156, 189, 0.3);
         }
 
         .theme-toggle {
@@ -200,16 +210,16 @@
         }
 
         .theme-toggle:hover {
-            background: linear-gradient(135deg, var(--primary-teal) 0%, var(--primary-orange) 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
             color: white;
             border-color: transparent;
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 180, 216, 0.3);
+            box-shadow: 0 8px 20px rgba(32, 156, 189, 0.3);
         }
 
         /* Main Content */
         .main-content {
-            margin-top: 4rem;
+            margin-top: 1rem;
             padding: 1rem;
             max-width: 1200px;
             margin-left: auto;
@@ -224,7 +234,7 @@
         .page-title {
             font-size: 2.5rem;
             font-weight: 800;
-            color: var(--primary-orange);
+            color: var(--accent);
             margin-bottom: 0.5rem;
             text-shadow: 2px 2px 4px var(--shadow);
             position: relative;
@@ -239,7 +249,7 @@
             transform: translateX(-50%);
             width: 60px;
             height: 3px;
-            background: linear-gradient(90deg, var(--primary-orange), var(--primary-teal));
+            background: linear-gradient(90deg, var(--accent), var(--bad));
             border-radius: 2px;
         }
 
@@ -274,7 +284,7 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(90deg, var(--primary-orange), var(--primary-teal));
+            background: linear-gradient(90deg, var(--accent), var(--bad));
         }
 
         .filters-title {
@@ -806,10 +816,10 @@
 </head>
 <body>
     <!-- Global Navigation Bar -->
-    <nav class="global-nav">
+    <nav class="nav">
         <a href="index.html" class="nav-brand">
-            <img id="nav-logo" src="Untitled design.svg" alt="Logo" />
-            Trumpet Trainer
+            <img id="nav-logo" src="Untitled design.svg" alt="Logo" class="nav-logo">
+            <span class="brand-text">Trumpet Trainer</span>
         </a>
         <div class="nav-controls">
             <a href="index.html" class="nav-btn">🏠 Game</a>

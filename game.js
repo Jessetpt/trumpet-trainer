@@ -4,23 +4,8 @@
 */
 
 (() => {
-  // Simple check for player info (from welcome page lead capture)
-  function checkPlayer() {
-    const playerInfo = localStorage.getItem('playerInfo');
-    if (!playerInfo) {
-      // No player info, redirect to welcome page
-      console.log('🔐 No player info found, redirecting to welcome page');
-      window.location.href = 'welcome.html';
-      return false;
-    }
-    console.log('✅ Player found, starting game');
-    return true;
-  }
-
-  // Initialize game if player exists
-  if (checkPlayer()) {
-    initializeGame();
-  }
+  // Just start the game
+  initializeGame();
 
   function initializeGame() {
     const overlay = document.getElementById('overlay');

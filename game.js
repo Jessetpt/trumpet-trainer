@@ -4,55 +4,23 @@
 */
 
 (() => {
-  // Wait for authentication to be ready before checking login status
-  async function waitForAuth() {
-    // Check if user is logged in
-    const token = localStorage.getItem('authToken');
-    const currentUser = localStorage.getItem('currentUser');
-    
-    if (!token && !currentUser) {
-      // Try to restore session from Supabase
-      if (window.supabaseClient && window.supabaseClient.get) {
-        const supabase = window.supabaseClient.get();
-        if (supabase) {
-          try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session && session.user) {
-              // Session exists, restore user data
-              const userData = {
-                id: session.user.id,
-                email: session.user.email,
-                name: session.user.user_metadata?.name || session.user.email,
-                phone: session.user.user_metadata?.phone || ''
-              };
-              localStorage.setItem('currentUser', JSON.stringify(userData));
-              localStorage.setItem('authToken', session.access_token);
-              console.log('✅ Session restored in game.js:', userData);
-              return; // User is now logged in
-            }
-          } catch (error) {
-            console.error('Error restoring session:', error);
-          }
-        }
-      }
-      
-      // No valid session, redirect to login
-      console.log('🔐 No valid session found, redirecting to login');
-      window.location.href = 'login.html';
-      return;
+  // Simple check for player info (from welcome page lead capture)
+  function checkPlayer() {
+    const playerInfo = localStorage.getItem('playerInfo');
+    if (!playerInfo) {
+      // No player info, redirect to welcome page
+      console.log('🔐 No player info found, redirecting to welcome page');
+      window.location.href = 'welcome.html';
+      return false;
     }
-    
-    console.log('✅ User already authenticated, proceeding with game');
+    console.log('✅ Player found, starting game');
+    return true;
   }
-  
-  // Initialize authentication check and game
-  waitForAuth().then(() => {
-    // Only initialize game if authentication was successful
-    if (localStorage.getItem('authToken')) {
-      console.log('🎮 Initializing game after successful authentication');
-      initializeGame();
-    }
-  });
+
+  // Initialize game if player exists
+  if (checkPlayer()) {
+    initializeGame();
+  }
 
   function initializeGame() {
     const overlay = document.getElementById('overlay');
@@ -520,21 +488,9 @@
     setStartButtonLabel();
   }
   
-  // Wait for Supabase client to be ready
+  // Supabase disabled - return null immediately
   async function waitForSupabase() {
-    let attempts = 0;
-    const maxAttempts = 50; // 5 seconds max wait
-    
-    while (!window.supabaseClient || !window.supabaseClient.isReady()) {
-      if (attempts >= maxAttempts) {
-        console.error('Supabase client not ready after 5 seconds');
-        return null;
-      }
-      await new Promise(resolve => setTimeout(resolve, 100));
-      attempts++;
-    }
-    
-    return window.supabaseClient.get();
+    return null;
   }
 
   async function saveScoreToBackend(score, correct, mistakes, bestStreak, avgResponse, accuracy) {
@@ -1012,9 +968,8 @@
   // Navigation functionality
   if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('currentUser');
-      localStorage.removeItem('authToken');
-      window.location.href = 'login.html';
+      localStorage.removeItem('playerInfo');
+      window.location.href = 'welcome.html';
     });
   }
 

@@ -625,20 +625,62 @@ body {
 .card.results-mode .chips,
 .card.results-mode .difficulty-selector,
 .card.results-mode .start-section {
-  display: none;
+  display: none !important;
 }
 
 .card.results-mode #subtitle {
-  margin-bottom: 12px;
+  display: none;
 }
 
 .card.results-mode #cta {
   margin-top: 10px;
 }
 
+.card.results-mode .brand-logo,
+.card.results-mode .eyebrow {
+  display: none;
+}
+
+.card.results-mode {
+  height: min(420px, calc(100vh - var(--nav-height) - 12px));
+  max-height: min(420px, calc(100vh - var(--nav-height) - 12px));
+  padding-top: 18px;
+}
+
+.card.results-mode #title {
+  margin-bottom: 10px;
+  font-size: clamp(1.7rem, 3.6vw, 2.1rem);
+}
+
+.card.results-mode .results-panel {
+  gap: 8px;
+}
+
+.card.results-mode .results-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.card.results-mode .result-item {
+  padding: 6px 6px;
+}
+
+.card.results-mode .result-value {
+  font-size: 15px;
+}
+
+.card.results-mode .results-panel .cta {
+  min-width: 155px;
+  padding: 10px 16px;
+}
+
 @media (max-width: 860px) {
   .card {
     min-height: 0;
+  }
+
+  .card.results-mode .results-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 

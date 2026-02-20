@@ -214,20 +214,30 @@ body {
 }
 
 .learning-hint {
-  min-height: 28px;
-  margin: -2px auto 2px auto;
-  padding: 5px 12px;
+  position: absolute;
+  top: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  min-height: 42px;
+  margin: 0;
+  padding: 8px 18px;
   border-radius: 999px;
   border: 1px solid rgba(32, 156, 189, 0.24);
   background: linear-gradient(120deg, rgba(32, 156, 189, 0.1), rgba(246, 131, 24, 0.08));
   color: var(--ink);
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 800;
   line-height: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
+  white-space: nowrap;
+  pointer-events: none;
+  max-width: calc(100% - 150px);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .learning-hint .note-token { color: var(--accent); }
@@ -241,6 +251,34 @@ body {
 :root.dark .learning-hint {
   border-color: rgba(32, 156, 189, 0.36);
   background: linear-gradient(120deg, rgba(32, 156, 189, 0.2), rgba(255, 255, 255, 0.06));
+}
+
+.board-reset {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 6;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 13px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.2px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
+  box-shadow: 0 8px 18px rgba(32, 156, 189, 0.28), 0 3px 8px rgba(0, 0, 0, 0.14);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.board-reset:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(32, 156, 189, 0.34), 0 5px 10px rgba(0, 0, 0, 0.16);
+  filter: saturate(1.08);
+}
+
+.board-reset:active {
+  transform: translateY(0);
 }
 
 #hud {
@@ -342,9 +380,20 @@ body {
   }
 
   .learning-hint {
-    font-size: 13px;
-    padding: 5px 10px;
-    min-height: 26px;
+    top: 20px;
+    max-width: calc(100% - 130px);
+    min-height: 34px;
+    padding: 7px 12px;
+    font-size: 16px;
+    gap: 8px;
+  }
+
+  .board-reset {
+    top: 10px;
+    right: 10px;
+    padding: 7px 10px;
+    font-size: 12px;
+    border-radius: 9px;
   }
 }
 

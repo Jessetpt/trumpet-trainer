@@ -14,6 +14,7 @@
     const boardEl = document.getElementById('board');
     const statsEl = document.getElementById('stats');
     const valvesEl = document.getElementById('valves');
+    const quickResetBtn = document.getElementById('quickResetBtn');
     const themeToggle = document.getElementById('themeToggle');
     const overlayThemeToggle = document.getElementById('overlayThemeToggle');
     const startBtn = document.getElementById('startBtn');
@@ -58,6 +59,10 @@
     }
     else if (roundState === 'running') startBtn.textContent = isRunning ? 'Pause' : 'Resume';
     else startBtn.textContent = 'Play Again';
+    if (quickResetBtn) {
+      const showQuickReset = roundState === 'running';
+      quickResetBtn.classList.toggle('hidden', !showQuickReset);
+    }
   }
 
   // Game constants
@@ -852,6 +857,14 @@
     learningModeSelect.addEventListener('change', (e) => {
       learningMode = e.target.value;
       draw();
+    });
+  }
+
+  if (quickResetBtn) {
+    quickResetBtn.addEventListener('click', () => {
+      if (roundState !== 'running') return;
+      resetRound();
+      startRound();
     });
   }
 

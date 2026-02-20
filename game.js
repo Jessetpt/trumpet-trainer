@@ -864,7 +864,6 @@
     quickResetBtn.addEventListener('click', () => {
       if (roundState !== 'running') return;
       resetRound();
-      startRound();
     });
   }
 

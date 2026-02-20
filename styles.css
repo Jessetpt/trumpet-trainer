@@ -421,9 +421,12 @@ body {
     0 26px 42px rgba(16, 24, 40, 0.12),
     0 8px 18px rgba(32, 156, 189, 0.14);
   position: relative;
-  overflow: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 560px;
   max-height: min(88vh, calc(100vh - var(--nav-height) - 16px));
-  overscroll-behavior: contain;
 }
 
 .card::before {
@@ -630,6 +633,12 @@ body {
 
 .card.results-mode #cta {
   margin-top: 10px;
+}
+
+@media (max-width: 860px) {
+  .card {
+    min-height: 0;
+  }
 }
 
 .hidden { display: none !important; }

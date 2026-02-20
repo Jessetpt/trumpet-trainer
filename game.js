@@ -18,8 +18,13 @@
     const overlayThemeToggle = document.getElementById('overlayThemeToggle');
     const startBtn = document.getElementById('startBtn');
     const timeModeSelect = document.getElementById('timeMode');
+    const learningModeSelect = document.getElementById('learningMode');
+    const learningHintEl = document.getElementById('learningHint');
     const navEl = document.querySelector('.nav');
+    const overlayCard = document.querySelector('#overlay .card');
     let selectedTimeMode = (timeModeSelect && timeModeSelect.value) || '60s';
+    let learningMode = (learningModeSelect && learningModeSelect.value) || 'off';
+    const ENDLESS_MAX_MISTAKES = 5;
 
   function secondsForTimeMode(tm) {
     if (tm === '30s') return 30;
@@ -28,13 +33,29 @@
     return 60;
   }
 
+  function isEndlessMode(tm = selectedTimeMode) {
+    return tm === 'endless';
+  }
+
+  function formatDuration(ms) {
+    const safeMs = Math.max(0, Math.round(ms || 0));
+    const totalSeconds = Math.floor(safeMs / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+
   // Round state machine
   // idle → running → finished
   let roundState = 'idle';
 
   function setStartButtonLabel() {
     if (!startBtn) return;
-    if (roundState === 'idle') startBtn.textContent = `Start ${secondsForTimeMode(selectedTimeMode)}s Round`;
+    if (roundState === 'idle') {
+      startBtn.textContent = isEndlessMode()
+        ? `Start Endless (${ENDLESS_MAX_MISTAKES} Lives)`
+        : `Start ${secondsForTimeMode(selectedTimeMode)}s Round`;
+    }
     else if (roundState === 'running') startBtn.textContent = isRunning ? 'Pause' : 'Resume';
     else startBtn.textContent = 'Play Again';
   }
@@ -330,6 +351,7 @@
   // Game state
   let isRunning = false;
   let remainingMs = ROUND_SECONDS * 1000;
+  let elapsedMs = 0;
   let score = 0;
   let streak = 0;
   let bestStreak = 0;
@@ -354,7 +376,8 @@
   function resetRound() {
     isRunning = false;
     ROUND_SECONDS = secondsForTimeMode(selectedTimeMode);
-    remainingMs = ROUND_SECONDS * 1000;
+    remainingMs = isEndlessMode() ? 0 : ROUND_SECONDS * 1000;
+    elapsedMs = 0;
     score = 0;
     streak = 0;
     bestStreak = 0;
@@ -366,7 +389,12 @@
     totalResponseMs = 0;
     roundState = 'idle';
     if (overlay) overlay.classList.remove('hidden');
+    if (overlayCard) overlayCard.classList.remove('results-mode');
     if (cta) cta.textContent = 'Press Space to start';
+    if (learningHintEl) {
+      learningHintEl.textContent = '';
+      learningHintEl.classList.add('hidden');
+    }
     if (startBtn) { startBtn.style.display = ''; }
     setStartButtonLabel();
     refreshBestForCurrentSelection();
@@ -400,72 +428,55 @@
     isRunning = false;
     roundState = 'finished';
     if (overlay) overlay.classList.remove('hidden');
+    if (overlayCard) overlayCard.classList.add('results-mode');
     if (startBtn) { startBtn.style.display = 'none'; }
     
 
-    
     const accuracy = numCorrect + numMistakes > 0 ? Math.round(100 * numCorrect / (numCorrect + numMistakes)) : 0;
+    const summaryTimeLabel = isEndlessMode() ? 'Survival' : 'Round Time';
+    const summaryTimeValue = isEndlessMode() ? formatDuration(elapsedMs) : `${ROUND_SECONDS}s`;
+    const livesRemaining = Math.max(0, ENDLESS_MAX_MISTAKES - numMistakes);
     
     if (cta) {
       cta.innerHTML = `
-        <div style="
-          text-align: center; 
-          margin: 5px auto 16px auto;
-          padding: 12px;
-          background: linear-gradient(135deg, rgba(32, 156, 189, 0.1), rgba(246, 131, 24, 0.1));
-          border-radius: 10px;
-          border: 1px solid rgba(32, 156, 189, 0.2);
-          backdrop-filter: blur(10px);
-          max-width: 360px;
-        ">
-          <div style="
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px;
-            margin: 0 auto;
-          ">
-            <div class="stat-blue" style="text-align: center; padding: 6px; background: linear-gradient(135deg, rgba(32, 156, 189, 0.15), rgba(32, 156, 189, 0.05)); border-radius: 5px; border: 1px solid rgba(32, 156, 189, 0.3); font-size: 0.85em;">
-              <strong>Final Score:</strong><br>
-              <span style="font-size: 1em; color: var(--primary-teal);">${score.toLocaleString()}</span>
+        <div class="results-panel">
+          <div class="results-grid">
+            <div class="result-item">
+              <span class="result-label">Final Score</span>
+              <strong class="result-value teal">${score.toLocaleString()}</strong>
             </div>
-            <div class="stat-orange" style="text-align: center; padding: 6px; background: linear-gradient(135deg, rgba(246, 131, 24, 0.15), rgba(246, 131, 24, 0.05)); border-radius: 5px; border: 1px solid rgba(246, 131, 24, 0.3); font-size: 0.85em;">
-              <strong>Best Score:</strong><br>
-              <span style="font-size: 1em; color: var(--primary-orange);">${bestScore.toLocaleString()}</span>
+            <div class="result-item">
+              <span class="result-label">Best Score</span>
+              <strong class="result-value orange">${bestScore.toLocaleString()}</strong>
             </div>
-            <div class="stat-blue" style="text-align: center; padding: 6px; background: linear-gradient(135deg, rgba(32, 156, 189, 0.15), rgba(32, 156, 189, 0.05)); border-radius: 5px; border: 1px solid rgba(32, 156, 189, 0.3); font-size: 0.85em;">
-              <strong>Correct:</strong><br>
-              <span style="font-size: 1em; color: var(--primary-teal);">${numCorrect.toLocaleString()}</span>
+            <div class="result-item">
+              <span class="result-label">Correct</span>
+              <strong class="result-value teal">${numCorrect.toLocaleString()}</strong>
             </div>
-            <div class="stat-orange" style="text-align: center; padding: 6px; background: linear-gradient(135deg, rgba(246, 131, 24, 0.15), rgba(246, 131, 24, 0.05)); border-radius: 5px; border: 1px solid rgba(246, 131, 24, 0.3); font-size: 0.85em;">
-              <strong>Mistakes:</strong><br>
-              <span style="font-size: 1em; color: var(--primary-orange);">${numMistakes.toLocaleString()}</span>
+            <div class="result-item">
+              <span class="result-label">Mistakes</span>
+              <strong class="result-value orange">${numMistakes.toLocaleString()}</strong>
             </div>
-            <div class="stat-blue" style="text-align: center; padding: 6px; background: linear-gradient(135deg, rgba(32, 156, 189, 0.15), rgba(32, 156, 189, 0.05)); border-radius: 5px; border: 1px solid rgba(32, 156, 189, 0.3); font-size: 0.85em;">
-              <strong>Best Streak:</strong><br>
-              <span style="font-size: 1em; color: var(--primary-teal);">${bestStreak.toLocaleString()}</span>
+            <div class="result-item">
+              <span class="result-label">Best Streak</span>
+              <strong class="result-value teal">${bestStreak.toLocaleString()}</strong>
             </div>
-            <div class="stat-orange" style="text-align: center; padding: 6px; background: linear-gradient(135deg, rgba(246, 131, 24, 0.15), rgba(246, 131, 24, 0.05)); border-radius: 5px; border: 1px solid rgba(246, 131, 24, 0.3); font-size: 0.85em;">
-              <strong>Accuracy:</strong><br>
-              <span style="font-size: 1em; color: var(--primary-orange);">${accuracy}%</span>
+            <div class="result-item">
+              <span class="result-label">Accuracy</span>
+              <strong class="result-value orange">${accuracy}%</strong>
             </div>
+            <div class="result-item">
+              <span class="result-label">${summaryTimeLabel}</span>
+              <strong class="result-value teal">${summaryTimeValue}</strong>
+            </div>
+            ${isEndlessMode() ? `
+              <div class="result-item">
+                <span class="result-label">Lives Left</span>
+                <strong class="result-value orange">${livesRemaining}/${ENDLESS_MAX_MISTAKES}</strong>
+              </div>
+            ` : ''}
           </div>
-        </div>
-        <div style="
-          display: flex; 
-          justify-content: center; 
-          margin-top: 12px;
-        ">
-          <button id="playAgainBtn" class="cta btn-orange" style="
-            background: linear-gradient(135deg, var(--primary-orange), var(--primary-teal));
-            border: none;
-            padding: 12px 24px;
-            font-size: 1em;
-            font-weight: 600;
-            border-radius: 10px;
-            box-shadow: 0 6px 20px rgba(246, 131, 24, 0.3);
-            transition: all 0.3s ease;
-            min-width: 140px;
-          ">Play Again</button>
+          <button id="playAgainBtn" class="cta">Play Again</button>
         </div>
       `;
       const playAgain = document.getElementById('playAgainBtn');
@@ -479,6 +490,40 @@
       localStorage.setItem('bestScore', String(bestScore));
     }
     setStartButtonLabel();
+  }
+
+  function formatNoteLabel(name) {
+    return name
+      .replace(/##/g, '♯♯')
+      .replace(/bb/g, '♭♭')
+      .replace(/#/g, '♯')
+      .replace(/b/g, '♭');
+  }
+
+  function formatFingeringLabel(valves) {
+    if (!Array.isArray(valves) || valves.length === 0) return 'Open (0)';
+    return `Valves ${valves.join('+')}`;
+  }
+
+  function renderLearningHint(noteObj) {
+    if (!learningHintEl) return;
+    if (learningMode === 'off' || !noteObj || !isRunning) {
+      learningHintEl.textContent = '';
+      learningHintEl.classList.add('hidden');
+      return;
+    }
+
+    const noteLabel = formatNoteLabel(noteObj.name);
+    if (learningMode === 'name+fingering') {
+      learningHintEl.innerHTML = `
+        <span class="note-token">${noteLabel}</span>
+        <span class="divider">•</span>
+        <span class="finger-token">${formatFingeringLabel(noteObj.valves)}</span>
+      `;
+    } else {
+      learningHintEl.innerHTML = `<span class="note-token">${noteLabel}</span>`;
+    }
+    learningHintEl.classList.remove('hidden');
   }
   
   function renderBoard() {
@@ -500,7 +545,10 @@
     }
     stave.setContext(context).draw();
 
-    if (!currentNote) return;
+    if (!currentNote) {
+      renderLearningHint(null);
+      return;
+    }
     const note = currentNote.name;
     const vfNote = new VF.StaveNote({ keys: [toVfKey(note)], duration: 'q' });
     const acc = toAccidental(note);
@@ -515,16 +563,27 @@
       VF.Formatter.FormatAndDraw(context, stave, [vfNote]);
     }
 
+    renderLearningHint(currentNote);
+
     // HUD text
     const secs = Math.max(0, Math.ceil(remainingMs / 1000));
+    const livesLeft = Math.max(0, ENDLESS_MAX_MISTAKES - numMistakes);
     if (statsEl) {
       statsEl.innerHTML = '';
-      const rows = [
-        `Time ${secs}s`,
-        `Score ${score.toLocaleString()}`,
-        `Streak ${streak.toLocaleString()}`,
-        `Best ${bestScore.toLocaleString()}`,
-      ];
+      const rows = isEndlessMode()
+        ? [
+            `Time ${formatDuration(elapsedMs)}`,
+            `Lives ${livesLeft}/${ENDLESS_MAX_MISTAKES}`,
+            `Score ${score.toLocaleString()}`,
+            `Streak ${streak.toLocaleString()}`,
+            `Best ${bestScore.toLocaleString()}`,
+          ]
+        : [
+            `Time ${secs}s`,
+            `Score ${score.toLocaleString()}`,
+            `Streak ${streak.toLocaleString()}`,
+            `Best ${bestScore.toLocaleString()}`,
+          ];
       rows.forEach(t => {
         const r = document.createElement('div'); r.className = 'stat-row'; r.textContent = t; statsEl.appendChild(r);
       });
@@ -614,6 +673,10 @@
       score = Math.max(0, score - 150);
       flashError();
       playErrorSound();
+      if (isEndlessMode() && numMistakes >= ENDLESS_MAX_MISTAKES) {
+        finishRound();
+        draw();
+      }
     }
   }
 
@@ -625,6 +688,10 @@
 
   function update(deltaMs) {
     if (!isRunning) return;
+    if (isEndlessMode()) {
+      elapsedMs += deltaMs;
+      return;
+    }
     remainingMs -= deltaMs;
     if (remainingMs <= 0) {
       remainingMs = 0;
@@ -773,9 +840,18 @@
       setStartButtonLabel();
       if (roundState === 'idle') {
         ROUND_SECONDS = secondsForTimeMode(selectedTimeMode);
-        remainingMs = ROUND_SECONDS * 1000;
+        remainingMs = isEndlessMode() ? 0 : ROUND_SECONDS * 1000;
+        elapsedMs = 0;
       }
       refreshBestForCurrentSelection();
+    });
+  }
+
+  if (learningModeSelect) {
+    learningMode = learningModeSelect.value;
+    learningModeSelect.addEventListener('change', (e) => {
+      learningMode = e.target.value;
+      draw();
     });
   }
 

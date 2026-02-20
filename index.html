@@ -385,6 +385,7 @@
     <main id="app">
       <div id="board">
         <div id="vf"></div>
+        <div id="learningHint" class="learning-hint hidden" aria-live="polite"></div>
         <div id="hud">
           <div id="stats"></div>
           <div id="valves"></div>
@@ -423,13 +424,22 @@
                 <option value="60s" selected>60s</option>
                 <option value="30s">30s</option>
                 <option value="120s">120s</option>
+                <option value="endless">Endless (5 lives)</option>
+              </select>
+            </div>
+            <div>
+              <label for="learningMode">Learning:</label>
+              <select id="learningMode">
+                <option value="off" selected>Off</option>
+                <option value="name">Note Name</option>
+                <option value="name+fingering">Name + Fingering</option>
               </select>
             </div>
           </div>
           <div class="start-section">
             <button id="startBtn" class="cta">Start 60s Round</button>
           </div>
-          <p id="cta" class="hint">Press Space to start</p>
+          <div id="cta" class="hint">Press Space to start</div>
         </div>
       </section>
     </main>

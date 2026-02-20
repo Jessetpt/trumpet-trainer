@@ -213,6 +213,36 @@ body {
   height: auto;
 }
 
+.learning-hint {
+  min-height: 28px;
+  margin: -2px auto 2px auto;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(32, 156, 189, 0.24);
+  background: linear-gradient(120deg, rgba(32, 156, 189, 0.1), rgba(246, 131, 24, 0.08));
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.learning-hint .note-token { color: var(--accent); }
+.learning-hint .finger-token { color: var(--bad); }
+.learning-hint .divider {
+  color: var(--muted);
+  opacity: 0.7;
+  font-weight: 600;
+}
+
+:root.dark .learning-hint {
+  border-color: rgba(32, 156, 189, 0.36);
+  background: linear-gradient(120deg, rgba(32, 156, 189, 0.2), rgba(255, 255, 255, 0.06));
+}
+
 #hud {
   width: min(100%, 780px);
   margin: 0 auto;
@@ -310,6 +340,12 @@ body {
     font-size: 12px;
     padding: 6px 9px;
   }
+
+  .learning-hint {
+    font-size: 13px;
+    padding: 5px 10px;
+    min-height: 26px;
+  }
 }
 
 #overlay {
@@ -322,6 +358,7 @@ body {
   text-align: center;
   padding: 24px;
   backdrop-filter: blur(2px);
+  overflow: hidden;
 }
 
 .card {
@@ -335,7 +372,9 @@ body {
     0 26px 42px rgba(16, 24, 40, 0.12),
     0 8px 18px rgba(32, 156, 189, 0.14);
   position: relative;
-  overflow: hidden;
+  overflow: auto;
+  max-height: min(88vh, calc(100vh - var(--nav-height) - 16px));
+  overscroll-behavior: contain;
 }
 
 .card::before {
@@ -379,6 +418,12 @@ body {
   align-items: center;
   justify-content: center;
   gap: 12px;
+  flex-wrap: wrap;
+}
+
+.difficulty-selector > div {
+  min-width: 165px;
+  text-align: left;
 }
 
 .difficulty-selector label {
@@ -468,7 +513,75 @@ body {
   font-weight: 500;
 }
 #help { color: var(--muted); max-width: 720px; }
-#cta { margin-top: 16px; color: var(--accent); font-weight: 600; }
+#cta {
+  margin-top: 16px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.results-panel {
+  width: min(520px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 14px;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 8px;
+}
+
+.result-item {
+  border-radius: 10px;
+  border: 1px solid rgba(32, 156, 189, 0.28);
+  background: linear-gradient(150deg, rgba(32, 156, 189, 0.12), rgba(246, 131, 24, 0.08));
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.result-label {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  margin-bottom: 4px;
+}
+
+.result-value {
+  display: block;
+  font-size: 19px;
+  line-height: 1.1;
+}
+
+.result-value.teal { color: var(--accent); }
+.result-value.orange { color: var(--bad); }
+
+.results-panel .cta {
+  justify-self: center;
+  min-width: 170px;
+  padding: 13px 24px;
+}
+
+:root.dark .result-item {
+  border-color: rgba(32, 156, 189, 0.34);
+  background: linear-gradient(150deg, rgba(32, 156, 189, 0.16), rgba(255, 255, 255, 0.06));
+}
+
+.card.results-mode .chips,
+.card.results-mode .difficulty-selector,
+.card.results-mode .start-section {
+  display: none;
+}
+
+.card.results-mode #subtitle {
+  margin-bottom: 12px;
+}
+
+.card.results-mode #cta {
+  margin-top: 10px;
+}
 
 .hidden { display: none !important; }
 

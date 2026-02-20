@@ -693,8 +693,12 @@ body {
     width: min(500px, 92vw);
     height: min(460px, calc(100vh - var(--nav-height) - 10px));
     max-height: calc(100vh - var(--nav-height) - 10px);
-    overflow: auto;
+    overflow: hidden;
     padding: 16px 14px 14px 14px;
+  }
+
+  .card.results-mode {
+    overflow: auto;
   }
 }
 

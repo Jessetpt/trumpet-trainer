@@ -81,67 +81,6 @@
             gap: 1rem;
         }
 
-        .profile-btn {
-            background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .nav-btn {
-            background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 8px 20px rgba(32, 156, 189, 0.3), 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .nav-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: left 0.3s ease;
-        }
-
-        .nav-btn:hover::before {
-            left: 100%;
-        }
-
-        .nav-btn:hover {
-            background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
-            color: white;
-            border-color: transparent;
-            transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(32, 156, 189, 0.4);
-        }
-
-        .nav-btn.active {
-            background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
-            color: white;
-            border-color: transparent;
-            box-shadow: 0 4px 10px rgba(32, 156, 189, 0.3);
-        }
-
         .free-class-btn {
             background: linear-gradient(135deg, var(--accent) 0%, var(--bad) 100%);
             color: white;
@@ -238,7 +177,7 @@
                 gap: 0.5rem;
             }
 
-            .nav-btn, .profile-btn, .free-class-btn {
+            .free-class-btn {
                 padding: 0.75rem 1rem;
                 font-size: 0.9rem;
                 min-width: 80px;
@@ -387,20 +326,6 @@
                 overflow: hidden;
             }
 
-            /* Mobile Logout Button */
-            #logoutBtn {
-                position: absolute;
-                top: 0.5rem;
-                right: 0.5rem;
-                padding: 0.5rem 0.75rem;
-                font-size: 0.8rem;
-                border-radius: 6px;
-                z-index: 10;
-                background: rgba(220, 53, 69, 0.9);
-                color: white;
-                border: none;
-            }
-
             /* Mobile Theme Toggle */
             #themeToggle {
                 position: absolute;
@@ -426,7 +351,7 @@
                 gap: 0.25rem;
             }
 
-            .nav-btn, .profile-btn, .free-class-btn {
+            .free-class-btn {
                 padding: 0.5rem 0.75rem;
                 font-size: 0.8rem;
                 min-width: 70px;
@@ -489,7 +414,6 @@
             <span class="brand-text">Trumpet Trainer</span>
         </a>
         <div class="nav-controls">
-            <a href="index.html" class="nav-btn active">🏠 Game</a>
             <a href="https://toot-your-own-horn.com/landing-page-page" class="free-class-btn" target="_blank" rel="noopener noreferrer">🎓 Free Trumpet Class</a>
         </div>
     </nav>

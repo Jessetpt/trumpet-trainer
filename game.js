@@ -16,7 +16,6 @@
     const valvesEl = document.getElementById('valves');
     const themeToggle = document.getElementById('themeToggle');
     const overlayThemeToggle = document.getElementById('overlayThemeToggle');
-    const logoutBtn = document.getElementById('logoutBtn');
     const startBtn = document.getElementById('startBtn');
     const timeModeSelect = document.getElementById('timeMode');
     let selectedTimeMode = (timeModeSelect && timeModeSelect.value) || '60s';
@@ -31,7 +30,6 @@
   // Round state machine
   // idle → running → finished
   let roundState = 'idle';
-  let hasPostedScore = false;
 
   function setStartButtonLabel() {
     if (!startBtn) return;
@@ -298,39 +296,14 @@
   let numCorrect = 0;
   let numMistakes = 0;
   let totalResponseMs = 0;
-  let bestScore = parseInt(localStorage.getItem('bestScore') || '0');
-  let currentRunId = null;
-  function newRunId() {
-    return 'run_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+  let bestScore = 0;
+  function bestScoreKey() {
+    return `bestScore:${currentDifficulty}:${selectedTimeMode}`;
   }
-
-  async function updateBestForCurrentSelection() {
-    try {
-      const currentUser = localStorage.getItem('currentUser');
-      if (!currentUser) return;
-      
-      const user = JSON.parse(currentUser);
-      if (!user || !user.id) return;
-
-      // Wait for Supabase client to be ready
-      const supabase = await waitForSupabase();
-      if (!supabase) return;
-
-      // Get best score from Supabase
-      const { data, error } = await supabase
-        .from('scores')
-        .select('score')
-        .eq('user_id', user.id)
-        .eq('game_mode', currentDifficulty)
-        .eq('time_mode', selectedTimeMode)
-        .order('score', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (!error && data) {
-        bestScore = Number(data.score || 0);
-      }
-    } catch {}
+  function refreshBestForCurrentSelection() {
+    const scopedBest = parseInt(localStorage.getItem(bestScoreKey()) || '0', 10);
+    const legacyBest = parseInt(localStorage.getItem('bestScore') || '0', 10);
+    bestScore = Math.max(scopedBest || 0, legacyBest || 0);
   }
 
   function resetRound() {
@@ -347,20 +320,17 @@
     numMistakes = 0;
     totalResponseMs = 0;
     roundState = 'idle';
-    hasPostedScore = false;
     if (overlay) overlay.classList.remove('hidden');
     if (cta) cta.textContent = 'Press Space to start';
     if (startBtn) { startBtn.style.display = ''; }
     setStartButtonLabel();
-    updateBestForCurrentSelection();
+    refreshBestForCurrentSelection();
   }
 
   function startRound() {
     if (isRunning) return;
     isRunning = true;
     roundState = 'running';
-    hasPostedScore = false;
-    currentRunId = newRunId();
     if (overlay) overlay.classList.add('hidden');
     nextNote();
     setStartButtonLabel();
@@ -381,7 +351,7 @@
     setStartButtonLabel();
   }
 
-  async function finishRound() {
+  function finishRound() {
     isRunning = false;
     roundState = 'finished';
     if (overlay) overlay.classList.remove('hidden');
@@ -389,7 +359,6 @@
     
 
     
-    const avgResponse = numCorrect > 0 ? Math.round(totalResponseMs / numCorrect) : 0;
     const accuracy = numCorrect + numMistakes > 0 ? Math.round(100 * numCorrect / (numCorrect + numMistakes)) : 0;
     
     if (cta) {
@@ -461,232 +430,12 @@
     // Save high score locally
     if (score > bestScore) {
       bestScore = score;
-      localStorage.setItem('bestScore', bestScore.toString());
-    }
-    
-    if (!hasPostedScore) {
-      hasPostedScore = true;
-      // Save score to backend (leaderboard placement will be handled by saveScoreToBackend)
-      saveScoreToBackend(score, numCorrect, numMistakes, bestStreak, avgResponse, accuracy)
-        .catch(() => {});
+      localStorage.setItem(bestScoreKey(), String(bestScore));
+      localStorage.setItem('bestScore', String(bestScore));
     }
     setStartButtonLabel();
   }
   
-  // Supabase disabled - return null immediately
-  async function waitForSupabase() {
-    return null;
-  }
-
-  async function saveScoreToBackend(score, correct, mistakes, bestStreak, avgResponse, accuracy) {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      console.error('No auth token found');
-      return;
-    }
-    
-    try {
-      // Get current user ID from localStorage (more reliable)
-      const currentUser = localStorage.getItem('currentUser');
-      if (!currentUser) {
-        console.error('No current user found');
-        return;
-      }
-
-      const user = JSON.parse(currentUser);
-      if (!user || !user.id) {
-        console.error('Invalid user data');
-        return;
-      }
-
-      // Wait for Supabase client to be ready
-      const supabase = await waitForSupabase();
-      if (!supabase) {
-        console.error('Supabase not available');
-        return;
-      }
-
-      // Get the current time mode from the selector to ensure we have the right value
-      const currentTimeMode = timeModeSelect ? timeModeSelect.value : selectedTimeMode;
-      console.log('🔍 Using time mode for score saving:', currentTimeMode);
-
-      // Save score directly to Supabase
-      const { data, error } = await supabase
-        .from('scores')
-        .insert({
-          score,
-          correct,
-          mistakes,
-          best_streak: bestStreak,
-          avg_response: avgResponse,
-          accuracy,
-          game_mode: currentDifficulty,
-          time_mode: currentTimeMode,
-          run_id: currentRunId || newRunId(),
-          user_id: user.id
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Failed to save score:', error);
-        return;
-      }
-
-      console.log('Score saved successfully:', data);
-      
-      // Store last score info for leaderboard highlighting
-      if (data) {
-        localStorage.setItem('lastScore', JSON.stringify({
-          score: data.score,
-          game_mode: currentDifficulty,
-          time_mode: currentTimeMode,
-          created_at: data.created_at,
-          user_id: user.id
-        }));
-      }
-
-      // Show leaderboard placement after successful save
-      await maybeShowLeaderboardPlacement(score);
-      
-    } catch (error) {
-      console.error('Error saving score:', error);
-    }
-  }
-
-  async function maybeShowLeaderboardPlacement(finalScore) {
-    try {
-      // Get current user ID from localStorage
-      const currentUser = localStorage.getItem('currentUser');
-      if (!currentUser) {
-        console.error('No current user found for leaderboard placement');
-        return;
-      }
-
-      const user = JSON.parse(currentUser);
-      if (!user || !user.id) {
-        console.error('Invalid user data for leaderboard placement');
-        return;
-      }
-
-      // Wait for Supabase client to be ready
-      const supabase = await waitForSupabase();
-      if (!supabase) {
-        console.error('Supabase not available for leaderboard placement');
-        return;
-      }
-
-      // Get the current time mode from the selector to ensure we have the right value
-      const currentTimeMode = timeModeSelect ? timeModeSelect.value : selectedTimeMode;
-      console.log('🔍 Using time mode for leaderboard query:', currentTimeMode);
-
-      // Get leaderboard from Supabase including the current user's score
-      const { data, error } = await supabase
-        .from('scores')
-        .select('score, user_id')
-        .eq('game_mode', currentDifficulty)
-        .eq('time_mode', currentTimeMode)
-        .order('score', { ascending: false })
-        .limit(100);
-
-      if (error) {
-        console.error('Error fetching leaderboard for placement:', error);
-        return;
-      }
-      
-      const list = data || [];
-      console.log('🔍 Raw leaderboard data received:', list);
-      console.log('🔍 Total scores in leaderboard:', list.length);
-      console.log('🔍 Current user ID:', user.id);
-      
-      // Find the current user's score in the leaderboard
-      // We need to find the score that matches the finalScore we're ranking
-      const userScore = list.find(s => s.user_id === user.id && s.score === finalScore);
-      console.log('🔍 User score found in leaderboard:', userScore);
-      
-      // If we can't find the exact score, log all user scores to debug
-      if (!userScore) {
-        const allUserScores = list.filter(s => s.user_id === user.id);
-        console.log('🔍 All user scores in leaderboard:', allUserScores);
-        console.log('🔍 Looking for score:', finalScore);
-      }
-      
-      if (userScore && cta) {
-        console.log('🔍 Final score to rank:', finalScore);
-        console.log('🔍 User score from leaderboard:', userScore.score);
-        
-        // Calculate the actual rank by counting how many scores are higher than the user's score
-        let rank = 1;
-        for (const score of list) {
-          if (score.score > userScore.score) {
-            rank++;
-          }
-        }
-        console.log('🔍 Calculated rank:', rank);
-        
-        const niceMode = ({normal:'Normal', lead:'Lead Trumpet', hard:'Hard Mode', doublec:'Double C', ultra:'Ultra Hard'})[currentDifficulty] || currentDifficulty;
-        
-        // Create placement message
-        const note = document.createElement('div');
-        note.style.marginTop = '10px';
-        note.style.padding = '8px';
-        note.style.borderRadius = '6px';
-        note.style.backgroundColor = 'rgba(32, 156, 189, 0.1)';
-        note.style.border = '1px solid var(--primary-teal)';
-        
-        note.innerHTML = `
-          <span class="stat-orange"><strong>🏆 Leaderboard:</strong></span> 
-          <span class="stat-blue">You placed #${rank} in ${niceMode} — ${currentTimeMode.toUpperCase()}</span>
-        `;
-        
-        // Remove any existing placement message
-        const existingNote = cta.querySelector('[data-placement-message]');
-        if (existingNote) {
-          existingNote.remove();
-        }
-        
-        note.setAttribute('data-placement-message', 'true');
-        cta.appendChild(note);
-        
-        console.log(`Leaderboard placement: #${rank} in ${currentDifficulty} ${currentTimeMode}`);
-      } else if (cta) {
-        // If user's score isn't in the top 100, show a generic message
-        const niceMode = ({normal:'Normal', lead:'Lead Trumpet', hard:'Hard Mode', doublec:'Double C', ultra:'Ultra Hard'})[currentDifficulty] || currentDifficulty;
-        
-        const note = document.createElement('div');
-        note.style.marginTop = '10px';
-        note.style.padding = '8px';
-        note.style.borderRadius = '6px';
-        note.style.backgroundColor = 'rgba(246, 131, 24, 0.1)';
-        note.style.border = '1px solid var(--primary-orange)';
-        
-        note.innerHTML = `
-          <span class="stat-orange"><strong>🎯 Score Saved!</strong></span> 
-          <span class="stat-blue">Your score of ${finalScore.toLocaleString()} has been saved to the ${niceMode} leaderboard!</span>
-        `;
-        
-        // Remove any existing placement message
-        const existingNote = cta.querySelector('[data-placement-message]');
-        if (existingNote) {
-          existingNote.remove();
-        }
-        
-        note.setAttribute('data-placement-message', 'true');
-        cta.appendChild(note);
-        
-        console.log(`Score saved: ${finalScore} in ${currentDifficulty} ${currentTimeMode}`);
-      }
-    } catch (error) {
-      console.error('Error showing leaderboard placement:', error);
-    }
-  }
-
-  function layoutForNote(midi) {
-    // Simple layout: staff position based on midi
-    const staffPos = (midi - MIDI_MIN) / (MIDI_MAX_C7 - MIDI_MIN);
-    return Math.max(0.1, Math.min(0.9, staffPos));
-  }
-
   function renderBoard() {
     context.clear();
     stave = new VF.Stave(40, 80, 820);
@@ -950,14 +699,6 @@
   // Mouse support: click circles at bottom
   // No mouse valve hints/clicks — user must identify and input via keys only
 
-  // Navigation functionality
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('playerInfo');
-      window.location.href = 'welcome.html';
-    });
-  }
-
   // Difficulty selector
   const difficultySelect = document.getElementById('difficulty');
   if (difficultySelect) {
@@ -966,7 +707,7 @@
     difficultySelect.addEventListener('change', (e) => {
       currentDifficulty = e.target.value;
       console.log('Difficulty changed to:', currentDifficulty);
-      updateBestForCurrentSelection();
+      refreshBestForCurrentSelection();
     });
   }
 
@@ -979,7 +720,7 @@
         ROUND_SECONDS = secondsForTimeMode(selectedTimeMode);
         remainingMs = ROUND_SECONDS * 1000;
       }
-      updateBestForCurrentSelection();
+      refreshBestForCurrentSelection();
     });
   }
 
@@ -994,4 +735,3 @@
     requestAnimationFrame(tick);
   }
 })();
-

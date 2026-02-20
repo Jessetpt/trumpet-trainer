@@ -13,8 +13,5 @@
     "education"
   ],
   "author": "Jesse Garcia",
-  "license": "MIT",
-  "dependencies": {
-    "@supabase/supabase-js": "^2.54.0"
-  }
+  "license": "MIT"
 }

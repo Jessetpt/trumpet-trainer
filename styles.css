@@ -6,6 +6,7 @@
   --accent: #209cbd; /* Primary Teal */
   --good: #209cbd;
   --bad: #f68318; /* Primary Orange */
+  --nav-height: 84px;
 }
 
 :root.dark {
@@ -124,19 +125,27 @@
 .stat-orange { color: var(--bad); }
 
 * { box-sizing: border-box; }
-html, body { height: 100%; }
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
 body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
   font-family: 'Outfit', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  display: flex;
+  flex-direction: column;
 }
 
 #app {
-  min-height: 100vh;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: calc(100vh - var(--nav-height));
   display: grid;
   place-items: center;
-  padding: 24px;
+  overflow: hidden;
+  padding: clamp(10px, 2vh, 20px);
   background: linear-gradient(135deg, 
     rgba(32, 156, 189, 0.05) 0%, 
     rgba(246, 131, 24, 0.05) 25%, 
@@ -164,6 +173,7 @@ body {
   width: min(94vw, 920px);
   height: auto;
   min-height: 392px;
+  max-height: min(92vh, calc(100vh - var(--nav-height) - 12px));
   background: var(--panel);
   border: 1px solid rgba(0,0,0,0.08);
   border-radius: 20px;
@@ -271,6 +281,7 @@ body {
 @media (max-width: 860px) {
   #board {
     min-height: 0;
+    max-height: calc(100vh - var(--nav-height) - 10px);
     padding: 14px 10px 14px 10px;
     gap: 12px;
   }

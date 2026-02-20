@@ -18,6 +18,7 @@
     const overlayThemeToggle = document.getElementById('overlayThemeToggle');
     const startBtn = document.getElementById('startBtn');
     const timeModeSelect = document.getElementById('timeMode');
+    const navEl = document.querySelector('.nav');
     let selectedTimeMode = (timeModeSelect && timeModeSelect.value) || '60s';
 
   function secondsForTimeMode(tm) {
@@ -85,8 +86,9 @@
     const height = clamp(Math.round(width * 0.4), 220, 300);
     const staveWidth = clamp(Math.round(width * 0.52), 320, 460);
     const staveX = Math.round((width - staveWidth) / 2);
-    const staveY = Math.round(height * 0.42);
     const lineSpacing = clamp(Math.round(height * 0.072), 14, 17);
+    const staveHeight = lineSpacing * 4;
+    const staveY = Math.round((height - staveHeight) / 2);
 
     rendererLayout.width = width;
     rendererLayout.height = height;
@@ -97,6 +99,12 @@
 
     renderer.resize(width, height);
     vfDiv.style.width = `${width}px`;
+  }
+
+  function syncViewportLayoutVars() {
+    if (!navEl) return;
+    const navHeight = Math.max(0, Math.round(navEl.getBoundingClientRect().height));
+    document.documentElement.style.setProperty('--nav-height', `${navHeight}px`);
   }
 
   // Audio feedback
@@ -772,11 +780,18 @@
   }
 
   window.addEventListener('resize', () => {
+    syncViewportLayoutVars();
+    applyRendererLayout(true);
+    draw();
+  });
+  window.addEventListener('load', () => {
+    syncViewportLayoutVars();
     applyRendererLayout(true);
     draw();
   });
 
     // Boot
+    syncViewportLayoutVars();
     applyRendererLayout(true);
     resetRound();
     setStartButtonLabel();

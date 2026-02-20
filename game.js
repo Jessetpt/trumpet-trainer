@@ -611,11 +611,10 @@
   }
   
   function updateLogo() {
-    const logos = document.querySelectorAll('#brandLogo');
+    const logos = document.querySelectorAll('.brand-logo, #nav-logo');
     if (!logos.length) return;
-    const dark = document.documentElement.classList.contains('dark');
     logos.forEach(logo => {
-      logo.src = dark ? 'Untitled design dark.svg' : 'Untitled design.svg';
+      logo.src = 'Untitled design.svg';
     });
   }
   

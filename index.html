@@ -6,6 +6,9 @@
     <!-- CSP removed to fix JavaScript blocking issues -->
     <title>Trumpet Trainer</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎺</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css" />
     <style>
         :root {
@@ -205,7 +208,7 @@
                 position: relative;
             }
 
-            #brandLogo {
+            .brand-logo {
                 height: 3rem;
                 margin-bottom: 1rem;
             }
@@ -420,7 +423,6 @@
 
     <main id="app">
       <div id="board">
-        <img id="brandLogo" alt="Logo" src="Untitled design.svg" />
         <div id="vf"></div>
         <div id="hud">
           <div id="valves"></div>
@@ -430,7 +432,8 @@
 
       <section id="overlay" aria-live="polite">
         <div class="card">
-          <img id="brandLogo" alt="Logo" src="Untitled design.svg" />
+          <img class="brand-logo" alt="Trumpet Trainer Logo" src="Untitled design.svg" />
+          <p class="eyebrow">Daily Skill Builder</p>
           <h1 id="title">Trumpet Trainer</h1>
           <p id="subtitle">Read fast. Finger faster. Build streaks.</p>
           <div class="chips">

@@ -48,7 +48,8 @@
 
 /* Dark mode overlay styling */
 :root.dark #overlay {
-  background: radial-gradient(1200px 600px at 50% 40%, color-mix(in srgb, var(--panel), var(--bg)), rgba(14, 15, 18, 0.98));
+  background:
+    radial-gradient(980px 560px at 50% 14%, rgba(32, 156, 189, 0.22) 0%, rgba(246, 131, 24, 0.16) 44%, rgba(14, 15, 18, 0.99) 100%);
 }
 
 /* Start section styling */
@@ -84,6 +85,12 @@
   box-shadow: 
     0 20px 40px rgba(0,0,0,0.4),
     0 8px 16px rgba(0,0,0,0.3);
+}
+
+:root.dark #title {
+  background: linear-gradient(135deg, #dff8ff 0%, #8fd7ea 48%, #ffb165 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
 :root.dark .chips {
@@ -127,7 +134,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: 'Outfit', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
 }
 
 #app {
@@ -238,22 +245,54 @@ body {
   inset: 0;
   display: grid;
   place-items: center;
-  background: radial-gradient(1200px 600px at 50% 40%, color-mix(in srgb, var(--panel), var(--bg)), rgba(14, 15, 18, 0.96));
+  background:
+    radial-gradient(980px 520px at 50% 14%, rgba(32, 156, 189, 0.13) 0%, rgba(246, 131, 24, 0.1) 42%, rgba(255, 255, 255, 0.985) 100%);
   text-align: center;
   padding: 24px;
+  backdrop-filter: blur(2px);
 }
 
 .card {
-  width: min(680px, 92vw);
-  padding: 28px 24px;
-  background: var(--panel);
-  border: 1px solid rgba(0,0,0,0.08);
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+  width: min(700px, 93vw);
+  padding: 34px 30px 30px 30px;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.96) 0%, rgba(246, 250, 251, 0.92) 100%);
+  border: 1px solid rgba(32, 156, 189, 0.2);
+  border-radius: 24px;
+  box-shadow:
+    0 26px 42px rgba(16, 24, 40, 0.12),
+    0 8px 18px rgba(32, 156, 189, 0.14);
+  position: relative;
+  overflow: hidden;
 }
 
-#brandLogo { width: 120px; height: auto; display: block; margin: 0 auto 32px auto; }
-#board #brandLogo { position: absolute; top: 16px; left: 16px; width: 80px; height: auto; z-index: 10; }
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(220px, 62%);
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--bad), var(--accent));
+}
+
+.brand-logo {
+  width: 118px;
+  height: auto;
+  display: block;
+  margin: 0 auto 14px auto;
+}
+
+.eyebrow {
+  margin: 0 0 10px 0;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+}
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 12px 0 16px 0; }
 .chip {
@@ -338,11 +377,24 @@ body {
 
 #title {
   margin: 0 0 8px 0;
+  font-family: 'Space Grotesk', 'Outfit', sans-serif;
+  font-size: clamp(2rem, 4.8vw, 3rem);
   font-weight: 800;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
+  line-height: 1.03;
+  background: linear-gradient(140deg, #133a46 0%, #1f8fae 48%, #f68318 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-#subtitle { margin: 0 0 20px 0; color: var(--muted); }
+#subtitle {
+  margin: 0 auto 22px auto;
+  max-width: 520px;
+  color: var(--muted);
+  font-size: clamp(1rem, 2.2vw, 1.15rem);
+  font-weight: 500;
+}
 #help { color: var(--muted); max-width: 720px; }
 #cta { margin-top: 16px; color: var(--accent); font-weight: 600; }
 

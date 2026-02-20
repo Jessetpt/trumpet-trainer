@@ -35,11 +35,6 @@
     0 8px 16px rgba(0,0,0,0.2);
 }
 
-:root.dark #stats {
-  background: rgba(255,255,255,0.05);
-  border-color: rgba(32, 156, 189, 0.2);
-}
-
 :root.dark .valve {
   background: rgba(255,255,255,0.1);
   border-color: rgba(32, 156, 189, 0.3);
@@ -166,18 +161,20 @@ body {
 }
 
 #board {
-  width: min(92vw, 900px);
+  width: min(94vw, 920px);
   height: auto;
-  aspect-ratio: 4 / 3;
+  min-height: 392px;
   background: var(--panel);
   border: 1px solid rgba(0,0,0,0.08);
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.06), inset 0 0 0 1px rgba(0,0,0,0.02);
+  border-radius: 20px;
+  box-shadow: 0 18px 36px rgba(0,0,0,0.08), inset 0 0 0 1px rgba(0,0,0,0.02);
   display: grid;
-  grid-template-rows: auto 1fr auto auto;
+  grid-template-rows: auto auto;
+  justify-items: center;
+  gap: 12px;
   align-content: start;
   position: relative;
-  padding: 10px 16px 44px 16px; /* ensure inner content stays within container */
+  padding: 18px 20px 20px 20px;
 }
 
 
@@ -192,33 +189,63 @@ body {
   box-shadow: 0 10px 30px rgba(0,0,0,0.06), 0 0 0 3px rgba(39, 174, 96, 0.7);
 }
 
-#vf { margin: 16px 16px 0 -12px; }
+#vf {
+  width: min(100%, 780px);
+  margin: 2px auto 0 auto;
+  display: flex;
+  justify-content: center;
+}
+
+#vf svg {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+}
 
 #hud {
-  margin: -290px 16px 8px 16px;
+  width: min(100%, 780px);
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
   align-items: center;
 }
 
 #stats { 
   color: var(--ink); 
-  opacity: 0.9; 
+  opacity: 0.95; 
   font-weight: 600; 
+  font-size: 12px;
   font-variant-numeric: tabular-nums; 
-  justify-self: start; 
-  display: grid; 
-  grid-auto-rows: 1.6em; 
-  gap: 2px; 
-  text-align: left; 
-  max-width: 220px; 
-  margin-left: 16px; 
+  justify-self: start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
+  text-align: left;
+  max-width: 100%;
+  margin-left: 0;
 }
-.stat-row { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px; }
+.stat-row {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 6px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(32, 156, 189, 0.24);
+  background: rgba(32, 156, 189, 0.07);
+  line-height: 1;
+}
 
-#valves { display: flex; gap: 10px; align-items: center; justify-self: start; }
+:root.dark .stat-row {
+  border-color: rgba(32, 156, 189, 0.36);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+#valves { display: flex; gap: 10px; align-items: center; justify-self: end; }
 .valve {
-  width: 48px; height: 48px; border-radius: 50%;
+  width: 50px; height: 50px; border-radius: 50%;
   display: grid; place-items: center;
   background: linear-gradient(145deg, #ffffff 0%, rgba(255,255,255,0.9) 100%);
   color: var(--ink); 
@@ -238,6 +265,39 @@ body {
   box-shadow: 
     0 8px 20px rgba(32, 156, 189, 0.3),
     0 4px 8px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 860px) {
+  #board {
+    min-height: 0;
+    padding: 14px 10px 14px 10px;
+    gap: 12px;
+  }
+
+  #hud {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    justify-items: center;
+  }
+
+  #stats {
+    justify-content: center;
+  }
+
+  #valves {
+    justify-self: center;
+  }
+
+  .valve {
+    width: 46px;
+    height: 46px;
+    font-size: 17px;
+  }
+
+  .stat-row {
+    font-size: 12px;
+    padding: 6px 9px;
+  }
 }
 
 #overlay {

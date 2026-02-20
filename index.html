@@ -215,37 +215,23 @@
 
             /* Mobile HUD */
             #hud {
-                flex-direction: column;
-                gap: 1rem;
-                margin-top: 1rem;
+                width: 100%;
+                grid-template-columns: 1fr;
+                justify-items: center;
+                gap: 0.75rem;
+                margin-top: 0.5rem;
             }
 
             #valves {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
                 gap: 0.5rem;
+                justify-content: center;
                 width: 100%;
-            }
-
-            #valves button {
-                padding: 1rem;
-                font-size: 1.2rem;
-                min-height: 60px;
-                border-radius: 12px;
             }
 
             #stats {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.75rem;
+                justify-content: center;
+                gap: 0.5rem;
                 width: 100%;
-            }
-
-            #stats div {
-                padding: 0.75rem;
-                font-size: 0.9rem;
-                text-align: center;
-                border-radius: 8px;
             }
 
             /* Mobile Overlay */
@@ -325,7 +311,7 @@
             #vf {
                 width: 100% !important;
                 height: auto !important;
-                max-height: 200px;
+                max-height: 230px;
                 overflow: hidden;
             }
 
@@ -392,18 +378,17 @@
             }
 
             #hud {
-                flex-direction: row;
+                grid-template-columns: minmax(0, 1fr) auto;
                 gap: 1rem;
             }
 
             #valves {
-                grid-template-columns: repeat(3, 1fr);
-                max-width: 200px;
+                max-width: none;
             }
 
             #stats {
-                grid-template-columns: repeat(2, 1fr);
-                max-width: 200px;
+                max-width: none;
+                justify-content: flex-start;
             }
         }
     </style>
@@ -425,8 +410,8 @@
       <div id="board">
         <div id="vf"></div>
         <div id="hud">
-          <div id="valves"></div>
           <div id="stats"></div>
+          <div id="valves"></div>
         </div>
       </div>
 

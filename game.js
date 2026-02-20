@@ -61,6 +61,43 @@
   renderer.resize(900, 300);
   const context = renderer.getContext();
   let stave;
+  let lastBoardWidth = 0;
+  const rendererLayout = {
+    width: 760,
+    height: 250,
+    staveWidth: 420,
+    staveX: 170,
+    staveY: 135,
+    lineSpacing: 15,
+  };
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function applyRendererLayout(force = false) {
+    if (!boardEl || !vfDiv) return;
+    const boardWidth = Math.round(boardEl.clientWidth || 0);
+    if (!force && Math.abs(boardWidth - lastBoardWidth) < 4) return;
+    lastBoardWidth = boardWidth;
+
+    const width = clamp(Math.round((boardWidth || 900) - 72), 520, 780);
+    const height = clamp(Math.round(width * 0.42), 220, 310);
+    const staveWidth = clamp(Math.round(width * 0.52), 320, 460);
+    const staveX = Math.round((width - staveWidth) / 2);
+    const staveY = Math.round(height * 0.54);
+    const lineSpacing = clamp(Math.round(height * 0.075), 13, 18);
+
+    rendererLayout.width = width;
+    rendererLayout.height = height;
+    rendererLayout.staveWidth = staveWidth;
+    rendererLayout.staveX = staveX;
+    rendererLayout.staveY = staveY;
+    rendererLayout.lineSpacing = lineSpacing;
+
+    renderer.resize(width, height);
+    vfDiv.style.width = `${width}px`;
+  }
 
   // Audio feedback
   const audioCtx = (window.AudioContext || window.webkitAudioContext) ? new (window.AudioContext || window.webkitAudioContext)() : null;
@@ -437,8 +474,12 @@
   }
   
   function renderBoard() {
+    applyRendererLayout();
     context.clear();
-    stave = new VF.Stave(40, 80, 820);
+    stave = new VF.Stave(rendererLayout.staveX, rendererLayout.staveY, rendererLayout.staveWidth);
+    if (typeof stave.setOptions === 'function') {
+      stave.setOptions({ spacing_between_lines_px: rendererLayout.lineSpacing });
+    }
     stave.addClef('treble');
     // Dark mode: render staff and notes in light color for contrast
     const isDark = document.documentElement.classList.contains('dark');
@@ -454,20 +495,30 @@
     if (!currentNote) return;
     const note = currentNote.name;
     const vfNote = new VF.StaveNote({ keys: [toVfKey(note)], duration: 'q' });
+    if (vfNote.render_options) {
+      vfNote.render_options.glyph_font_scale = 52;
+    }
     const acc = toAccidental(note);
     if (acc) vfNote.addModifier(new VF.Accidental(acc), 0);
-    VF.Formatter.FormatAndDraw(context, stave, [vfNote]);
+    if (typeof VF.GhostNote === 'function') {
+      const voice = new VF.Voice({ num_beats: 3, beat_value: 4 }).setStrict(false);
+      voice.addTickables([new VF.GhostNote('q'), vfNote, new VF.GhostNote('q')]);
+      new VF.Formatter().joinVoices([voice]).format([voice], rendererLayout.staveWidth - 30);
+      voice.draw(context, stave);
+    } else {
+      vfNote.setXShift(Math.round(rendererLayout.staveWidth * 0.28));
+      VF.Formatter.FormatAndDraw(context, stave, [vfNote]);
+    }
 
     // HUD text
     const secs = Math.max(0, Math.ceil(remainingMs / 1000));
     if (statsEl) {
       statsEl.innerHTML = '';
       const rows = [
-        `Time: ${secs}s`,
-        `Score: ${score.toLocaleString()}`,
-        `Streak: ${streak.toLocaleString()}`,
-        `Mult: x${multiplier.toFixed(2)}`,
-        `Best: ${bestScore.toLocaleString()}`,
+        `Time ${secs}s`,
+        `Score ${score.toLocaleString()}`,
+        `Streak ${streak.toLocaleString()}`,
+        `Best ${bestScore.toLocaleString()}`,
       ];
       rows.forEach(t => {
         const r = document.createElement('div'); r.className = 'stat-row'; r.textContent = t; statsEl.appendChild(r);
@@ -723,7 +774,13 @@
     });
   }
 
+  window.addEventListener('resize', () => {
+    applyRendererLayout(true);
+    draw();
+  });
+
     // Boot
+    applyRendererLayout(true);
     resetRound();
     setStartButtonLabel();
     if (startBtn) startBtn.addEventListener('click', () => {

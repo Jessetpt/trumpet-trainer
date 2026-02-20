@@ -172,7 +172,7 @@ body {
   grid-template-rows: auto auto;
   justify-items: center;
   gap: 12px;
-  align-content: start;
+  align-content: center;
   position: relative;
   padding: 18px 20px 20px 20px;
 }
@@ -207,7 +207,8 @@ body {
   width: min(100%, 780px);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto auto;
+  justify-content: center;
   gap: 12px;
   align-items: center;
 }
@@ -218,7 +219,7 @@ body {
   font-weight: 600; 
   font-size: 12px;
   font-variant-numeric: tabular-nums; 
-  justify-self: start;
+  justify-self: end;
   display: flex;
   flex-wrap: wrap;
   gap: 7px;
@@ -243,7 +244,7 @@ body {
   background: rgba(255, 255, 255, 0.06);
 }
 
-#valves { display: flex; gap: 10px; align-items: center; justify-self: end; }
+#valves { display: flex; gap: 10px; align-items: center; justify-self: start; }
 .valve {
   width: 50px; height: 50px; border-radius: 50%;
   display: grid; place-items: center;

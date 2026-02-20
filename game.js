@@ -67,8 +67,8 @@
     height: 250,
     staveWidth: 420,
     staveX: 170,
-    staveY: 135,
-    lineSpacing: 15,
+    staveY: 102,
+    lineSpacing: 16,
   };
 
   function clamp(value, min, max) {
@@ -82,11 +82,11 @@
     lastBoardWidth = boardWidth;
 
     const width = clamp(Math.round((boardWidth || 900) - 72), 520, 780);
-    const height = clamp(Math.round(width * 0.42), 220, 310);
+    const height = clamp(Math.round(width * 0.4), 220, 300);
     const staveWidth = clamp(Math.round(width * 0.52), 320, 460);
     const staveX = Math.round((width - staveWidth) / 2);
-    const staveY = Math.round(height * 0.54);
-    const lineSpacing = clamp(Math.round(height * 0.075), 13, 18);
+    const staveY = Math.round(height * 0.42);
+    const lineSpacing = clamp(Math.round(height * 0.072), 14, 17);
 
     rendererLayout.width = width;
     rendererLayout.height = height;
@@ -495,9 +495,6 @@
     if (!currentNote) return;
     const note = currentNote.name;
     const vfNote = new VF.StaveNote({ keys: [toVfKey(note)], duration: 'q' });
-    if (vfNote.render_options) {
-      vfNote.render_options.glyph_font_scale = 52;
-    }
     const acc = toAccidental(note);
     if (acc) vfNote.addModifier(new VF.Accidental(acc), 0);
     if (typeof VF.GhostNote === 'function') {

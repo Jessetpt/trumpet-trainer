@@ -627,6 +627,11 @@ body {
   display: none !important;
 }
 
+.card.results-mode .eyebrow,
+.card.results-mode #subtitle {
+  display: none !important;
+}
+
 .card.results-mode #cta {
   margin-top: 10px;
 }

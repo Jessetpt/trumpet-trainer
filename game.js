@@ -395,7 +395,10 @@
     roundState = 'idle';
     if (overlay) overlay.classList.remove('hidden');
     if (overlayCard) overlayCard.classList.remove('results-mode');
-    if (cta) cta.textContent = 'Press Space to start';
+    if (cta) {
+      cta.innerHTML = '';
+      cta.classList.add('hidden');
+    }
     if (learningHintEl) {
       learningHintEl.textContent = '';
       learningHintEl.classList.add('hidden');
@@ -418,7 +421,10 @@
     if (!isRunning) return;
     isRunning = false;
     if (overlay) overlay.classList.remove('hidden');
-    if (cta) cta.textContent = 'Press Space to resume';
+    if (cta) {
+      cta.innerHTML = '';
+      cta.classList.add('hidden');
+    }
     setStartButtonLabel();
   }
 
@@ -443,6 +449,7 @@
     const livesRemaining = Math.max(0, ENDLESS_MAX_MISTAKES - numMistakes);
     
     if (cta) {
+      cta.classList.remove('hidden');
       cta.innerHTML = `
         <div class="results-panel">
           <div class="results-grid">

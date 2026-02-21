@@ -623,32 +623,22 @@ body {
 }
 
 .card.results-mode .chips,
-.card.results-mode .difficulty-selector,
 .card.results-mode .start-section {
   display: none !important;
-}
-
-.card.results-mode #subtitle {
-  display: none;
 }
 
 .card.results-mode #cta {
   margin-top: 10px;
 }
 
-.card.results-mode .brand-logo,
-.card.results-mode .eyebrow {
-  display: none;
-}
-
 .card.results-mode {
-  height: min(420px, calc(100vh - var(--nav-height) - 12px));
-  max-height: min(420px, calc(100vh - var(--nav-height) - 12px));
-  padding-top: 18px;
+  height: min(500px, calc(100vh - var(--nav-height) - 14px));
+  max-height: min(500px, calc(100vh - var(--nav-height) - 14px));
+  padding-top: 20px;
 }
 
 .card.results-mode #title {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   font-size: clamp(1.7rem, 3.6vw, 2.1rem);
 }
 
@@ -698,7 +688,7 @@ body {
   }
 
   .card.results-mode {
-    overflow: auto;
+    overflow: hidden;
   }
 }
 
